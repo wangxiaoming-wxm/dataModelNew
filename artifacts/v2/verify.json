@@ -15,7 +15,7 @@
     "finite": true,
     "in_unit_interval": true,
     "min": 0.001,
-    "max": 0.9989999999990012
+    "max": 0.9989999999990014
   },
   "all_ok": true
 }

@@ -1,0 +1,52 @@
+{
+  "arm_oof_auc": {
+    "cat_alt": 0.6949376790791026,
+    "cat_d5": 0.6951803489270978,
+    "cat_d6": 0.6955142500989189,
+    "gap": 0.6904384845618787,
+    "glm": 0.6648914499008421,
+    "lgb_te": 0.6710958018962182
+  },
+  "arm_corr": {
+    "cat_alt~cat_d5": 0.9541531375314142,
+    "cat_alt~cat_d6": 0.9555363155643459,
+    "cat_alt~gap": 0.9428042479983694,
+    "cat_alt~glm": 0.877623494721643,
+    "cat_alt~lgb_te": 0.9025537500675079,
+    "cat_d5~cat_d6": 0.9968282810696236,
+    "cat_d5~gap": 0.9709129084127799,
+    "cat_d5~glm": 0.8976009317038158,
+    "cat_d5~lgb_te": 0.9288072779803229,
+    "cat_d6~gap": 0.9723114726151264,
+    "cat_d6~glm": 0.8990695660919937,
+    "cat_d6~lgb_te": 0.9293521259248683,
+    "gap~glm": 0.8826864537989237,
+    "gap~lgb_te": 0.9087722205881082,
+    "glm~lgb_te": 0.9101920312077049
+  },
+  "rule_full_oof_auc": {
+    "cat_d5_only": 0.6951803489270978,
+    "cat_pair": 0.6954845445628817,
+    "cat_pair_max": 0.6957172130494977,
+    "views_half": 0.6974641423827642,
+    "views_thirds": 0.6973247950566803,
+    "views_max": 0.6995752008830655,
+    "views_plus_weak": 0.6961856101407635,
+    "three_views_gap": 0.696569866425599,
+    "four_views_equal": 0.6966127329570831,
+    "four_views_max": 0.6992264718222342,
+    "four_views_plus_weak": 0.6955763232248926,
+    "cat_pair_plus_glm": 0.6935812755407901,
+    "all_equal": 0.6871214161290811
+  },
+  "nested_selection_picks": [
+    "views_max",
+    "views_max",
+    "views_max",
+    "four_views_max",
+    "views_max"
+  ],
+  "nested_oof_auc": 0.6992790162879883,
+  "submitted_rule": "views_max",
+  "submission": "submissions/submission_v2.csv"
+}

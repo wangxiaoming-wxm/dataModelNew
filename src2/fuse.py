@@ -29,6 +29,12 @@ RULES: dict[str, dict[str, float]] = {
     "views_max": {"__max__": 1.0, "cat_d5": 1.0, "cat_d6": 1.0, "cat_alt": 1.0},
     "views_plus_weak": {"cat_d5": 0.30, "cat_d6": 0.30, "cat_alt": 0.30,
                         "glm": 0.05, "lgb_te": 0.05},
+    "three_views_gap": {"cat_d5": 0.20, "cat_d6": 0.20, "cat_alt": 0.30, "gap": 0.30},
+    "four_views_equal": {"cat_d5": 0.25, "cat_d6": 0.25, "cat_alt": 0.25, "gap": 0.25},
+    "four_views_max": {"__max__": 1.0, "cat_d5": 1.0, "cat_d6": 1.0,
+                       "cat_alt": 1.0, "gap": 1.0},
+    "four_views_plus_weak": {"cat_d5": 0.225, "cat_d6": 0.225, "cat_alt": 0.225,
+                             "gap": 0.225, "glm": 0.05, "lgb_te": 0.05},
     "cat_pair_plus_glm": {"cat_d5": 0.425, "cat_d6": 0.425, "glm": 0.15},
     "all_equal": {"cat_d5": 0.25, "cat_d6": 0.25, "glm": 0.25, "lgb_te": 0.25},
 }

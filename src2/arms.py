@@ -28,7 +28,8 @@ from sklearn.preprocessing import SplineTransformer, StandardScaler
 
 import lightgbm as lgb
 
-from features import BIN_COLS, _derive, build, add_noise_view, fit_edges
+from features import (BIN_COLS, _derive, add_noise_view, build, build_alt,
+                      fit_edges, fit_edges_alt)
 from jitter import add_jitter_views
 from te import encode
 
@@ -49,6 +50,25 @@ def catboost_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: 
     return X, cats
 
 
+def altboost_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int = 3):
+    """Second encoding world: rank-normalised condition, different bin counts.
+
+    Averaging over encodings is what buys accuracy on this dataset, so this view
+    deliberately re-expresses the same information differently to decorrelate
+    from the main CatBoost arm.
+    """
+    X, cats = build_alt(raw, edges)
+    add_noise_view(X, cats, raw)
+    rk = raw.groupby("source")["condition"].rank(pct=True).fillna(0.5)
+    add_jitter_views(X, cats, raw, rk, pd.to_numeric(raw["days"]),
+                     n_views=n_views, n_bins=13, stream_offset=50 + stream_offset)
+    for c in cats:
+        X[c] = X[c].astype(str)
+    num = [c for c in X.columns if c not in cats]
+    X[num] = X[num].astype(float).fillna(-999.0)
+    return X, cats
+
+
 # --------------------------------------------------------------------------
 # arms
 # --------------------------------------------------------------------------
@@ -59,6 +79,8 @@ CAT_BASE = dict(loss_function="Logloss", learning_rate=0.03, l2_leaf_reg=10,
 ARMS = {
     "cat_d5": dict(kind="cat", depth=5, iterations=1000, params={}),
     "cat_d6": dict(kind="cat", depth=6, iterations=700, params={"bagging_temperature": 1.0}),
+    "cat_alt": dict(kind="cat", depth=6, iterations=800,
+                    params={"l2_leaf_reg": 6, "one_hot_max_size": 12}),
     "lgb_te": dict(kind="lgb"),
     "glm": dict(kind="glm"),
 }
@@ -114,8 +136,11 @@ def _glm_matrix(Xf: pd.DataFrame, Xo: list[pd.DataFrame], y_fit: np.ndarray, see
 def fit_predict(name: str, Xtr, Xva, Xte, cats, y_fit, seed):
     spec = ARMS[name]
     if spec["kind"] == "cat":
-        m = CatBoostClassifier(**CAT_BASE, depth=spec["depth"], iterations=spec["iterations"],
-                               random_seed=seed, **spec["params"])
+        base = dict(CAT_BASE)
+        base.update({k: v for k, v in spec["params"].items() if k in base})
+        extra = {k: v for k, v in spec["params"].items() if k not in CAT_BASE}
+        m = CatBoostClassifier(**base, depth=spec["depth"], iterations=spec["iterations"],
+                               random_seed=seed, **extra)
         m.fit(Xtr, y_fit, cat_features=cats, verbose=False)
         return m.predict_proba(Xva)[:, 1], m.predict_proba(Xte)[:, 1]
     if spec["kind"] == "lgb":

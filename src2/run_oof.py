@@ -16,8 +16,8 @@ from scipy.stats import rankdata
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
-from arms import ARMS, catboost_frame, fit_predict
-from features import fit_edges
+from arms import ARMS, altboost_frame, catboost_frame, fit_predict
+from features import fit_edges, fit_edges_alt
 
 
 def main() -> int:
@@ -25,6 +25,7 @@ def main() -> int:
     ap.add_argument("--seeds", type=int, nargs="+", default=[20260, 20261, 20262, 20263])
     ap.add_argument("--arms", nargs="+", default=list(ARMS))
     ap.add_argument("--folds", type=int, default=5)
+    ap.add_argument("--view", choices=["main", "alt"], default="main")
     ap.add_argument("--stream-base", type=int, default=0,
                     help="offset into the jitter stream family, so separate runs "
                          "see different re-encodings")
@@ -35,7 +36,8 @@ def main() -> int:
     test = pd.read_csv("data/test.csv")
     y = train["label"].to_numpy()
     raw_all = pd.concat([train.drop(columns=["label"]), test], ignore_index=True)
-    edges = fit_edges(raw_all)
+    edges = fit_edges(raw_all) if args.view == "main" else fit_edges_alt(raw_all)
+    make_frame = catboost_frame if args.view == "main" else altboost_frame
     args.out.mkdir(parents=True, exist_ok=True)
 
     oof_seeds = {a: [] for a in args.arms}
@@ -44,7 +46,7 @@ def main() -> int:
 
     for si, seed in enumerate(args.seeds):
         t0 = time.time()
-        X, cats = catboost_frame(raw_all, edges, stream_offset=args.stream_base + si + 1)
+        X, cats = make_frame(raw_all, edges, stream_offset=args.stream_base + si + 1)
         Xtr = X.iloc[: len(train)].reset_index(drop=True)
         Xte = X.iloc[len(train):].reset_index(drop=True)
         print(f"[seed {seed}] frame {X.shape} cats={len(cats)} ({time.time() - t0:.0f}s)", flush=True)

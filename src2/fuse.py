@@ -23,10 +23,14 @@ from sklearn.model_selection import StratifiedKFold
 RULES: dict[str, dict[str, float]] = {
     "cat_d5_only": {"cat_d5": 1.0},
     "cat_pair": {"cat_d5": 0.5, "cat_d6": 0.5},
-    "cat_pair_plus_glm": {"cat_d5": 0.425, "cat_d6": 0.425, "glm": 0.15},
-    "cat_pair_plus_both": {"cat_d5": 0.40, "cat_d6": 0.40, "glm": 0.10, "lgb_te": 0.10},
-    "all_equal": {"cat_d5": 0.25, "cat_d6": 0.25, "glm": 0.25, "lgb_te": 0.25},
     "cat_pair_max": {"__max__": 1.0, "cat_d5": 0.5, "cat_d6": 0.5},
+    "views_half": {"cat_d5": 0.25, "cat_d6": 0.25, "cat_alt": 0.50},
+    "views_thirds": {"cat_d5": 1 / 3, "cat_d6": 1 / 3, "cat_alt": 1 / 3},
+    "views_max": {"__max__": 1.0, "cat_d5": 1.0, "cat_d6": 1.0, "cat_alt": 1.0},
+    "views_plus_weak": {"cat_d5": 0.30, "cat_d6": 0.30, "cat_alt": 0.30,
+                        "glm": 0.05, "lgb_te": 0.05},
+    "cat_pair_plus_glm": {"cat_d5": 0.425, "cat_d6": 0.425, "glm": 0.15},
+    "all_equal": {"cat_d5": 0.25, "cat_d6": 0.25, "glm": 0.25, "lgb_te": 0.25},
 }
 
 

@@ -213,12 +213,112 @@ def add_noise_view(out: pd.DataFrame, cats: list[str], df: pd.DataFrame) -> None
         ("liv_age", ("liv_cat", "age_cat")),
         ("reg_liv", ("region", "liv_cat")),
         ("t3_days5", ("t3_cat", "days_q5")),
+        ("t3_d7", ("t3_cat", "d7")),
         ("src_x20_age", ("source", "x20_cat", "age_cat")),
         ("reg_x20_age", ("region", "x20_cat", "age_cat")),
         ("reg_src_x19", ("region", "source", "x19_cat")),
     ]:
+        if not all(p in out.columns for p in parts):
+            continue
         s = out[parts[0]].astype(str)
         for p in parts[1:]:
             s = s + "|" + out[p].astype(str)
         out[name] = s
         cats.append(name)
+
+
+# ---------------------------------------------------------------------------
+# Alternative encoding world
+# ---------------------------------------------------------------------------
+# The single largest lever in this dataset turned out to be averaging over
+# different *encodings* of the same interactions rather than over different
+# models.  `build_alt` therefore rebuilds the same information with a different
+# condition normalisation (rank inside the vehicle model instead of a ratio to
+# its median), different bin counts and a different cross list, so an arm
+# trained on it decorrelates from the main view while staying as strong.
+
+ALT_QUANTS = (7, 13, 25)
+
+
+def fit_edges_alt(df: pd.DataFrame) -> dict:
+    rk = df.groupby("source")["condition"].rank(pct=True).fillna(0.5)
+    days = pd.to_numeric(df["days"])
+    rate = days * (1.0 - rk)
+    edges: dict = {"__rank__": True}
+    for n in ALT_QUANTS:
+        qs = np.linspace(0, 1, n + 1)[1:-1]
+        edges[f"days_{n}"] = np.quantile(days.dropna(), qs)
+        edges[f"crk_{n}"] = np.quantile(rk, qs)
+        edges[f"rate_{n}"] = np.quantile(rate, qs)
+    return edges
+
+
+def build_alt(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
+    out = pd.DataFrame(index=df.index)
+    days = pd.to_numeric(df["days"])
+    cond = pd.to_numeric(df["condition"])
+    rk = df.groupby("source")["condition"].rank(pct=True).fillna(0.5)
+    rate = days * (1.0 - rk)
+
+    out["days"] = days
+    out["sqrt_days"] = np.sqrt(days.clip(lower=0))
+    out["condition"] = cond
+    out["cond_rk"] = rk
+    out["rate"] = rate
+    out["log_rate"] = np.log1p(rate.clip(lower=0))
+    out["rate_over_age"] = rate / df["age_range"].astype(float)
+    out["condition_missing"] = cond.isna().astype(int)
+    out["age_range"] = df["age_range"].astype(float)
+    out["grade_ord"] = df["grades"].map(GRADE_MAP).astype(float)
+    for c in BIN_COLS:
+        out[c] = df[c].astype(int)
+    out["bin_sum"] = df[BIN_COLS].sum(axis=1)
+
+    cats: list[str] = []
+    out["region"] = df["region"].astype(str)
+    out["source"] = df["source"].astype(str)
+    out["month"] = df["month"].astype(str)
+    out["version"] = df["version"].astype(str)
+    out["grades_c"] = df["grades"].astype(str)
+    out["age_cat"] = df["age_range"].astype(str)
+    out["bin_pat"] = df[BIN_COLS].astype(str).agg("".join, axis=1)
+    cats += ["region", "source", "month", "version", "grades_c", "age_cat", "bin_pat"]
+    for n in ALT_QUANTS:
+        out[f"d{n}"] = _qbins(days, edges[f"days_{n}"]).astype(str)
+        out[f"k{n}"] = _qbins(rk, edges[f"crk_{n}"]).astype(str)
+        out[f"e{n}"] = _qbins(rate, edges[f"rate_{n}"]).astype(str)
+        cats += [f"d{n}", f"k{n}", f"e{n}"]
+
+    def cross(name, *parts):
+        s = out[parts[0]].astype(str)
+        for p in parts[1:]:
+            s = s + "|" + out[p].astype(str)
+        out[name] = s
+        cats.append(name)
+
+    cross("A_k7_src", "k7", "source")
+    cross("A_k13_src", "k13", "source")
+    cross("A_k25_src", "k25", "source")
+    cross("A_k13_reg", "k13", "region")
+    cross("A_k7_age", "k7", "age_cat")
+    cross("A_d13_reg", "d13", "region")
+    cross("A_d13_src", "d13", "source")
+    cross("A_d7_age", "d7", "age_cat")
+    cross("A_d25_reg", "d25", "region")
+    cross("A_e13_reg", "e13", "region")
+    cross("A_e13_src", "e13", "source")
+    cross("A_e7_age", "e7", "age_cat")
+    cross("A_e7_pat", "e7", "bin_pat")
+    cross("A_d7_k7", "d7", "k7")
+    cross("A_d13_k13", "d13", "k13")
+    cross("A_reg_src", "region", "source")
+    cross("A_reg_age", "region", "age_cat")
+    cross("A_src_age", "source", "age_cat")
+    cross("A_d7_reg_src", "d7", "region", "source")
+    cross("A_k7_reg_age", "k7", "region", "age_cat")
+    cross("A_e7_reg_src", "e7", "region", "source")
+    cross("A_d7_pat", "d7", "bin_pat")
+    cross("A_reg_pat", "region", "bin_pat")
+    for c in ("region", "source", "bin_pat", "A_reg_src", "A_k13_src", "A_d13_reg"):
+        out[f"freq_{c}"] = out[c].map(out[c].value_counts()).astype(float)
+    return out, cats

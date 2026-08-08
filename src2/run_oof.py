@@ -16,8 +16,8 @@ from scipy.stats import rankdata
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
-from arms import ARMS, altboost_frame, catboost_frame, fit_predict
-from features import fit_edges, fit_edges_alt
+from arms import ARMS, alt2_frame, altboost_frame, catboost_frame, fit_predict
+from features import fit_edges, fit_edges_alt, fit_edges_alt2
 
 
 def main() -> int:
@@ -25,7 +25,7 @@ def main() -> int:
     ap.add_argument("--seeds", type=int, nargs="+", default=[20260, 20261, 20262, 20263])
     ap.add_argument("--arms", nargs="+", default=list(ARMS))
     ap.add_argument("--folds", type=int, default=5)
-    ap.add_argument("--view", choices=["main", "alt"], default="main")
+    ap.add_argument("--view", choices=["main", "alt", "alt2"], default="main")
     ap.add_argument("--stream-base", type=int, default=0,
                     help="offset into the jitter stream family, so separate runs "
                          "see different re-encodings")
@@ -36,8 +36,9 @@ def main() -> int:
     test = pd.read_csv("data/test.csv")
     y = train["label"].to_numpy()
     raw_all = pd.concat([train.drop(columns=["label"]), test], ignore_index=True)
-    edges = fit_edges(raw_all) if args.view == "main" else fit_edges_alt(raw_all)
-    make_frame = catboost_frame if args.view == "main" else altboost_frame
+    edge_fit = {"main": fit_edges, "alt": fit_edges_alt, "alt2": fit_edges_alt2}[args.view]
+    make_frame = {"main": catboost_frame, "alt": altboost_frame, "alt2": alt2_frame}[args.view]
+    edges = edge_fit(raw_all)
     args.out.mkdir(parents=True, exist_ok=True)
 
     oof_seeds = {a: [] for a in args.arms}

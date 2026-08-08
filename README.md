@@ -1,5 +1,7 @@
 # 车险索赔预测 — task-20260808-cursor
 
+> 提交文件：`submissions/submission_v2.csv`；本地嵌套 OOF AUC **0.69928**（诚实协议，见 `docs/RESULTS.md`）。
+
 赛题：根据保单与车辆等多维信息，预测投保人未来一年内是否发生索赔。评价指标 ROC-AUC。
 数据在 `data/`（`train.csv` 14930 行含 `label`，`test.csv` 6398 行，`submit_sample.csv` 为提交模板）。
 
@@ -95,4 +97,6 @@ docs/
   SOLUTION.md        方案与协议
   RESULTS.md         结果与诚实性检查
 src/                 上一版 B7 代码（仅用于对照与 gap 视图）
+docs/B7_*.md         上一版的文档，保留作历史记录；其中的本地分数用的是旧口径，不要与本版直接比较
+docs/supervision/    同上
 ```

@@ -322,3 +322,101 @@ def build_alt(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
     for c in ("region", "source", "bin_pat", "A_reg_src", "A_k13_src", "A_d13_reg"):
         out[f"freq_{c}"] = out[c].map(out[c].value_counts()).astype(float)
     return out, cats
+
+
+# ---------------------------------------------------------------------------
+# Third encoding world
+# ---------------------------------------------------------------------------
+# Same information again, expressed a third way: condition standardised inside
+# region x source, days replaced by its within-region percentile, and a coarser
+# set of bin counts.  Adding encoding worlds is what actually moves the score on
+# this dataset, so this arm exists purely to be a further decorrelated view.
+
+ALT2_QUANTS = (4, 9, 16)
+
+
+def fit_edges_alt2(df: pd.DataFrame) -> dict:
+    g = df.groupby(["source", "region"])["condition"]
+    cz = ((df["condition"] - g.transform("mean")) / g.transform("std").replace(0, np.nan)).fillna(0.0)
+    dpc = df.groupby("region")["days"].rank(pct=True)
+    load = cz - 2.0 * dpc
+    edges: dict = {}
+    for n in ALT2_QUANTS:
+        qs = np.linspace(0, 1, n + 1)[1:-1]
+        edges[f"cz_{n}"] = np.quantile(cz, qs)
+        edges[f"dpc_{n}"] = np.quantile(dpc, qs)
+        edges[f"load_{n}"] = np.quantile(load, qs)
+    return edges
+
+
+def build_alt2(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
+    out = pd.DataFrame(index=df.index)
+    days = pd.to_numeric(df["days"])
+    cond = pd.to_numeric(df["condition"])
+    g = df.groupby(["source", "region"])["condition"]
+    cz = ((cond - g.transform("mean")) / g.transform("std").replace(0, np.nan)).fillna(0.0)
+    dpc = df.groupby("region")["days"].rank(pct=True)
+    load = cz - 2.0 * dpc
+
+    out["cz"] = cz
+    out["dpc"] = dpc
+    out["load"] = load
+    out["days"] = days
+    out["condition"] = cond
+    out["condition_missing"] = cond.isna().astype(int)
+    out["cz_x_age"] = cz * df["age_range"].astype(float)
+    out["load_x_bin"] = load * df[BIN_COLS].sum(axis=1)
+    out["age_range"] = df["age_range"].astype(float)
+    out["grade_ord"] = df["grades"].map(GRADE_MAP).astype(float)
+    for c in BIN_COLS:
+        out[c] = df[c].astype(int)
+    out["bin_sum"] = df[BIN_COLS].sum(axis=1)
+
+    cats: list[str] = []
+    out["region"] = df["region"].astype(str)
+    out["source"] = df["source"].astype(str)
+    out["month"] = df["month"].astype(str)
+    out["version"] = df["version"].astype(str)
+    out["grades_c"] = df["grades"].astype(str)
+    out["age_cat"] = df["age_range"].astype(str)
+    out["bin_pat"] = df[BIN_COLS].astype(str).agg("".join, axis=1)
+    cats += ["region", "source", "month", "version", "grades_c", "age_cat", "bin_pat"]
+    for n in ALT2_QUANTS:
+        out[f"z{n}"] = _qbins(cz, edges[f"cz_{n}"]).astype(str)
+        out[f"p{n}"] = _qbins(dpc, edges[f"dpc_{n}"]).astype(str)
+        out[f"l{n}"] = _qbins(load, edges[f"load_{n}"]).astype(str)
+        cats += [f"z{n}", f"p{n}", f"l{n}"]
+
+    def cross(name, *parts):
+        s = out[parts[0]].astype(str)
+        for p in parts[1:]:
+            s = s + "|" + out[p].astype(str)
+        out[name] = s
+        cats.append(name)
+
+    cross("B_z9_src", "z9", "source")
+    cross("B_z16_src", "z16", "source")
+    cross("B_z9_reg", "z9", "region")
+    cross("B_z4_age", "z4", "age_cat")
+    cross("B_p9_reg", "p9", "region")
+    cross("B_p9_src", "p9", "source")
+    cross("B_p16_reg", "p16", "region")
+    cross("B_p4_age", "p4", "age_cat")
+    cross("B_l9_reg", "l9", "region")
+    cross("B_l9_src", "l9", "source")
+    cross("B_l16_src", "l16", "source")
+    cross("B_l4_pat", "l4", "bin_pat")
+    cross("B_p9_z9", "p9", "z9")
+    cross("B_p4_z4", "p4", "z4")
+    cross("B_reg_src", "region", "source")
+    cross("B_reg_age", "region", "age_cat")
+    cross("B_src_age", "source", "age_cat")
+    cross("B_reg_src_age", "region", "source", "age_cat")
+    cross("B_p4_reg_src", "p4", "region", "source")
+    cross("B_l4_reg_src", "l4", "region", "source")
+    cross("B_z4_reg_age", "z4", "region", "age_cat")
+    cross("B_p9_pat", "p9", "bin_pat")
+    cross("B_reg_pat", "region", "bin_pat")
+    for c in ("region", "source", "bin_pat", "B_reg_src", "B_z9_src", "B_p9_reg"):
+        out[f"freq_{c}"] = out[c].map(out[c].value_counts()).astype(float)
+    return out, cats

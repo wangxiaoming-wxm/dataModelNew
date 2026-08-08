@@ -29,7 +29,7 @@ from sklearn.preprocessing import SplineTransformer, StandardScaler
 import lightgbm as lgb
 
 from features import (BIN_COLS, _derive, add_noise_view, build, build_alt,
-                      fit_edges, fit_edges_alt)
+                      build_alt2, fit_edges, fit_edges_alt, fit_edges_alt2)
 from jitter import add_jitter_views
 from te import encode
 
@@ -69,6 +69,21 @@ def altboost_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: 
     return X, cats
 
 
+def alt2_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int = 3):
+    """Third encoding world: condition standardised inside region x source."""
+    X, cats = build_alt2(raw, edges)
+    add_noise_view(X, cats, raw)
+    g = raw.groupby(["source", "region"])["condition"]
+    cz = ((raw["condition"] - g.transform("mean")) / g.transform("std").replace(0, np.nan)).fillna(0.0)
+    add_jitter_views(X, cats, raw, cz, pd.to_numeric(raw["days"]),
+                     n_views=n_views, n_bins=7, stream_offset=100 + stream_offset)
+    for c in cats:
+        X[c] = X[c].astype(str)
+    num = [c for c in X.columns if c not in cats]
+    X[num] = X[num].astype(float).fillna(-999.0)
+    return X, cats
+
+
 # --------------------------------------------------------------------------
 # arms
 # --------------------------------------------------------------------------
@@ -81,6 +96,8 @@ ARMS = {
     "cat_d6": dict(kind="cat", depth=6, iterations=700, params={"bagging_temperature": 1.0}),
     "cat_alt": dict(kind="cat", depth=6, iterations=800,
                     params={"l2_leaf_reg": 6, "one_hot_max_size": 12}),
+    "cat_alt2": dict(kind="cat", depth=6, iterations=900,
+                     params={"l2_leaf_reg": 14, "random_strength": 1.0}),
     "lgb_te": dict(kind="lgb"),
     "glm": dict(kind="glm"),
 }

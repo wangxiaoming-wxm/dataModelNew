@@ -8,6 +8,7 @@ from pathlib import Path
 SOURCES = [
     ("artifacts/v2main", ["cat_d5", "cat_d6", "lgb_te", "glm"]),
     ("artifacts/v2altmerged", ["cat_alt"]),
+    ("artifacts/v2alt2merged", ["cat_alt2"]),
     ("artifacts/v2gap", ["gap"]),
 ]
 

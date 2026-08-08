@@ -12,3 +12,10 @@ catboost_info/
 artifacts/**/*.log
 artifacts/b6_retrain/
 artifacts/b7_plus_retrain/
+
+# local experiment scratch
+exp/*.npy
+artifacts/tmp_*
+train.csv
+test.csv
+submit_sample.csv

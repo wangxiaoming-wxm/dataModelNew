@@ -1,0 +1,9 @@
+fold 0 best_iter(AUC)=435 165s
+fold 1 best_iter(AUC)=272 307s
+fold 2 best_iter(AUC)=429 497s
+fold 3 best_iter(AUC)=372 654s
+fold 4 best_iter(AUC)=222 736s
+early stop on valid AUC     : 0.6871
+early stop on valid Logloss : 0.68692
+fixed 500 trees, no peeking : 0.68456
+optimism from AUC early stop: 0.00254

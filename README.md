@@ -14,7 +14,8 @@
 | 本地口径 | 重复分层 5 折，固定树数，无验证折早停，融合规则嵌套选择 |
 | 对照 | B7 提交（`submissions/submission_b7_closest_honest.csv`）公开榜 0.70722 |
 
-结果数字见 [`docs/RESULTS.md`](docs/RESULTS.md)。
+结果数字见 [`docs/RESULTS.md`](docs/RESULTS.md)；
+接手继续开发请先读 [`docs/HANDOFF.md`](docs/HANDOFF.md) 和 [`docs/DATA_STRUCTURE.md`](docs/DATA_STRUCTURE.md)。
 
 ---
 
@@ -56,47 +57,58 @@ LightGBM 与 GLM 臂里这些列全部剔除——它们没有有序目标统计
 
 ## 复现
 
+不重训、直接用仓库内已有的臂预测复算融合与提交（秒级）：
+
 ```bash
 python3 -m pip install -r requirements.txt
-
-# 主视图，两段各 4 个种子（抖动流互不重叠）
-PYTHONPATH=src2 python3 src2/run_oof.py --seeds 20260 20261 20262 20263 --stream-base 0  --out artifacts/v2a
-PYTHONPATH=src2 python3 src2/run_oof.py --seeds 20264 20265 20266 20267 --stream-base 10 --out artifacts/v2b
-
-# 第二套编码世界
-PYTHONPATH=src2 python3 src2/run_oof.py --view alt --arms cat_alt --seeds 20280 20281 20282 20283 --stream-base 0  --out artifacts/v2alt
-PYTHONPATH=src2 python3 src2/run_oof.py --view alt --arms cat_alt --seeds 20284 20285 20286 20287 --stream-base 10 --out artifacts/v2alt2
-
-# 沿用上一版 gap 视图，但改用诚实协议重跑，只为多样性
-python3 src2/run_gap_arm.py --seeds 20290 20291 20292 20293 --out artifacts/v2gap
-
-# 合并 → 融合 → 写提交
-PYTHONPATH=src2 python3 src2/merge_runs.py --inputs artifacts/v2a artifacts/v2b --out artifacts/v2main
-PYTHONPATH=src2 python3 src2/merge_runs.py --inputs artifacts/v2alt artifacts/v2alt2 --out artifacts/v2altmerged
-PYTHONPATH=src2 python3 src2/collect.py --out artifacts/v2
 PYTHONPATH=src2 python3 src2/fuse.py --dir artifacts/v2 --submission submissions/submission_v2.csv
+PYTHONPATH=src2 python3 src2/verify.py
 ```
+
+从零重训（4 核约 3.5 小时），一条命令：
+
+```bash
+bash run_all.sh
+```
+
+`run_all.sh` 里的每一步都可以单独跑，逐段命令与耗时见 [`docs/HANDOFF.md`](docs/HANDOFF.md) 第 3 节。
+分段跑（而不是一次跑 12 个种子）是为了每段能用不同的抖动流 `--stream-base`，
+同时断点续跑时只损失一段。
 
 ## 目录
 
 ```text
-data/                比赛数据
-src2/                本分支的方案
-  features.py        特征工程（两套编码世界）
-  jitter.py          确定性扰动重编码
-  te.py              折内嵌套目标编码
-  arms.py            四个模型臂 + 重复 CV 运行器
-  run_oof.py         主/备视图的 OOF 与 test 预测
-  run_gap_arm.py     上一版 gap 视图，改用诚实协议
-  merge_runs.py      合并多段运行
-  fuse.py            预登记规则 + 嵌套选择 + 写提交
-eda/                 数据结构逆向的探查脚本
-exp/                 特征与超参的对照实验
+data/                  比赛数据 + SHA256
+run_all.sh             一键从零重训到提交
+
+src2/                  本分支的方案
+  features.py          特征工程（三套编码世界 + 主办方噪声视图）
+  jitter.py            确定性扰动重编码（按行 id 哈希）
+  te.py                折内嵌套目标编码
+  arms.py              模型臂定义 + 特征帧构造
+  run_oof.py           训练入口：跑一个视图的若干种子
+  run_gap_arm.py       上一版 gap 视图，改用诚实协议重跑
+  merge_runs.py        合并多段运行
+  collect.py           汇总各视图的臂文件
+  fuse.py              预登记规则 + 嵌套选择 + 写提交
+  verify.py            诚实性检查
+  common.py            早期实验用的共享 CV 工具
+
+artifacts/v2/          最终融合用的臂预测 + fusion_report / verify / es_bias
+artifacts/v2*/         各段运行与各视图的中间产物
+logs/training/         每一次训练运行的原始日志（逐种子 OOF 与耗时）
+logs/screening/        筛选实验的原始终端输出
+eda/                   数据结构逆向的探查脚本
+exp/                   对照实验脚本 exp01–exp15
+submissions/           提交文件
+
 docs/
-  DATA_STRUCTURE.md  数据生成机制逆向（本方案的地基）
-  SOLUTION.md        方案与协议
-  RESULTS.md         结果与诚实性检查
-src/                 上一版 B7 代码（仅用于对照与 gap 视图）
-docs/B7_*.md         上一版的文档，保留作历史记录；其中的本地分数用的是旧口径，不要与本版直接比较
-docs/supervision/    同上
+  DATA_STRUCTURE.md    数据生成机制逆向（本方案的地基，先读这个）
+  HANDOFF.md           交接说明：怎么继续开发和训练
+  EXPERIMENTS.md       全部对照实验，含明确无效的方向清单
+  SOLUTION.md          方案与协议
+  RESULTS.md           结果与诚实性检查
+  B7_*.md, b6/, supervision/   上一版文档，本地分数是旧口径，不要与本版直接比较
+
+src/                   上一版 B7 代码（仅用于对照，并提供 gap 视图）
 ```

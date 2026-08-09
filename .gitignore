@@ -15,6 +15,7 @@ artifacts/b7_plus_retrain/
 
 # local experiment scratch
 exp/*.npy
+!logs/
 artifacts/tmp_*
 train.csv
 test.csv

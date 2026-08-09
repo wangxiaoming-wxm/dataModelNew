@@ -18,6 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 
 STRONG = ("cat_d5", "cat_d6", "cat_alt")
 STRONG_F20 = ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20")
+STRONG_R16 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r16")
 SUB85 = ("cat_d6_sf85", "cat_alt_sf85")
 ALT_D5 = ("cat_alt_d5",)
 NEW = ("cat_w6", "cat_w7", "cat_w5")
@@ -34,6 +35,9 @@ RULES: dict[str, dict[str, float]] = {
     "views_mean_f20": {k: 1 / 3 for k in STRONG_F20},
     "views_half_f20": {"cat_d5_f20": 0.25, "cat_d6_f20": 0.25, "cat_alt_f20": 0.50},
     "views_max_10_20": {"__max__": 1.0, **{k: 1.0 for k in STRONG + STRONG_F20}},
+    # Repeated 10-fold seeds: original 8-seed arms plus one extra 8-seed block.
+    "views_max_r16": {"__max__": 1.0, **{k: 1.0 for k in STRONG_R16}},
+    "views_max_10_r16": {"__max__": 1.0, **{k: 1.0 for k in STRONG + STRONG_R16}},
     # Fixed 85% stratified training-fold subsample diversity arms.
     "sub85_max": {"__max__": 1.0, **{k: 1.0 for k in SUB85}},
     "views_max_sub85": {"__max__": 1.0, **{k: 1.0 for k in STRONG + SUB85}},

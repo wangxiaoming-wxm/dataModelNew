@@ -11,9 +11,9 @@
 | 任务 | 车险索赔 **二分类**（是否索赔） |
 | 主指标 | ROC-AUC（诚实本地 OOF / nested） |
 | B7 配方 | `max(B6_gap, B6_gap_bag, V10_plus)` |
-| 本地权威分 | **0.702704955**（未达 0.71 门禁） |
+| 本地权威分 | **B7** 0.702704955 / **B8 gate** 0.703485（未达 0.71 门禁） |
 | **公开榜** | **0.70722**（同一提交文件） |
-| 提交文件 | `submissions/submission_b7_closest_honest.csv` |
+| 提交文件 | B7: `submissions/submission_b7_closest_honest.csv`；B8: `submissions/submission_b8_closest_honest.csv` |
 
 ---
 
@@ -168,6 +168,7 @@ docs/                      比赛/方案/审计（仅权威终稿）
 | 文档 | 用途 |
 |---|---|
 | `docs/B7_FINAL_REPORT.md` | B7 方案与结果终稿 |
+| `docs/B8_PUSH_REPORT.md` | B8 冲分进展（分段门控） |
 | `docs/LESSONS.md` | 实战经验：有效/有坑/浪费时间/弱模型 |
 | `docs/TRAINING.md` | 训练与复现步骤 |
 | `docs/supervision/B7_RECOMPUTE.md` | 独立复算说明 |

@@ -1,0 +1,109 @@
+{
+  "experiment_id": "b8_segment_gate_v2",
+  "recipe": "s_M_v10_22_age6",
+  "nested_votes": [
+    "s_M_v10_22_age6",
+    "s_M_v10_22_age6",
+    "s_M_v10_22_age6",
+    "s_M_v10_22_age6",
+    "s_M_v10_age6"
+  ],
+  "nested_oof_auc": 0.7033743498617524,
+  "full_recipe_auc": 0.7034850614491605,
+  "b7_closest": 0.7027049552615718,
+  "delta_vs_b7": 0.0006693946001805617,
+  "gate_0_71": false,
+  "full_scores": {
+    "max3": 0.7027049552615718,
+    "gate_s": 0.7030601279855805,
+    "gate_sm": 0.7030608245978158,
+    "s_age6": 0.7033244923289061,
+    "s_v10_age6": 0.7034234112663296,
+    "s_M_v10_age6": 0.703424107878565,
+    "s_M_v10_22_age6": 0.7034850614491605
+  },
+  "shuffled_plus_recipe_auc": 0.6402270478210368,
+  "shuffled_plus_pass_lt_0_66": true,
+  "stability_2way_vs_max3": {
+    "0": {
+      "nested": 0.7034850614491605,
+      "votes": [
+        "alt",
+        "alt",
+        "alt",
+        "alt",
+        "alt"
+      ]
+    },
+    "1": {
+      "nested": 0.7034850614491605,
+      "votes": [
+        "alt",
+        "alt",
+        "alt",
+        "alt",
+        "alt"
+      ]
+    },
+    "2": {
+      "nested": 0.7034850614491605,
+      "votes": [
+        "alt",
+        "alt",
+        "alt",
+        "alt",
+        "alt"
+      ]
+    },
+    "7": {
+      "nested": 0.7034850614491605,
+      "votes": [
+        "alt",
+        "alt",
+        "alt",
+        "alt",
+        "alt"
+      ]
+    },
+    "42": {
+      "nested": 0.7034850614491605,
+      "votes": [
+        "alt",
+        "alt",
+        "alt",
+        "alt",
+        "alt"
+      ]
+    },
+    "123": {
+      "nested": 0.7034850614491605,
+      "votes": [
+        "alt",
+        "alt",
+        "alt",
+        "alt",
+        "alt"
+      ]
+    },
+    "2026": {
+      "nested": 0.7034850614491605,
+      "votes": [
+        "alt",
+        "alt",
+        "alt",
+        "alt",
+        "alt"
+      ]
+    }
+  },
+  "protocol_declaration": {
+    "no_test_labels": true,
+    "no_global_te": true,
+    "fold_local_fe": true,
+    "no_oof_weight_search": true,
+    "fusion_rule": "pre_registered_segment_gates_on_b7_frozen_arms",
+    "rule_selection": "nested_5fold_menu",
+    "b6_freeze_untampered": true,
+    "new_data_only": true
+  }
+}

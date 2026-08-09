@@ -1,0 +1,118 @@
+{
+  "arm": "gapv3",
+  "solo_auc": 0.6941468251598825,
+  "corr_eq": 0.9798292539934783,
+  "corr_plus": 0.9009376450859016,
+  "corr_max3": 0.9696318684004267,
+  "max4_auc": 0.7022074746094793,
+  "gate_s_b7_auc": 0.7030601279855805,
+  "gate_s_max4_auc": 0.7024628327517617,
+  "gate_sm_max4_auc": 0.7024635791220137,
+  "nested_select_auc": 0.7030601279855805,
+  "nested_votes": [
+    "gate_s_b7",
+    "gate_s_b7",
+    "gate_s_b7",
+    "gate_s_b7",
+    "gate_s_b7"
+  ],
+  "delta_vs_b7_max4": -0.0004974806520925412,
+  "delta_vs_b7_best": 0.0003551727240086455,
+  "seed_aucs": {
+    "2026": 0.6912755885577261,
+    "2027": 0.6886057226496104
+  },
+  "oof_auc": 0.6941468251598825,
+  "folds": [
+    {
+      "tag": "gapv3",
+      "seed": 2026,
+      "fold": 0,
+      "valid_auc": 0.7024755636266776,
+      "best_iter": 257,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2026,
+      "fold": 1,
+      "valid_auc": 0.6883769617867771,
+      "best_iter": 480,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2026,
+      "fold": 2,
+      "valid_auc": 0.69146877135421,
+      "best_iter": 290,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2026,
+      "fold": 3,
+      "valid_auc": 0.6646643756075642,
+      "best_iter": 318,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2026,
+      "fold": 4,
+      "valid_auc": 0.7131161578555474,
+      "best_iter": 653,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2027,
+      "fold": 0,
+      "valid_auc": 0.6732913209022009,
+      "best_iter": 669,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2027,
+      "fold": 1,
+      "valid_auc": 0.6867588649922269,
+      "best_iter": 538,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2027,
+      "fold": 2,
+      "valid_auc": 0.703411570387833,
+      "best_iter": 423,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2027,
+      "fold": 3,
+      "valid_auc": 0.6928964306029401,
+      "best_iter": 286,
+      "n_features": 196,
+      "n_cats": 125
+    },
+    {
+      "tag": "gapv3",
+      "seed": 2027,
+      "fold": 4,
+      "valid_auc": 0.6911988086373789,
+      "best_iter": 363,
+      "n_features": 196,
+      "n_cats": 125
+    }
+  ]
+}

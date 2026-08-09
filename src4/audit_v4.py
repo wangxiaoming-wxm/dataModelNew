@@ -197,10 +197,24 @@ def main() -> int:
 
     # pre-registered minimal rule set for V4 (mirrors V3 views_max family)
     strong = [k for k in ("cat_d5", "cat_d6", "cat_alt") if k in ranks]
+    strong_f20 = [k for k in ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20") if k in ranks]
+    sub85 = [k for k in ("cat_d6_sf85", "cat_alt_sf85") if k in ranks]
     rules = {}
     if len(strong) >= 2:
         rules["views_max"] = {"__max__": 1.0, **{k: 1.0 for k in strong}}
         rules["views_mean"] = {k: 1 / len(strong) for k in strong}
+    if len(strong_f20) >= 2:
+        rules["views_max_f20"] = {"__max__": 1.0, **{k: 1.0 for k in strong_f20}}
+        rules["views_mean_f20"] = {k: 1 / len(strong_f20) for k in strong_f20}
+    if len(strong) >= 2 and len(strong_f20) >= 2:
+        rules["views_max_10_20"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20},
+        }
+    if len(sub85) >= 1:
+        rules["sub85_max"] = {"__max__": 1.0, **{k: 1.0 for k in sub85}}
+    if len(strong) >= 2 and len(sub85) >= 1:
+        rules["views_max_sub85"] = {"__max__": 1.0, **{k: 1.0 for k in strong + sub85}}
     # optional extras if present and strong enough later
     for extra in ("cat_w6", "cat_w7", "cat_w5"):
         if extra in ranks and len(strong) >= 2:

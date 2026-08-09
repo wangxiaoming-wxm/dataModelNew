@@ -18,6 +18,7 @@ from sklearn.model_selection import StratifiedKFold
 
 STRONG = ("cat_d5", "cat_d6", "cat_alt")
 STRONG_F20 = ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20")
+SUB85 = ("cat_d6_sf85", "cat_alt_sf85")
 NEW = ("cat_w6", "cat_w7", "cat_w5")
 
 RULES: dict[str, dict[str, float]] = {
@@ -32,6 +33,9 @@ RULES: dict[str, dict[str, float]] = {
     "views_mean_f20": {k: 1 / 3 for k in STRONG_F20},
     "views_half_f20": {"cat_d5_f20": 0.25, "cat_d6_f20": 0.25, "cat_alt_f20": 0.50},
     "views_max_10_20": {"__max__": 1.0, **{k: 1.0 for k in STRONG + STRONG_F20}},
+    # Fixed 85% stratified training-fold subsample diversity arms.
+    "sub85_max": {"__max__": 1.0, **{k: 1.0 for k in SUB85}},
+    "views_max_sub85": {"__max__": 1.0, **{k: 1.0 for k in STRONG + SUB85}},
     # V4 extensions (pre-registered)
     "w6_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w6",)}},
     "w7_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w7",)}},

@@ -57,6 +57,22 @@ BASE = dict(
 )
 
 
+def stratified_subsample(idx: np.ndarray, y: np.ndarray, frac: float, seed: int) -> np.ndarray:
+    if frac >= 1.0:
+        return idx
+    if not 0.0 < frac < 1.0:
+        raise ValueError(f"train fraction must be in (0, 1], got {frac}")
+    rng = np.random.default_rng(seed)
+    kept = []
+    for cls in np.unique(y[idx]):
+        cls_idx = idx[y[idx] == cls]
+        n_keep = max(1, int(round(len(cls_idx) * frac)))
+        kept.append(rng.choice(cls_idx, size=n_keep, replace=False))
+    out = np.concatenate(kept)
+    rng.shuffle(out)
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--world", required=True, choices=sorted(WORLDS))
@@ -67,6 +83,8 @@ def main() -> int:
     ap.add_argument("--threads", type=int, default=1)
     ap.add_argument("--loss", default="Logloss",
                     help="CatBoost loss_function; no eval_set is ever passed")
+    ap.add_argument("--train-frac", type=float, default=1.0,
+                    help="Fixed stratified fraction of each training fold to fit")
     ap.add_argument("--out", type=Path, default=Path("artifacts/v4_probe"))
     args = ap.parse_args()
 
@@ -92,14 +110,16 @@ def main() -> int:
     for f, (ti, vi) in enumerate(
         StratifiedKFold(args.folds, shuffle=True, random_state=args.seed).split(Xtr, y)
     ):
+        fit_idx = stratified_subsample(ti, y, args.train_frac, seed=args.seed * 1000 + f)
         m = CatBoostClassifier(**params, random_seed=args.seed + f)
-        m.fit(Xtr.iloc[ti], y[ti], cat_features=cats, verbose=False)
+        m.fit(Xtr.iloc[fit_idx], y[fit_idx], cat_features=cats, verbose=False)
         oof[vi] = m.predict_proba(Xtr.iloc[vi])[:, 1]
         test_parts.append(rankdata(m.predict_proba(Xte)[:, 1]) / len(Xte))
 
     auc = float(roc_auc_score(y, oof))
     loss_tag = args.loss.lower().replace(":", "")
-    tag = f"{args.world}_{args.preset}_{loss_tag}_s{args.seed}_f{args.folds}"
+    frac_tag = "" if args.train_frac == 1.0 else f"_sf{int(round(args.train_frac * 100)):02d}"
+    tag = f"{args.world}_{args.preset}_{loss_tag}{frac_tag}_s{args.seed}_f{args.folds}"
     args.out.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         args.out / f"part_{tag}.npz",
@@ -113,6 +133,7 @@ def main() -> int:
         "seed": args.seed,
         "folds": args.folds,
         "loss": args.loss,
+        "train_frac": args.train_frac,
         "stream_offset": offset,
         "oof_auc": auc,
         "elapsed_sec": round(time.time() - t0, 1),

@@ -26,6 +26,11 @@ from sklearn.model_selection import StratifiedKFold
 from arms import alt2_frame, altboost_frame, catboost_frame
 from features import fit_edges, fit_edges_alt, fit_edges_alt2
 from worlds import fit_edges_w4, fit_edges_w5, w4_frame, w5_frame
+from v5_world import fit_edges_w6, w6_frame
+from v5_w7 import fit_edges_w7, w7_frame
+from v5_w8 import fit_edges_w8, w8_frame
+from v5_w9 import fit_edges_w9, w9_frame
+from v5_w10 import fit_edges_w10, w10_frame
 
 WORLDS = {
     "main": (fit_edges, catboost_frame),
@@ -33,6 +38,11 @@ WORLDS = {
     "alt2": (fit_edges_alt2, alt2_frame),
     "w4": (fit_edges_w4, w4_frame),
     "w5": (fit_edges_w5, w5_frame),
+    "w6": (fit_edges_w6, w6_frame),
+    "w7": (fit_edges_w7, w7_frame),
+    "w8": (fit_edges_w8, w8_frame),
+    "w9": (fit_edges_w9, w9_frame),
+    "w10": (fit_edges_w10, w10_frame),
 }
 
 # Depth/iterations mirror the tuned settings of the existing CatBoost arms; the

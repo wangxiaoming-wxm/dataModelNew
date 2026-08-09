@@ -1,0 +1,10 @@
+{
+  "world": "alt",
+  "preset": "fast",
+  "seed": 22000,
+  "folds": 5,
+  "loss": "Logloss",
+  "stream_offset": 79,
+  "oof_auc": 0.689739309788636,
+  "elapsed_sec": 192.9
+}

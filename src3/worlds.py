@@ -88,6 +88,7 @@ def fit_edges_w4(df: pd.DataFrame) -> dict:
         edges[f"pb_{n}"] = np.quantile(c["probit"], np.linspace(0, 1, n + 1)[1:-1])
         edges[f"rz_{n}"] = np.quantile(c["rz"], np.linspace(0, 1, n + 1)[1:-1])
         edges[f"ld_{n}"] = np.quantile(c["log_days"], np.linspace(0, 1, n + 1)[1:-1])
+        edges[f"q_{n}"] = np.quantile(c["cond"].dropna(), np.linspace(0, 1, n + 1)[1:-1])
         # equal-width in log space, not quantile: a genuinely different cut set
         lo, hi = np.percentile(c["log_rate"], [0.5, 99.5])
         edges[f"lr_{n}"] = np.linspace(lo, hi, n + 1)[1:-1]
@@ -128,10 +129,15 @@ def build_w4(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
         out[f"Z{n}"] = _qbins(c["rz"], edges[f"rz_{n}"]).astype(str)
         out[f"D{n}"] = _qbins(c["log_days"], edges[f"ld_{n}"]).astype(str)
         out[f"R{n}"] = _qbins(c["log_rate"], edges[f"lr_{n}"]).astype(str)
-        cats += [f"P{n}", f"Z{n}", f"D{n}", f"R{n}"]
+        out[f"Q{n}"] = _qbins(c["cond"].fillna(-1), edges[f"q_{n}"]).astype(str)
+        cats += [f"P{n}", f"Z{n}", f"D{n}", f"R{n}", f"Q{n}"]
     # add_noise_view crosses t3 against a 5-bin day column; keep that hook alive
     out["days_q5"] = _qbins(c["log_days"], edges["ld_5x"]).astype(str)
-    cats.append("days_q5")
+    # Fixed physical day edges rather than quantiles.  `dfx_c10` in the main
+    # world is the single strongest column measured anywhere in this dataset
+    # (honest OOF-TE AUC 0.628) and w4 had no member of that family at all.
+    out["days_fx"] = np.digitize(c["days"].to_numpy(dtype=float), DAYS_FIXED_EDGES).astype(str)
+    cats += ["days_q5", "days_fx"]
 
     x = _cross
     x(out, cats, "W_P6_src", "P6", "source")
@@ -158,6 +164,13 @@ def build_w4(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
     x(out, cats, "W_P6_reg_age", "P6", "region", "age_cat")
     x(out, cats, "W_D6_pat", "D6", "bin_pat")
     x(out, cats, "W_reg_pat", "region", "bin_pat")
+    x(out, cats, "W_dfx_Q11", "days_fx", "Q11")
+    x(out, cats, "W_dfx_P11", "days_fx", "P11")
+    x(out, cats, "W_dfx_R11", "days_fx", "R11")
+    x(out, cats, "W_dfx_src", "days_fx", "source")
+    x(out, cats, "W_dfx_reg", "days_fx", "region")
+    x(out, cats, "W_Q11_src", "Q11", "source")
+    x(out, cats, "W_Q6_reg", "Q6", "region")
     for col in ("region", "source", "bin_pat", "W_reg_src", "W_P11_src", "W_D11_reg"):
         out[f"freq_{col}"] = out[col].map(out[col].value_counts()).astype(float)
     return out, cats

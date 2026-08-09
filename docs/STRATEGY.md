@@ -554,3 +554,5 @@ logit(p) = f₁(log_days) + f₂(log_cond_r) + f₃(log_ratio)
 4. 融合规则集在看到融合分之前就固定；新加规则要在文档里说明加的时点；
 5. 训练日志留档在 `logs/training/`；
 6. 报告里凡是引用上一版的数字，必须注明它是旧口径（含 +0.0025 早停乐观）。
+
+> 未验证的判断、待办实验与验证命令：见 [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md)。

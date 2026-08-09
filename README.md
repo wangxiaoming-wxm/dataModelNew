@@ -108,7 +108,8 @@ docs/                  按这个顺序读
   STRATEGY.md          ② 解题思路 / 架构 / 避开的坑 / 冲榜路线图 / 两套备用方案
   EXPERIMENTS.md       ③ 对照实验台账，含明确无效的方向清单
   RESULTS.md           ④ 最终数字与诚实性检查
-  HANDOFF.md           ⑤ 操作手册：环境、重跑、协议红线
+  OPEN_QUESTIONS.md    ⑤ 未验证的判断 + 待办实验 + 可直接跑的验证命令
+  HANDOFF.md           ⑥ 操作手册：环境、重跑、协议红线
   legacy/              上一版（B5/B6/V10/B7）文档，旧口径不可直接比较，先读其 README
 
 src/                   上一版 B7 代码（仅用于对照，并提供 gap 视图）

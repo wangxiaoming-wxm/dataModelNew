@@ -1,0 +1,45 @@
+{
+  "protocol": "V2-identical stratified 5-fold, fixed trees, no ES, nested rule selection",
+  "gap_bagging": "mean of raw OOF probabilities across 8 seeds (then rank at fusion)",
+  "gap_bag_auc": 0.6963640423890536,
+  "arm_oof_auc": {
+    "cat_d5": 0.6950635171036217,
+    "cat_d6": 0.6949146908753351,
+    "cat_alt": 0.6950799372491698,
+    "w11_d5": 0.6960603443334376,
+    "w11_d6": 0.6950498336489981,
+    "gap": 0.6963640423890536
+  },
+  "rule_full_oof_auc": {
+    "views_max": 0.6990960311811597,
+    "v2_gap_max": 0.7010969751902547,
+    "w11pair_alt": 0.6991921387906334,
+    "w11pair_alt_gap": 0.7007564810812059,
+    "w11_alt_gap": 0.7004324071177052
+  },
+  "fixed_nested99": {
+    "views_max": 0.6991427539589468,
+    "v2_gap_max": 0.7011469322391346,
+    "w11pair_alt": 0.6992980736084276,
+    "w11pair_alt_gap": 0.7009220508821499,
+    "w11_alt_gap": 0.7005730232732177
+  },
+  "nested_selection_picks": [
+    "v2_gap_max",
+    "v2_gap_max",
+    "v2_gap_max",
+    "w11pair_alt_gap",
+    "v2_gap_max"
+  ],
+  "nested_oof_auc_seed99": 0.700586507695774,
+  "supervisor_nested20_mean": 0.7007565470105781,
+  "supervisor_nested20_std": 0.0002961632305710443,
+  "v2_pipeline_nested": 0.6985627496359704,
+  "v2_supervisor_mean": 0.69824,
+  "delta_vs_v2_pipeline": 0.0021937973746076755,
+  "delta_vs_v2_supervisor": 0.0025165470105781296,
+  "submitted_rule": "v2_gap_max",
+  "submission": "submissions/submission_v5.csv",
+  "target": 0.70056,
+  "admit": true
+}

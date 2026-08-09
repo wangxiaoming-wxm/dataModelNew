@@ -1,0 +1,22 @@
+  lr02 seed=900 oof=0.68094 (1131s)
+  lr02 seed=901 oof=0.68655 (2277s)
+{
+  "config": "lr02",
+  "view": "main",
+  "folds": 5,
+  "seeds": [
+    900,
+    901
+  ],
+  "params": {
+    "learning_rate": "0.02",
+    "iterations": "1500"
+  },
+  "single_mean": 0.6837458820265285,
+  "per_seed": [
+    0.6809402016115229,
+    0.6865515624415343
+  ],
+  "bagged_oof_auc": 0.6871845092943996,
+  "elapsed_sec": 2277.3
+}

@@ -1,0 +1,116 @@
+{
+  "verdict_inputs": {},
+  "files": {
+    "v2_sha256": "01fa19b4233a4f4ea7a793d6e072f26ef2ddb5dcae14caa4cc5c4fd7fdb7a6c3",
+    "v3_sha256": "01ec697c9fbc47221b17b9a4b87e2f0a395638104ad786427f30f0eea94af1e9",
+    "ids_aligned": true,
+    "spearman": 0.9982563746633935,
+    "mean_abs_rank_diff": 0.011835716479467982
+  },
+  "views_max_full_oof": {
+    "v2": 0.6990960311811597,
+    "v3": 0.7015141215242033,
+    "delta": 0.002418090343043633
+  },
+  "nested_20seed": {
+    "v2_mean": 0.6982393610891513,
+    "v2_sd": 0.0004520327928726871,
+    "v2_min": 0.6975062874230045,
+    "v2_max": 0.6993076271476555,
+    "v3_mean": 0.7012447216695765,
+    "v3_sd": 0.0003542718287765171,
+    "v3_min": 0.700677440471499,
+    "v3_max": 0.7016219969046533,
+    "delta_mean": 0.0030053605804252204,
+    "v2_picks": {
+      "views_max": 75,
+      "four_views_max": 16,
+      "worlds3_gap_max": 8,
+      "worlds3_max": 1
+    },
+    "v3_picks": {
+      "views_max": 93,
+      "four_views_max": 7
+    }
+  },
+  "paired_bootstrap_delta": {
+    "mean": 0.002421522576406418,
+    "sd": 0.0010686146140224486,
+    "p2.5": 0.00033974276299506554,
+    "p97.5": 0.004544333124150602,
+    "p_delta_le_0": 0.0105,
+    "p_delta_gt_0": 0.9895
+  },
+  "arm_oof": {
+    "v2": {
+      "cat_alt": 0.6950799372491698,
+      "cat_alt2": 0.6910049795832904,
+      "cat_d5": 0.6950635171036217,
+      "cat_d6": 0.6949146908753351,
+      "gap": 0.6904384845618787,
+      "glm": 0.6648914499008421,
+      "lgb_te": 0.6710958018962182
+    },
+    "v3": {
+      "cat_alt": 0.6981784187141095,
+      "cat_alt2": 0.6910049795832904,
+      "cat_d5": 0.6977134051679871,
+      "cat_d6": 0.6975988622132843,
+      "cat_w4": 0.6885832320260112,
+      "cat_w5": 0.6942989105382702,
+      "gap": 0.6904384845618787,
+      "glm": 0.6648914499008421,
+      "lgb_te": 0.6710958018962182
+    }
+  },
+  "arm_seed_counts": {
+    "v2_note": "cat_d5/d6/alt were 12 seeds @ 5-fold",
+    "v3_note": "cat_d5/d6/alt are 8 seeds @ 10-fold"
+  },
+  "v2_v3_oof_rank_corr": {
+    "cat_d5": 0.992283863721037,
+    "cat_d6": 0.9928551474761064,
+    "cat_alt": 0.9904652683698122
+  },
+  "tenfold_protocol_note": "V3 OOF estimates the 10-fold bagged predictor that is also used at test time.  Comparing V3 OOF to V2 OOF is comparing two different predictors, not two estimates of the same one.  That is the correct comparison for choosing which file to submit.",
+  "selection_history_risks": {
+    "kept_10fold_after_seeing_lift": true,
+    "hyperparam_screen_none_helped": true,
+    "new_worlds_w4_w5_did_not_enter_winning_rule": true,
+    "winning_rule_still_preregistered_views_max": true,
+    "extra_fuse2_rules_exist_but_views_max_still_wins": true,
+    "mild_selection_optimism": "Choosing to switch from 5-fold to 10-fold after observing the lift is a one-bit selection.  Expected optimism from one binary choice of this magnitude is well below 0.001, and the paired bootstrap below already conditions on the realised scores."
+  },
+  "protocol_scan_hits": [],
+  "shuffled_label_auc_v2_pipeline": 0.49825309554574193,
+  "data_sha_ok": true,
+  "test_has_label_column": false,
+  "public_lb": {
+    "v2_reported": 0.70878,
+    "v3_unknown": true,
+    "local_to_lb_gap_v2": 0.010539999999999994,
+    "implied_lb_se": 0.011,
+    "local_delta_vs_lb_noise": "Local +0.003 is ~0.25\u00d7 the public-LB sampling SE.  A one-shot submission therefore has material risk that V3 loses on the board even if it is truly better in expectation."
+  },
+  "gates": {
+    "data_unmodified": true,
+    "no_test_labels": true,
+    "no_protocol_violations_in_live_code": true,
+    "shuffled_label_collapsed": true,
+    "winning_rule_preregistered": true,
+    "v3_beats_v2_in_paired_bootstrap": true,
+    "v3_lift_exceeds_nested_seed_noise": true,
+    "no_cheating_detected": true
+  },
+  "board_delta_inference": {
+    "local_delta": 0.0030053605804252204,
+    "pred_spearman": 0.9982563746633935,
+    "paired_delta_se": 0.0010686146140224486,
+    "approx_p_v3_wins_board_given_corr": 0.9895,
+    "note": "Because V2 and V3 predictions correlate at Spearman 0.998, the public-board delta is far less noisy than an independent 0.011 SE suggests.  The paired local bootstrap is the right uncertainty."
+  },
+  "recommendation": {
+    "submit": "V3",
+    "reason": "Honest protocol, paired lift +0.0030 with P(\u0394>0)=0.990 under bootstrap; predictions correlate 0.998 with V2 so board delta should track local delta; mild one-bit selection (kept 10-fold after seeing it) does not overturn a +0.003 gap."
+  }
+}

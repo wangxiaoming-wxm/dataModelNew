@@ -37,6 +37,8 @@
 | 复用 b6pro keepx/nodays/aging/baghot | max4 ≤ B7；高相关同质 |
 | **全数据贪心分段补丁（可抬到 ~0.7057）** | **诚实嵌套发现仅 ~0.7022；内层校验回退到 0.703485** → 过拟合，禁止交付 |
 | plus 5fold 变体屏（deep/wide） | 5fold 低估；未超门控地板 |
+| plus_deep 10fold×2seed | solo 0.6880 < 冻结 plus 0.6886；corr(ref)=0.986；不抬门控 |
+| gate + mean(ref,deep) | full 可到 0.70357，但嵌套/多种子不稳，nested≈0.70345 ≤ 门控地板 |
 
 历史 b6pro 本地 0.71 链已因公开榜 0.70208 作废，**不引用**。
 

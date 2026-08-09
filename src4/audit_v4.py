@@ -228,7 +228,7 @@ def main() -> int:
         nested_mean_v, nested_sd = None, None
         scores = []
     else:
-        nested_mean_v, nested_sd, scores = nested_mean(rules, ranks, y)
+        nested_mean_v, nested_sd, scores = nested_mean(rules, ranks, y, seeds=range(1000, 1020))
         gates["nested_selection"] = True
     detail["nested_oof_mean"] = nested_mean_v
     detail["nested_oof_sd"] = nested_sd
@@ -239,7 +239,7 @@ def main() -> int:
     y_perm = y.copy()
     rng.shuffle(y_perm)
     if rules:
-        perm_mean, _, _ = nested_mean(rules, ranks, y_perm, seeds=range(5))
+        perm_mean, _, _ = nested_mean(rules, ranks, y_perm, seeds=range(1000, 1005))
     else:
         perm_mean = None
     gates["permutation_no_signal"] = perm_mean is not None and perm_mean < 0.55

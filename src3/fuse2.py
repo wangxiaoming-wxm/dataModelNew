@@ -86,11 +86,20 @@ def nested_run(rules, ranks, y, seed, use_stacker=True):
             if a > best_auc:
                 best, best_auc, best_kind = n, a, "rule"
         if use_stacker:
-            # the stacker is scored the same way every rule is: fit and judged
-            # inside the inner block only, never on the block it will predict
-            sub = np.array_split(inner, 2)
-            names, m = fit_stacker(ranks, y, sub[0])
-            a = roc_auc_score(y[sub[1]], apply_stacker(m, names, ranks, sub[1]))
+            # The fixed rules have no parameters, so their AUC over the whole
+            # inner block is already an unbiased estimate of held-out
+            # behaviour.  Scoring the stacker on a single half-split is neither
+            # unbiased nor computed on the same number of rows, and it made the
+            # stacker win selection while generalising worse.  Cross-fit it
+            # inside the inner block instead, so both sides of the comparison
+            # are out-of-sample estimates over the same rows.
+            inner_oof = np.zeros(len(inner))
+            for a_idx, b_idx in StratifiedKFold(4, shuffle=True, random_state=seed).split(
+                np.zeros(len(inner)), y[inner]
+            ):
+                names, m = fit_stacker(ranks, y, inner[a_idx])
+                inner_oof[b_idx] = apply_stacker(m, names, ranks, inner[b_idx])
+            a = roc_auc_score(y[inner], inner_oof)
             if a > best_auc:
                 best, best_auc, best_kind = STACKER, a, "stack"
         picks.append(best)

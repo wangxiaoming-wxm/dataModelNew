@@ -192,8 +192,16 @@ def _w5_core(df: pd.DataFrame) -> pd.DataFrame:
     # diagonal / anti-diagonal of that square carry the rate and the exposure
     diag = dp - cp
     anti = (dp + cp) / 2.0
+    # absolute rate kept alongside the percentile view: the single strongest
+    # column in the main world is days/cond_r (AUC 0.620), and a pure percentile
+    # world discards that scale.  The median-ratio recovers it without collapsing
+    # back onto the main world's expression of condition.
+    med = df.groupby("source")["condition"].transform("median")
+    cond_r = (cond / med.replace(0, np.nan)).fillna(1.0)
+    ratio = days / cond_r.clip(lower=1e-9)
     return pd.DataFrame({"cp": cp, "dp": dp, "diag": diag, "anti": anti,
-                         "days": days, "cond": cond}, index=df.index)
+                         "days": days, "cond": cond, "cond_r": cond_r,
+                         "ratio": ratio}, index=df.index)
 
 
 def fit_edges_w5(df: pd.DataFrame) -> dict:
@@ -205,6 +213,8 @@ def fit_edges_w5(df: pd.DataFrame) -> dict:
         edges[f"dp_{n}"] = np.quantile(c["dp"], qs)
         edges[f"dg_{n}"] = np.quantile(c["diag"], qs)
         edges[f"an_{n}"] = np.quantile(c["anti"], qs)
+        edges[f"rt_{n}"] = np.quantile(c["ratio"], qs)
+        edges[f"cr_{n}"] = np.quantile(c["cond_r"], qs)
     edges["dq_5x"] = np.quantile(c["days"], np.linspace(0, 1, 6)[1:-1])
     return edges
 
@@ -216,6 +226,9 @@ def build_w5(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
     out["dp"] = c["dp"]
     out["diag"] = c["diag"]
     out["anti"] = c["anti"]
+    out["ratio"] = c["ratio"]
+    out["log_ratio"] = np.log(c["ratio"].clip(lower=1e-9))
+    out["cond_r"] = c["cond_r"]
     out["days"] = c["days"]
     out["condition"] = c["cond"]
     out["condition_missing"] = c["cond"].isna().astype(int)
@@ -244,7 +257,9 @@ def build_w5(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
         out[f"T{n}"] = _qbins(c["dp"], edges[f"dp_{n}"]).astype(str)
         out[f"G{n}"] = _qbins(c["diag"], edges[f"dg_{n}"]).astype(str)
         out[f"A{n}"] = _qbins(c["anti"], edges[f"an_{n}"]).astype(str)
-        cats += [f"C{n}", f"T{n}", f"G{n}", f"A{n}"]
+        out[f"U{n}"] = _qbins(c["ratio"], edges[f"rt_{n}"]).astype(str)
+        out[f"S{n}"] = _qbins(c["cond_r"], edges[f"cr_{n}"]).astype(str)
+        cats += [f"C{n}", f"T{n}", f"G{n}", f"A{n}", f"U{n}", f"S{n}"]
     # add_noise_view crosses t3 against a 5-bin day column; keep that hook alive
     out["days_q5"] = _qbins(c["days"], edges["dq_5x"]).astype(str)
     cats.append("days_q5")
@@ -268,13 +283,21 @@ def build_w5(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
     x(out, cats, "V_A8_src", "A8", "source")
     x(out, cats, "V_dfx_src", "days_fx", "source")
     x(out, cats, "V_dfx_C8", "days_fx", "C8")
+    x(out, cats, "V_dfx_S8", "days_fx", "S8")
+    x(out, cats, "V_dfx_U8", "days_fx", "U8")
+    x(out, cats, "V_U8_src", "U8", "source")
+    x(out, cats, "V_U8_reg", "U8", "region")
+    x(out, cats, "V_U8_age", "U8", "age_cat")
+    x(out, cats, "V_S8_src", "S8", "source")
+    x(out, cats, "V_S15_src", "S15", "source")
     x(out, cats, "V_reg_src", "region", "source")
     x(out, cats, "V_reg_age", "region", "age_cat")
     x(out, cats, "V_src_age", "source", "age_cat")
     x(out, cats, "V_reg_src_age", "region", "source", "age_cat")
     x(out, cats, "V_G8_reg_src", "G8", "region", "source")
+    x(out, cats, "V_U8_reg_src", "U8", "region", "source")
     x(out, cats, "V_reg_pat", "region", "bin_pat")
-    for col in ("region", "source", "bin_pat", "V_reg_src", "V_cell8", "V_G8_src"):
+    for col in ("region", "source", "bin_pat", "V_reg_src", "V_cell8", "V_G8_src", "V_U8_src"):
         out[f"freq_{col}"] = out[col].map(out[col].value_counts()).astype(float)
     return out, cats
 

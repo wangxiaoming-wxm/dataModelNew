@@ -199,6 +199,7 @@ def main() -> int:
     strong = [k for k in ("cat_d5", "cat_d6", "cat_alt") if k in ranks]
     strong_f20 = [k for k in ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20") if k in ranks]
     sub85 = [k for k in ("cat_d6_sf85", "cat_alt_sf85") if k in ranks]
+    alt_d5 = [k for k in ("cat_alt_d5",) if k in ranks]
     rules = {}
     if len(strong) >= 2:
         rules["views_max"] = {"__max__": 1.0, **{k: 1.0 for k in strong}}
@@ -215,6 +216,8 @@ def main() -> int:
         rules["sub85_max"] = {"__max__": 1.0, **{k: 1.0 for k in sub85}}
     if len(strong) >= 2 and len(sub85) >= 1:
         rules["views_max_sub85"] = {"__max__": 1.0, **{k: 1.0 for k in strong + sub85}}
+    if len(strong) >= 2 and len(alt_d5) == 1:
+        rules["views_max_alt_d5"] = {"__max__": 1.0, **{k: 1.0 for k in strong + alt_d5}}
     # optional extras if present and strong enough later
     for extra in ("cat_w6", "cat_w7", "cat_w5"):
         if extra in ranks and len(strong) >= 2:

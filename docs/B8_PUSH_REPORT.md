@@ -33,13 +33,21 @@
 | gapv3 新交叉特征 CatBoost | solo≈0.694；max4 伤分 |
 | gapv3 lossguide / baghot / LGB | 更弱 |
 | embedding MLP | solo≈0.60，伤分 |
+| YetiRank（region group） | solo≈0.645；伤分 |
 | 复用 b6pro keepx/nodays/aging/baghot | max4 ≤ B7；高相关同质 |
-| 样本加权 hard-region / FN proxy | 进行中 / 预期有限 |
+| **全数据贪心分段补丁（可抬到 ~0.7057）** | **诚实嵌套发现仅 ~0.7022；内层校验回退到 0.703485** → 过拟合，禁止交付 |
+| plus 5fold 变体屏（deep/wide） | 5fold 低估；未超门控地板 |
 
 历史 b6pro 本地 0.71 链已因公开榜 0.70208 作废，**不引用**。
+
+## 关键教训（B8）
+
+- 分段门控对「max 伤害切片」有效，但是小幅（+0.0007）
+- 在全量 OOF 上堆叠许多切片规则，本地可虚高到 0.705+，**必须**用折外发现/内层校验；一经诚实嵌套即塌
+- 同质 CatBoost 微扰 / 弱异构臂无法通过 `max` 抬分
 
 ## 下一步（继续冲 0.71）
 
 1. 找 **solo≳0.69 且 corr(B6)≲0.90** 的新异构臂（不同损失/表模型/表征）
 2. 在分段门控地板上做 max(门控, 新臂)，并保持嵌套预注册
-3. 禁止单 seed ultra patch / 连续 α 搜权冒充 nested
+3. 禁止单 seed ultra patch / 连续 α 搜权 / 全量贪心切片冒充 nested

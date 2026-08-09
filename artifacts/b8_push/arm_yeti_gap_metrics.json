@@ -1,0 +1,21 @@
+{
+  "arm": "yeti_gap",
+  "solo_auc": 0.6454790562536273,
+  "corr_eq": 0.6666851681863372,
+  "corr_plus": 0.6599205910100444,
+  "corr_max3": 0.6658678293553771,
+  "max4_auc": 0.6492363338611664,
+  "gate_s_b7_auc": 0.7030601279855805,
+  "gate_s_max4_auc": 0.6492382246658053,
+  "gate_sm_max4_auc": 0.6492382246658053,
+  "nested_select_auc": 0.7030601279855805,
+  "nested_votes": [
+    "gate_s_b7",
+    "gate_s_b7",
+    "gate_s_b7",
+    "gate_s_b7",
+    "gate_s_b7"
+  ],
+  "delta_vs_b7_max4": -0.053468621400405425,
+  "delta_vs_b7_best": 0.0003551727240086455
+}

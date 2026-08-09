@@ -14,8 +14,9 @@
 | 本地口径 | 重复分层 5 折，固定树数，无验证折早停，融合规则嵌套选择 |
 | 对照 | B7 提交（`submissions/submission_b7_closest_honest.csv`）公开榜 0.70722 |
 
-结果数字见 [`docs/RESULTS.md`](docs/RESULTS.md)；
-接手继续开发请先读 [`docs/HANDOFF.md`](docs/HANDOFF.md) 和 [`docs/DATA_STRUCTURE.md`](docs/DATA_STRUCTURE.md)。
+结果数字见 [`docs/RESULTS.md`](docs/RESULTS.md)。
+**接手继续冲榜的人请先读 [`docs/DATA_STRUCTURE.md`](docs/DATA_STRUCTURE.md)（数据地基）
+和 [`docs/STRATEGY.md`](docs/STRATEGY.md)（思路、架构、路线图、备用方案）。**
 
 ---
 
@@ -102,13 +103,13 @@ eda/                   数据结构逆向的探查脚本
 exp/                   对照实验脚本 exp01–exp15
 submissions/           提交文件
 
-docs/
-  DATA_STRUCTURE.md    数据生成机制逆向（本方案的地基，先读这个）
-  HANDOFF.md           交接说明：怎么继续开发和训练
-  EXPERIMENTS.md       全部对照实验，含明确无效的方向清单
-  SOLUTION.md          方案与协议
-  RESULTS.md           结果与诚实性检查
-  B7_*.md, b6/, supervision/   上一版文档，本地分数是旧口径，不要与本版直接比较
+docs/                  按这个顺序读
+  DATA_STRUCTURE.md    ① 数据生成机制逆向（整个方案的地基）
+  STRATEGY.md          ② 解题思路 / 架构 / 避开的坑 / 冲榜路线图 / 两套备用方案
+  EXPERIMENTS.md       ③ 对照实验台账，含明确无效的方向清单
+  RESULTS.md           ④ 最终数字与诚实性检查
+  HANDOFF.md           ⑤ 操作手册：环境、重跑、协议红线
+  legacy/              上一版（B5/B6/V10/B7）文档，旧口径不可直接比较，先读其 README
 
 src/                   上一版 B7 代码（仅用于对照，并提供 gap 视图）
 ```

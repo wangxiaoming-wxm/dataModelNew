@@ -1,0 +1,4 @@
+5fold_40pct            fit_rows=  4778 single=0.64927 bag=0.65886 (235s)
+5fold_60pct            fit_rows=  7166 single=0.66971 bag=0.67694 (312s)
+5fold_80pct            fit_rows=  9555 single=0.67746 bag=0.68250 (375s)
+5fold_100pct           fit_rows= 11944 single=0.68987 bag=0.69362 (450s)

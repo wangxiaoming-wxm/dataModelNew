@@ -1,0 +1,9 @@
+fold 0 base=0.70031 pl=0.70594 n_aug=1920
+fold 1 base=0.68770 pl=0.68433 n_aug=1920
+fold 2 base=0.67119 pl=0.67516 n_aug=1920
+fold 3 base=0.69528 pl=0.68969 n_aug=1920
+fold 4 base=0.68224 pl=0.68489 n_aug=1920
+BASE 0.6869578864068263
+PL   0.6872660378049471
+sec 344.1
+DONE

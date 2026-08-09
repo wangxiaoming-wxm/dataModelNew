@@ -1,0 +1,16 @@
+import pandas as pd, numpy as np
+pd.set_option('display.width',250); pd.set_option('display.max_columns',100)
+tr=pd.read_csv('data/train.csv'); te=pd.read_csv('data/test.csv')
+al=pd.concat([tr.drop(columns=['label']),te],ignore_index=True)
+al['sq']=np.sqrt(al.x19)
+print("=== sqrt(x19) vs V ===")
+print(al[['source','x19','sq','V','cc','max_g']].groupby('source').agg(['mean','std','min','max','count']).round(4).to_string())
+print("\nV - sq stats:"); print((al.V-al.sq).describe())
+print("\ncheck: round(V,2)**2 == x19 ?", np.mean(np.isclose(np.round(al.V,2)**2, al.x19)))
+print("\n=== source x x19 crosstab ===")
+print(pd.crosstab(al.source, al.x19).to_string())
+print("\n=== source vs region/version/month/code/grades cardinality ===")
+for c in ['region','version','month','code','grades','age_range','livability','t3']:
+    print(c, "n_uniq per source:", al.groupby('source')[c].nunique().to_dict())
+print("\n=== livability vs region ===")
+print(pd.crosstab(al.region, al.livability).to_string())

@@ -1,0 +1,31 @@
+[seed 20284] frame (21328, 107) cats=78 (1s)
+    cat_alt  oof=0.68522 (263s)
+[seed 20285] frame (21328, 107) cats=78 (1s)
+    cat_alt  oof=0.68725 (270s)
+[seed 20286] frame (21328, 107) cats=78 (1s)
+    cat_alt  oof=0.68706 (259s)
+[seed 20287] frame (21328, 107) cats=78 (1s)
+    cat_alt  oof=0.68481 (270s)
+[final] cat_alt: 0.69323
+{
+  "seeds": [
+    20284,
+    20285,
+    20286,
+    20287
+  ],
+  "folds": 5,
+  "arms": {
+    "cat_alt": {
+      "bagged_oof_auc": 0.693227297009185,
+      "per_seed_auc": [
+        0.6852226750865192,
+        0.6872485727410457,
+        0.6870632738864356,
+        0.68481162410963
+      ]
+    }
+  },
+  "oof_corr": {},
+  "elapsed_sec": 1065.4
+}

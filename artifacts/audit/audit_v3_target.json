@@ -4,7 +4,8 @@
     "no_validation_fold_peeking": true,
     "selection_cannot_manufacture_signal": true,
     "arms_plausible": true,
-    "submission_valid": true
+    "submission_valid": true,
+    "target_reached": false
   },
   "data_sha256": {
     "train.csv": "494a61073a0438f692914c4868db31df1171e662348e0024e06b120d08d44f28",
@@ -119,5 +120,6 @@
     "finite": true,
     "in_range": true
   },
-  "all_gates_pass": true
+  "target": 0.99999,
+  "all_gates_pass": false
 }

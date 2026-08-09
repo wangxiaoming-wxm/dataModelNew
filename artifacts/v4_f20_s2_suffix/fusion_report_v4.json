@@ -1,0 +1,27 @@
+{
+  "arms": [
+    "cat_alt_f20",
+    "cat_d5_f20",
+    "cat_d6_f20"
+  ],
+  "arm_oof_auc": {
+    "cat_alt_f20": 0.6954741451373678,
+    "cat_d5_f20": 0.693393414148314,
+    "cat_d6_f20": 0.6945231947990533
+  },
+  "n_rules": 3,
+  "rule_full_oof_auc": {
+    "views_max_f20": 0.6988089771821676,
+    "views_half_f20": 0.6976863368068409,
+    "views_mean_f20": 0.6971386005577673
+  },
+  "nested_oof_mean": 0.6988089771821676,
+  "nested_oof_sd": 0.0,
+  "nested_oof_min": 0.6988089771821676,
+  "nested_oof_max": 0.6988089771821676,
+  "pick_counts": {
+    "views_max_f20": 100
+  },
+  "submitted_rule": "views_max_f20",
+  "submission": "artifacts/v4_f20_s2_suffix/submission_v4.csv"
+}

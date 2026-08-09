@@ -20,8 +20,8 @@
 - 每个 fold 的 test 预测也先转秩；
 - 然后做平均。
 
-这样能消除不同模型的校准差异，但也可能丢掉“某行风险远高于相邻行”的置信度。仓库中 `max`
-融合持续优于普通平均，说明极端置信信息可能有价值，但目前没有保存原始逐模型概率，无法回测。
+这样能消除不同模型的校准差异，但也可能丢掉“某行风险远高于相邻行”的置信度。
+现有 `max` 融合发生在经验秩上，不能作为原始概率置信度有价值的证据；E1 纯属待验证假设。
 
 ### 2.2 预登记聚合器
 
@@ -45,7 +45,8 @@ C logit_standardized
 
 ### 2.3 设计和门槛
 
-- 使用同一批已训练模型，不重训；
+- 现有 artifacts 没有原始概率，需先按 S0 新 schema 重跑一次基础模型；
+  得到这批原始预测后，不为 A/B/C 三个聚合器重复训练；
 - `cat_d5`、`cat_alt` 分别比较，不能只看最终融合；
 - 报告每 seed 差值、聚合 OOF、与 current 的相关性；
 - 聚合器在 discovery seeds 上选定后，用 confirmation seeds 验证；
@@ -69,11 +70,12 @@ fixed     = [1000, 1000, 1000, 1000]
 scheduled = [700, 900, 1100, 1300]
 ```
 
-两组平均都是 1000，按 `hash(seed, fold) % 4` 分配，确保：
+两组平均都是 1000。运行前按全部 `(seed, fold)` 生成平衡 Latin schedule，
+确保四种树数出现次数之差不超过 1，并在 manifest 记录实际总树数。这样才能确保：
 
 - 不读取验证 AUC；
 - 重跑完全确定；
-- 平均树数和计算预算一致；
+- 实际总树数和计算预算一致（允许不足一个模型树数的舍入误差）；
 - 容量范围足以制造差异，但不包含极端弱模型。
 
 `cat_d6` 只有在 d5 通过后再试：
@@ -95,16 +97,16 @@ confirmation seeds = 20510..20513
 
 只修改 `iterations`。先比较：
 
-- 每个树数成员的单独 OOF；
 - fixed bag vs scheduled bag；
 - 成员平均相关性；
+- 按树数分组的“同 seed/同 fold scheduled AUC − fixed AUC”局部诊断；
 - 与 alt 臂融合后的增益。
 
 晋级：
 
 - scheduled bag 确认集增益 ≥ +0.001；
 - 至少 6/8 seeds 方向为正；
-- 最弱树数成员不能比 fixed 单模型低 >0.004；
+- 任一树数组的平均配对 fold 差值不能低于 -0.004；
 - 提升不能只来自一次幸运的 1300 树模型。
 
 不通过就停止，不根据结果把范围改成 742～1261。
@@ -120,13 +122,13 @@ confirmation seeds = 20510..20513
 这表明“编码平均”有效，但单模型列数过多会增加过拟合。新假设是：让两个模型各看较少且不重叠的
 jitter，再平均模型输出，可能比一个模型同时看 4～6 套列更稳。
 
-### 4.2 固定模型预算比较
+### 4.2 先做配对机制试验，再做固定预算比较
 
-Discovery 比较：
+Discovery 先用完全相同的 4 个 base seeds 比较：
 
 ```text
-A：8 seeds × 1 model × 4 jitter views = 8 models/fold
-B：4 seeds × 2 submodels × 2 disjoint jitter views = 8 models/fold
+A_pair：4 seeds × 1 model × 4 jitter views = 4 models/fold
+B_pair：4 seeds × 2 submodels × 2 disjoint jitter views = 8 models/fold
 ```
 
 B 中每个 seed：
@@ -137,23 +139,44 @@ submodel_2 streams = [base+2, base+3]
 seed prediction    = mean(rank(submodel_1), rank(submodel_2))
 ```
 
-两组 fold 模型数量相同，避免把单纯算力增加误认为结构收益。若 B 通过，再试：
+这组可以逐 seed 配对，但 B 使用两倍模型数，所以只回答“额外算力用于 jitter 分工是否有效”。
+通过后再做固定预算的非配对生产对照：
 
 ```text
-C：4 seeds × 2 submodels × 3 jitter views
+A_budget：8 seeds × 1 model × 4 jitter views = 8 models/fold
+B_budget：4 seeds × 2 submodels × 2 jitter views = 8 models/fold
 ```
 
-不测试更多组合。
+8 个 A seeds 固定为 `20500..20503 + 20510..20513`，B 使用其中 discovery 的前 4 个。
+该固定预算对照 seed 数不同，不能称为配对。不测试更多组合。
 
 ### 4.3 门槛
 
-- B 相对 A 配对增益 ≥ +0.001；
+- `B_pair` 相对 `A_pair` 的逐 seed 配对增益 ≥ +0.001；
+- `B_budget` 相对 `A_budget` 的非配对结果不能下降；
 - 子模型相关性应明显低于普通相邻 seeds；
 - confirmation seeds 方向为正；
 - 加入整体融合后不被 main/alt 相关性抵消；
 - 计算量和峰值内存有明确记录。
 
-## 5. 实验顺序
+## 5. 实现前置
+
+当前仓库尚不保存逐模型原始概率，也没有树数 schedule 或 submodel-jitter CLI。执行前需实现：
+
+```text
+src2/run_oof.py
+  --save-raw-predictions
+  --iteration-schedule <json>
+  --jitter-submodels <int>
+  --jitter-views-per-submodel <int>
+
+scripts/gpt56_compare_aggregators.py
+scripts/gpt56_structural_report.py
+```
+
+脚本统一读取 S0 schema，输出到 `artifacts/gpt56/s4_*`；这些名称是接口规格，不代表当前已经存在。
+
+## 6. 实验顺序
 
 严格按成本从低到高：
 
@@ -161,19 +184,19 @@ C：4 seeds × 2 submodels × 3 jitter views
 2. E2：先 4 seeds，约一次主臂训练成本；
 3. E3：固定 8 模型/fold 的 A/B；
 4. 每项单独确认；
-5. 最后只组合已经独立通过的项。
+5. 最后只组合已经独立通过的项，并使用预登记的 `[20520,20521,20522,20523]` 做组合确认。
 
 组合确认必须再做一次 4 个新 seeds。单项各自 +0.001 不代表组合一定 +0.002，
 因为它们都可能通过增加同一种方差多样性起作用。
 
-## 6. 与 S2/S3 的关系
+## 7. 与 S2/S3 的关系
 
 - S4 discovery 优先在 5 折 main 上做，成本最低；
 - 如果 S2 证明 10 折有效，只把 S4 胜出的机制迁移到 10 折做一次确认；
 - 如果 S3 已得到新强世界，先保持其聚合方式不变，S4 机制只在 main 上确认后再推广；
 - 不允许“新世界 + 10 折 + 随机树数 + 概率平均”一次上线，否则无法判断收益来源。
 
-## 7. 不做的后处理
+## 8. 不做的后处理
 
 - 不调分类阈值：ROC-AUC 与阈值无关；
 - 不做概率校准作为提分手段：任何严格单调校准都不会改变 AUC；
@@ -181,7 +204,7 @@ C：4 seeds × 2 submodels × 3 jitter views
 - 不按公开榜结果挑 rank/prob 聚合器；
 - 不在验证折早停，即使只把 best iteration 用作“多样性”也不允许。
 
-## 8. 预期收益
+## 9. 预期收益
 
 | 子实验 | 合理预期 | 成本 |
 |---|---:|---:|
@@ -192,7 +215,7 @@ C：4 seeds × 2 submodels × 3 jitter views
 总增益不能线性相加。S4 的成功标准是找到一个可复现的 `+0.001～+0.002` 机制，
 而不是把三个小波动全部塞进最终模型。
 
-## 9. 完成定义
+## 10. 完成定义
 
 - 三项消融分别有 paired report；
 - 聚合器选择使用冻结的 discovery/confirmation；

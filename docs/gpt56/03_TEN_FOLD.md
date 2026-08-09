@@ -67,7 +67,7 @@ PYTHONPATH=src2 python3 src2/run_oof.py \
 | 结果 | 决策 |
 |---|---|
 | `Δ10f-5f ≥ +0.0020`，两个 seed 均为正 | 进入 Stage B |
-| `+0.0010 ≤ Δ < +0.0020` | 加跑 2 个 seed 后再判断 |
+| `+0.0010 ≤ Δ < +0.0020` | 加跑预登记的 `20262,20263` 后再判断 |
 | `Δ < +0.0010` | 停止 10 折路线 |
 | 任一 seed 明显下降 >0.002 | 检查日志；无实现问题则停止 |
 
@@ -75,9 +75,11 @@ PYTHONPATH=src2 python3 src2/run_oof.py \
 
 ## 4. Stage B：跨编码世界确认
 
-Stage A 通过后，用未参与发现的 seeds：
+Stage A 通过后，给 main 补跑 `20262,20263`，并给 `cat_alt` 跑齐同样的 4 个
+discovery seeds，再使用未参与发现的 confirmation seeds：
 
 ```text
+discovery seeds    = [20260, 20261, 20262, 20263]
 confirmation seeds = [20264, 20265, 20266, 20267]
 views              = main, alt
 arms               = cat_d5, cat_alt
@@ -89,7 +91,7 @@ arms               = cat_d5, cat_alt
 确认门槛：
 
 - 两个编码世界的配对差值都为正；
-- 6 个 discovery+confirmation seeds 中至少 5 个方向为正；
+- 对 `cat_d5` 和 `cat_alt` 分别要求 8 个 seeds 中至少 6 个方向为正；
 - 聚合配对增益 ≥ `+0.0015`；
 - 90% bootstrap 区间下界 > 0；
 - 单个世界不能依赖一个异常 seed 才转正。
@@ -97,21 +99,36 @@ arms               = cat_d5, cat_alt
 如果 main 通过、alt 不通过，只把 main 改成 10 折，不强求全流水线折数一致。融合允许不同臂使用不同折数，
 前提是每个臂自己的 OOF 对每行都严格折外。
 
-## 5. Stage C：固定计算预算对照
+## 5. Stage C：配对确认与固定计算预算
+
+### 5.1 共享 8 seeds 的严格配对
+
+先在完全相同的 8 个 seeds 上比较：
+
+```text
+A = 8 seeds × 5 folds
+B = 8 seeds ×10 folds
+```
+
+只有这一组可以报告逐 seed 配对差值和配对 bootstrap。
+
+### 5.2 固定模型预算的生产对照
 
 当前每个 12-seed×5-fold 臂训练 60 个模型。公平生产对照：
 
 ```text
-A = 当前 v2：12 seeds × 5 folds = 60 models/arm
-B = 新候选： 6 seeds ×10 folds = 60 models/arm
+A = 当前 v2：12 seeds × 5 folds = 60 test models/arm
+B = 新候选：前 6 个预登记 seeds ×10 folds = 60 test models/arm
 ```
 
+该对照同时改变 seed 数和折数，只能比较整体生产方案，不能称为逐 seed 配对。
 对 `cat_d5`、`cat_d6`、`cat_alt` 各自比较后，再复算原来冻结的融合规则。
 
 必须同时报告：
 
 - 每臂 OOF AUC；
-- 相对 5 折父臂的配对差值；
+- 共享 8 seeds 的 5/10 折配对差值；
+- 12×5 与 6×10 的非配对生产方案差值；
 - 三臂相关矩阵；
 - `views_max` 和 `views_half`；
 - 嵌套 OOF；
@@ -123,7 +140,7 @@ B = 新候选： 6 seeds ×10 folds = 60 models/arm
 - 至少两个主臂单独提升；
 - 新三臂间相关性没有全部上升到 >0.98；
 - 规则选择至少 4/5 外层块一致；
-- 打乱标签和提交格式检查通过。
+- 候选级打乱标签 sanity check、静态泄漏审计和提交格式检查通过。
 
 若 6 seeds 的 OOF bagging 明显不稳定，再扩到 8 seeds；不要直接回到 12 seeds×10 folds，
 因为现有证据已经显示普通 seed 在 8 个后接近饱和。

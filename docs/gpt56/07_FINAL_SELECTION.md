@@ -17,8 +17,8 @@
 
 | ID | 候选 | 来源 |
 |---|---|---|
-| C0 | v2 冻结基线 | `submission_v2.csv` |
-| C1 | v2 + B7 rank mean | S1 |
+| C0 | v2 冻结基线 | `submissions/submission_v2.csv` |
+| C1 | v2 + 诚实重训 B7 rank mean | S1 |
 | C2 | 10 折升级版 | S2 |
 | C3 | 新编码世界融合 | S3 |
 | C4 | 结构 bagging | S4 |
@@ -31,11 +31,12 @@
 每个候选计算：
 
 ```text
-nested_oof_auc
+conditional_nested_oof_auc
+pipeline_nested_oof_auc
 delta_vs_v2
 paired_ci90
 paired_ci95
-probability_delta_gt_0
+bootstrap_positive_fraction
 positive_seed_ratio
 outer_block_wins
 spearman_vs_v2
@@ -60,26 +61,53 @@ pipeline_complexity
 discovery/confirmation seeds 使用的是同一批标签，它们能防止“碰巧选中一个好随机种子”，
 但不能完全消除在同一组样本上筛很多候选造成的选择乐观。因此最终主报数字必须再做按行嵌套评估。
 
-### 4.2 按行嵌套选择
+### 4.2 条件嵌套评估
 
-在开始最终融合前冻结候选和最多 6 条规则。使用固定的 5 个 stratified meta-fold：
+若候选已经用全部标签开发完，再使用 5 个 stratified meta-fold 选择融合规则，只能回答
+“给定这些已选候选后，规则选择表现如何”，不能消除上游候选筛选的乐观。该层使用：
 
 1. 在 4 个 meta-fold 上选择候选成员与规则；
 2. 在第 5 个 meta-fold 上应用选择结果；
 3. 循环 5 次拼成完整 nested OOF；
-4. held-out meta-fold 从未参与该块的成员/规则选择。
+4. held-out meta-fold 从未参与该块的融合规则选择。
 
 所有基础预测本身仍必须是训练折外 OOF。meta-fold 只是选择层，不替代模型 CV。
 
 报告：
 
-- nested OOF AUC；
+- conditional nested OOF AUC；
 - 5 个 held-out 块各自的 ΔAUC；
 - 每个规则的选择次数；
 - 拼接预测相对 v2 的配对 bootstrap；
 - 全量最优与 nested 结果的差距。
 
-如果全量 OOF 很高、nested OOF 回落 >0.002，说明融合选择过拟合，退回更简单规则。
+如果全量 OOF 很高、conditional nested OOF 回落 >0.002，说明融合选择过拟合，退回更简单规则。
+
+### 4.3 无选择乐观的完整外层评估
+
+正式声称“调优流水线相对 v2 提升”需要支付完整重训成本。固定
+`StratifiedKFold(5, shuffle=True, random_state=20999)`，每个 outer fold：
+
+1. outer-valid 的标签从开发流程中封存；
+2. 只在 outer-train 内完整重训 C0 v2 基线和 C1（若启用），并重新执行 S2～S5
+   的候选筛选、参数选择和融合规则选择；
+3. 所有 C0～C5 模型都只能读取 outer-train 标签；用 outer-train 训练当折选出的最终成员；
+4. 只预测一次 outer-valid；
+5. 拼接 5 块得到 `pipeline_nested_oof`。
+
+预登记的是**候选生成器和选择门槛**，不是先看全量标签选出的具体赢家。若算力不足而不执行该流程，
+所有最终数字必须标为 conditional，bootstrap 也只能描述冻结预测的样本波动。
+
+执行前需实现完整重训入口：
+
+```bash
+python3 scripts/gpt56_pipeline_nested.py \
+  --config configs/gpt56/pipeline_candidates.json \
+  --outer-folds 5 --outer-seed 20999 \
+  --out artifacts/gpt56/final/pipeline_nested_selection.json
+```
+
+该脚本当前不存在；只消费既有全量 artifacts 的 selector 不能替代它。
 
 ## 5. 最多 6 条预登记最终规则
 
@@ -91,7 +119,8 @@ R1 = best_single_upgrade
 R2 = 0.50*v2 + 0.50*best_single_upgrade
 R3 = 0.75*v2 + 0.25*best_diversity_arm
 R4 = equal_rank_mean(all qualified strong arms)
-R5 = rank_max(all arms whose standalone gap <= 0.0015)
+R5 = rank_max(all arms where
+              AUC(best_qualified_strong_arm) - AUC(arm) <= 0.0015)
 ```
 
 限制：
@@ -105,25 +134,38 @@ R5 = rank_max(all arms whose standalone gap <= 0.0015)
 最终规则：
 
 - 5 块中同一规则胜出 ≥4 次：用该规则；
-- 选择分散但 R2/R4 始终在前二：用二者平均；
+- 选择分散：退回已预登记的简单规则 R2，不在结果出来后新增 R2/R4 平均；
 - 没有任何升级规则稳定胜过 R0：继续提交 v2，不强行换版本。
 
 ## 6. 最终晋级门槛
 
-一个新文件要替代 v2，至少满足：
+### 6.1 正式替代门槛
+
+一个新文件要正式替代 v2，必须完成 pipeline-nested，并至少满足：
 
 | 项 | 门槛 |
 |---|---:|
-| nested ΔAUC | ≥ +0.002 |
-| 配对 bootstrap `P(Δ>0)` | ≥ 95% |
+| pipeline-nested ΔAUC | ≥ +0.002 |
+| bootstrap 正差比例（描述性） | ≥ 95% |
 | 90% CI 下界 | > 0 |
 | held-out meta-fold 胜出 | ≥ 4/5 |
 | 正向 seeds | ≥ 75% |
 | test Spearman vs v2 | ≥ 0.94 |
-| shuffled-label AUC | 0.47～0.53 |
+| 候选级 shuffled-label sanity-check AUC | 0.47～0.53，并通过静态泄漏审计 |
 
 对于与 v2 相关 ≤0.92 的真正正交臂，可将 nested Δ 门槛放宽到 +0.0015，但必须使用小权重 mean，
 不能直接替代主模型。
+
+### 6.2 探索性提交门槛
+
+若算力不足而只有 conditional 评估，候选不能获得“正式替代”结论。只有在以下条件同时满足时，
+可明确标记为探索性提交：
+
+- conditional ΔAUC ≥+0.002；
+- 5 个 held-out meta-fold 至少 4 个为正；
+- bootstrap 90% 区间下界 >0；
+- 候选级 shuffle sanity check 和静态审计通过；
+- 榜单结果不用于修改后续候选、特征或权重。
 
 ## 7. 提交预算
 
@@ -131,16 +173,17 @@ R5 = rank_max(all arms whose standalone gap <= 0.0015)
 
 ### 提交 1：低成本结构确认
 
-`C1` 的 v2+B7 50/50 rank mean。目的仅是利用两套已经冻结且各自有真实榜单结果的系统。
-无论结果如何，不调整权重。
+只有 B7 已诚实重训时，提交 `C1` 的 v2+B7 50/50 rank mean。若没有诚实 OOF，
+它只能占用额外的探索预算，不能挤占最终冠军名额。无论结果如何，不调整权重或候选集合。
 
 ### 提交 2：本地冠军
 
-S2～S5 完成后，提交 nested 规则选出的最高期望候选。这是主提交。
+S2～S5 完成后，优先提交 pipeline-nested 规则选出的冠军；未完成完整外层评估时，
+文件和实验台账必须标记为 exploratory，不得写成已证明替代 v2。
 
 ### 提交 3：保守备份
 
-仅当主冠军与 v2 test Spearman <0.97 时，提交：
+仅当在看到任何新榜单结果之前已确认主冠军与 v2 test Spearman <0.97，提交：
 
 ```text
 0.75 * rank(main_champion) + 0.25 * rank(v2)
@@ -173,22 +216,37 @@ S2～S5 完成后，提交 nested 规则选出的最高期望候选。这是主�
 
 ```bash
 # 1. 数据与环境
-sha256sum -c data/SHA256SUMS.txt
+(cd data && sha256sum -c SHA256SUMS.txt)
 git status --short
 
-# 2. 复算最终融合（命令按最终 artifact 调整）
-PYTHONPATH=src2 python3 src2/fuse.py \
-  --dir artifacts/gpt56/final \
-  --submission submissions/gpt56_final.csv
+# 2. 复算最终融合
+python3 scripts/gpt56_shuffle_audit.py \
+  --config configs/gpt56/final_rules.json \
+  --shuffle-seed 20888 \
+  --out artifacts/gpt56/final/shuffle_audit.json
+
+python3 scripts/gpt56_final_select.py \
+  --config configs/gpt56/final_rules.json \
+  --artifacts artifacts/gpt56 \
+  --submission submissions/gpt56_champion.csv \
+  --safe-submission submissions/gpt56_champion_safe.csv \
+  --shuffle-audit artifacts/gpt56/final/shuffle_audit.json \
+  --report-dir artifacts/gpt56/final
 
 # 3. 完整检查
 PYTHONPATH=src2 python3 src2/verify.py \
-  --submission submissions/gpt56_final.csv
+  --submission submissions/gpt56_champion.csv \
+  --out artifacts/gpt56/final/verify.json
 
 # 4. 文件检查
-sha256sum submissions/gpt56_final.csv
-wc -l submissions/gpt56_final.csv
+sha256sum submissions/gpt56_champion.csv
+wc -l submissions/gpt56_champion.csv  # 应为 6399（含表头）
 ```
+
+当前仓库没有 `scripts/gpt56_shuffle_audit.py`、`scripts/gpt56_final_select.py`
+或配置化 R0～R5 支持，现有 `src2/fuse.py` 只能计算旧规则。所以上述命令是 S6 的实现验收接口；
+执行前必须先实现候选级 shuffle、配置加载、Pareto 表和 nested 报告。final selector 必须验证
+audit 的 config hash/commit 与当前候选一致且 AUC 在 0.47～0.53，否则拒绝输出提交。
 
 额外断言：
 
@@ -201,7 +259,8 @@ label finite
 n_unique(label) > 1000
 ```
 
-最终 report 中保存所有父预测 hash，避免提交文件与报告错配。
+`gpt56_final_select.py` 必须强制执行上述断言（包括 `n_unique`），最终 report 保存所有父预测 hash，
+避免提交文件与报告错配。现有 `verify.py` 只补充检查 main/cat_d5，不代表完整候选审计。
 
 ## 10. 命名与产物
 
@@ -213,10 +272,12 @@ submissions/
 
 artifacts/gpt56/final/
   candidate_table.csv
-  nested_selection.json
+  conditional_nested_selection.json
+  pipeline_nested_selection.json       # 仅完整外层重训后存在
   bootstrap_delta.json
   prediction_correlations.csv
   manifest.json
+  shuffle_audit.json
   verify.json
 ```
 
@@ -236,7 +297,8 @@ leaderboard_not_used_for_tuning = true
 
 ## 11. 回滚
 
-- 训练中断：保留已完成 seed 段，用 manifest 判断能否等权合并；模型数不相等时按模型数加权；
+- 训练中断：只合并完整 seed。OOF 按 seed 数加权，test 按实际 `seed×fold` 模型数加权；
+  混合 5/10 折时不能用同一个模型数权重处理 OOF；
 - 新世界确认失败：回滚到 v2/S2，不改旧产物；
 - nested 选择不稳定：回滚到 R2 的简单平均；
 - 完整候选不达晋级门槛：继续使用 `submission_v2.csv`；
@@ -248,7 +310,7 @@ leaderboard_not_used_for_tuning = true
 |---:|---|---|
 | 1 | S0 仪器与基线 | 基线不能精确复算则不继续 |
 | 2 | S1 冻结融合 | 最多消耗 1 次提交 |
-| 3 | S2 2-seed 5/10 折 | Δ<0.001 立即停 |
+| 3 | S2 Stage A；通过后依次执行 B、C | Stage A Δ<0.001 立即停 |
 | 4 | S3 alt2-repair + 8～12 世界 discovery | 最多 4 个晋级 |
 | 5 | S3 confirmation | 最多保留 2～3 个 |
 | 6 | S4 E1→E2→E3 | 只保留独立通过项 |

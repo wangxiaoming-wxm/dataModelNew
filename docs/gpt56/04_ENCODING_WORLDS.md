@@ -74,12 +74,12 @@ z_robust = (condition - median(condition | source))
            / (1.4826 * MAD(condition | source) + eps)
 ```
 
-分箱：`z_robust ∈ {6, 12, 24}`；`days/ratio ∈ {8, 16, 32}`。
+分箱数：`z_robust ∈ {6, 12, 24}`；`days/ratio ∈ {8, 16, 32}`。
 交叉只保留 `z × source/region/age`、`ratio × region/source` 和已证实的 segment 交叉。
 
 ### W2：shrunk-region-source
 
-目的：利用 region×source 的局部结构，同时通过 W1 的收缩公式避免 alt2 小格子过拟合。
+目的：利用 region×source 的局部结构，同时通过 §2.1 的收缩公式避免 alt2 小格子过拟合。
 
 额外生成：
 
@@ -127,6 +127,19 @@ n_jitter      ∈ {3,4}
 cross_family  ∈ {core, core_plus_segment}
 ```
 
+首轮实际冻结为 8 个配置，不运行完整笛卡尔积：
+
+| ID | normalization | bin_scheme | n_jitter | cross_family |
+|---|---|---|---:|---|
+| W01 | alt2_repair | (4,9,16) | 3 | core |
+| W02 | alt2_repair | (6,12,24) | 4 | core_plus_segment |
+| W03 | robust_source | (6,12,24) | 3 | core |
+| W04 | robust_source | (8,16,32) | 4 | core_plus_segment |
+| W05 | shrunk_regsrc | (6,12,24) | 3 | core |
+| W06 | shrunk_regsrc | (8,16,32) | 4 | core_plus_segment |
+| W07 | qnorm | (6,12,24) | 3 | core |
+| W08 | qnorm | offset_10 | 4 | core_plus_segment |
+
 禁止：
 
 - 随机生成 50 个世界后在同一 OOF 上挑最高者；
@@ -161,7 +174,8 @@ positive_seed_count
 晋级规则：
 
 - 强度型：相对 paired main `ΔAUC ≥ 0`，且融合增益 ≥ +0.001；
-- 多样性型：单臂不低于 main `0.0015` 以上、最大相关 ≤0.95、融合增益 ≥ +0.001；
+- 多样性型：单臂相对 main `ΔAUC ≥ -0.0015`、最大 Spearman 相关 ≤0.95、
+  冻结融合增益 ≥ +0.001；
 - 两类都要求至少 3/4 seeds 方向不矛盾。
 
 最多保留 4 个，不能按裸 AUC 排名前 4；应保留强度—相关性的 Pareto 前沿。
@@ -177,12 +191,17 @@ seeds = 20410, 20411, 20412, 20413
 最终保留条件：
 
 - confirmation 的融合增益为正；
-- 8 seeds 合并后配对 `P(Δ>0) ≥ 90%`；
+- 8 seeds 合并后 bootstrap 正差比例 ≥90%；
 - 单臂相对 main 不低于 `-0.0015`；
-- 与已选世界的最大相关 ≤0.96；
+- 与已选世界的最大 OOF 经验秩 Spearman ≤0.96；
 - 最多留下 2～3 个新世界。
 
 只在 discovery 上高、confirmation 回落的世界直接淘汰，不进行“再换一组 seed”挽救。
+这里的 0.95/0.96 是阶段筛选上限；若要使用 ROADMAP 中“低相关弱臂”的放宽增益门槛，
+最终仍必须达到更严格的 Spearman ≤0.94。
+seed 隔离只能检查随机初始化/jitter 稳定性，因为两组仍复用同一批标签。完成候选开发后，
+若要给出无选择乐观的最终估计，必须在每个最外层 outer-train 内重新执行候选筛选，
+outer-valid 只能评分；否则只能报告“给定已选世界后的条件评估”。
 
 ## 6. 融合规则
 
@@ -201,9 +220,14 @@ two_new_mean   = 0.70*base_mean + 0.15*new1 + 0.15*new2
 - 新臂与最强臂差距 ≤0.0015 才可进入 `max`；
 - 差距在 0.0015～0.003 时只允许 10%～20% rank mean；
 - 差距 >0.003 时无论相关性多低都淘汰；
-- 最终仍由 5 块嵌套评估，不看全量 OOF 临时改权重。
+- 给定已选世界后的融合规则仍由 5 块条件嵌套评估，不看全量 OOF 临时改权重；
+- 若需要覆盖世界筛选本身的乐观，按上一节执行完整最外层重跑。
 
 ## 7. 实现结构
+
+当前 `run_oof.py` 不支持下面的 `--world-spec`，`ARMS` 也没有 `cat_world`。
+执行 S3 前必须先在 `src2/run_oof.py`、`src2/arms.py` 实现并测试该接口；
+以下命令是目标接口规格，不是当前可直接执行的命令。
 
 建议将世界定义参数化，而不是继续复制 `build_alt3/alt4`：
 
@@ -229,6 +253,8 @@ PYTHONPATH=src2 python3 src2/run_oof.py \
 ```
 
 每个配置文件在运行前提交到 Git；配置 hash 写入产物 manifest，防止结果出来后无痕改参数。
+所有 group rank/分箱同时实现 `transductive` 和 `outer-train-only` 两种拟合模式，
+先确认比赛规则，再按 `01_EXPERIMENT_PROTOCOL.md` 的敏感性对照决定。
 
 ## 8. 预期收益与成本
 

@@ -4,7 +4,7 @@
 
 这是备用增益方向，不是主力替换：
 
-| 臂 | OOF AUC | 与 v2 融合的秩相关（约） | 加入 `max` 后 |
+| 臂 | OOF AUC | 与 v2 的 OOF 秩相关（约） | 加入 `max` 后 |
 |---|---:|---:|---:|
 | `glm` | 0.66489 | 0.895 | 0.69562 |
 | `lgb_te` | 0.67110 | 0.923 | 0.69685 |
@@ -69,14 +69,17 @@ unseen_rate_in_validation
 
 ```text
 p       = inner-training 全局正例率
-v_obs   = 类别正例率的加权观测方差
-v_noise = E[p(1-p)/n_category]
-tau²    = max(v_obs - v_noise, epsilon)
-m       = clip(p(1-p)/tau² - 1, 2, 500)
+w_j     = n_j / sum(n_j)
+v_obs   = sum_j w_j * (p_j - p)^2
+v_noise = sum_j w_j * p*(1-p)/max(n_j, 1)
+tau²    = max(v_obs - v_noise, 1e-6)
+m       = clip(p*(1-p)/tau² - 1, 2, 500)
 alpha   = p*m
 beta    = (1-p)*m
 
 posterior_mean = (positive_count + alpha) / (count + alpha + beta)
+posterior_var  = ((positive_count+alpha)*(negative_count+beta))
+                 / ((count+alpha+beta)^2 * (count+alpha+beta+1))
 ```
 
 关键约束：
@@ -85,7 +88,9 @@ posterior_mean = (positive_count + alpha) / (count + alpha + beta)
 - outer-validation/test 用 outer-training 的统计量；
 - 训练行仍必须 inner cross-fit，任何行不能看到自己的标签；
 - 每列独立估计 `m`，并保存每折的估计值；
-- 同时输出 `log1p(count)` 与 posterior standard deviation，帮助模型判断编码可靠性。
+- 未见类别回退到 `p`，count=0，posterior SD 按先验方差；
+- inner splitter seed 固定为 `outer_seed + 1000 + column_index`；
+- 同时输出 `log1p(count)` 与 `sqrt(posterior_var)`，帮助模型判断编码可靠性。
 
 ### 4.2 对照
 
@@ -123,8 +128,8 @@ one_hot(age_cat)
 one_hot(source) × spline(log_cond_r)   # 最关键
 one_hot(source) × spline(log_ratio)
 one_hot(region) × spline(log_days)
-one_hot(region × source)               # 强 L2 收缩
-one_hot(bin_pat)                        # 强 L2 收缩
+one_hot(region × source)               # 需要块级额外收缩
+one_hot(bin_pat)                        # 需要块级额外收缩
 ```
 
 不加入所有样条两两张量积；那会迅速扩大维度并重现盲目交叉过拟合。
@@ -142,7 +147,12 @@ LogisticRegression(
 )
 ```
 
-三个 C 作为三个独立候选走 discovery/confirmation，不在全量 OOF 上选最优后直接报分。
+scikit-learn 的单个 `C` 会同等惩罚所有系数，不能天然对高基数块“强收缩”。实现时先标准化其他块，
+再将 `region×source`、`bin_pat` 两个 one-hot 块共同乘以预登记缩放 `s ∈ {0.25, 0.5}`；
+较小输入尺度会让达到同等效应所需的系数更大，从而承受更强 L2 惩罚。块缩放后不能再次做逐列
+标准化，否则收缩会被抵消。
+
+三个 C 与两档块缩放作为有限候选走 discovery/confirmation，不在全量 OOF 上选最优后直接报分。
 稀疏矩阵过大时改用支持稀疏输入的 solver，但不改变特征定义。
 
 ## 6. E4：低容量 GBDT 作为补充
@@ -189,11 +199,27 @@ seeds = [20600, 20601, 20602, 20603]
 | 与 v2 相关 | ≤0.93 |
 | confirmation 融合增益 | ≥+0.001 |
 | 正向 seeds | 至少 6/8 |
-| 配对 `P(Δ>0)` | ≥90% |
+| bootstrap 正差比例 | ≥90% |
 
 如果单臂达到 0.690 但相关 >0.96，它更像弱版 CatBoost，不是需要的正交臂；只在能替换某臂时保留。
 
-## 8. 融合规则
+## 8. 实现前置
+
+当前 `te.py` 没有经验贝叶斯接口，也没有分块样条 GLM runner。执行前实现：
+
+```text
+src2/te.py
+  encode_empirical_bayes(...)
+
+scripts/gpt56_te_diagnostics.py
+scripts/gpt56_run_orthogonal.py
+scripts/gpt56_orthogonal_report.py
+```
+
+所有 empirical-Bayes 超参数必须在对应 inner-training 内估计。脚本接口、输出 schema 和配置
+应先提交再运行；上述文件当前不存在，是实现规格。
+
+## 9. 融合规则
 
 正交臂默认不能直接进入 `max`。预登记：
 
@@ -207,7 +233,7 @@ orth_max 仅当 orth_auc ≥ 0.688 时评估
 权重在 discovery 前写死，由 confirmation 和嵌套外层块决定。即使全量 OOF 显示 0.17 最好，
 也不增加 0.17 规则。
 
-## 9. 停止规则与预算
+## 10. 停止规则与预算
 
 - E2 不能把 LGB 提高至少 +0.001：停止经验贝叶斯在树模型上的扩展；
 - 新 GLM <0.678：不做更多张量交互；
@@ -223,12 +249,14 @@ orth_max 仅当 orth_auc ≥ 0.688 时评估
 
 这是高不确定性方向，达到停止门槛后应果断结束。
 
-## 10. 完成定义
+## 11. 完成定义
 
 - 每列 TE 的可靠性诊断齐全；
 - 经验贝叶斯超参数严格由训练折估计；
 - GLM 只含有数据证据支持的交互；
 - discovery/confirmation 分离；
+- seed 分离只检验随机稳定性；最终统计声明需执行 S6 的最外层按行嵌套开发，
+  否则标为给定候选后的条件评估；
 - 达不到 0.685 明确停止；
 - 通过时只作为 10%～30% 的正交臂进入冻结融合。
 

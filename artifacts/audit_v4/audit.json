@@ -1,0 +1,75 @@
+{
+  "gates": {
+    "data_integrity": true,
+    "protocol_scan": true,
+    "arms_present": true,
+    "arm_sanity": true,
+    "nested_selection": true,
+    "permutation_no_signal": true,
+    "submission": true,
+    "target_reached": false
+  },
+  "detail": {
+    "sha256": {
+      "train.csv": "494a61073a0438f692914c4868db31df1171e662348e0024e06b120d08d44f28",
+      "test.csv": "d6ffd26bd4873fa09f6fac361f59170a880e88e331a01d7a6356bd9184ce55ec",
+      "submit_sample.csv": "83cb0263cc5729f61d0e05c68d673dc3f21b41c24bad68afa35159859054c4bf"
+    },
+    "violations": [],
+    "arm_oof_auc": {
+      "cat_alt": 0.6981784187141095,
+      "cat_alt2": 0.6910049795832904,
+      "cat_d5": 0.6977134051679871,
+      "cat_d6": 0.6975988622132843,
+      "cat_w5": 0.6942989105382702,
+      "gap": 0.6904384845618787
+    },
+    "nested_oof_mean": 0.7015141215242033,
+    "nested_oof_sd": 0.0,
+    "nested_scores": [
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033,
+      0.7015141215242033
+    ],
+    "permutation_nested_mean": 0.5116308568171269,
+    "submission": {
+      "exists": true,
+      "columns": [
+        "id",
+        "label"
+      ],
+      "expected_columns": [
+        "id",
+        "label"
+      ],
+      "rows": 6398,
+      "expected_rows": 6398,
+      "columns_ok": true,
+      "length_ok": true,
+      "ids_ok": true,
+      "finite_ok": true,
+      "range_ok": true
+    },
+    "target": 0.707
+  },
+  "target": 0.707,
+  "passed": false,
+  "honesty_passed": true
+}

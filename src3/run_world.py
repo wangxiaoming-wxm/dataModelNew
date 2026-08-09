@@ -31,6 +31,9 @@ from v5_w7 import fit_edges_w7, w7_frame
 from v5_w8 import fit_edges_w8, w8_frame
 from v5_w9 import fit_edges_w9, w9_frame
 from v5_w10 import fit_edges_w10, w10_frame
+from v5_w11 import fit_edges_w11, w11_frame
+from v5_w12 import fit_edges_w12, w12_frame
+from v5_w13 import fit_edges_w13, w13_frame
 
 WORLDS = {
     "main": (fit_edges, catboost_frame),
@@ -43,6 +46,9 @@ WORLDS = {
     "w8": (fit_edges_w8, w8_frame),
     "w9": (fit_edges_w9, w9_frame),
     "w10": (fit_edges_w10, w10_frame),
+    "w11": (fit_edges_w11, w11_frame),
+    "w12": (fit_edges_w12, w12_frame),
+    "w13": (fit_edges_w13, w13_frame),
 }
 
 # Depth/iterations mirror the tuned settings of the existing CatBoost arms; the

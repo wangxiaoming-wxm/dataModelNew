@@ -7,7 +7,7 @@
 | 口径 | 值 |
 |---|---:|
 | B7 closest max3 | 0.702704955 |
-| **B8 segment-gate nested** | **0.703485**（`s_M_v10_22_age6`） |
+| **B8 segment-gate nested** | **0.703374**（菜单嵌套；多数规则 `s_M_v10_22_age6` full=0.703485） |
 | Δ vs B7 | **+0.000780** |
 | gate 0.71 | FAIL |
 

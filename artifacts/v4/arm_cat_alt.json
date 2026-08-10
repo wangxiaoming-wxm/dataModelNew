@@ -1,0 +1,31 @@
+{
+  "arm": "cat_alt",
+  "world": "alt",
+  "preset": "d6l6",
+  "loss": "Logloss",
+  "folds": 10,
+  "n_seeds": 8,
+  "parts_dir": "artifacts/worlds10",
+  "parts": [
+    "part_alt_d6l6_s21000_f10.npz",
+    "part_alt_d6l6_s21001_f10.npz",
+    "part_alt_d6l6_s21002_f10.npz",
+    "part_alt_d6l6_s21003_f10.npz",
+    "part_alt_d6l6_s21004_f10.npz",
+    "part_alt_d6l6_s21005_f10.npz",
+    "part_alt_d6l6_s21006_f10.npz",
+    "part_alt_d6l6_s21007_f10.npz"
+  ],
+  "per_seed_auc": [
+    0.6927983829042601,
+    0.6932626749591386,
+    0.6909228539765414,
+    0.6850062774714012,
+    0.6934949453816202,
+    0.693117580582113,
+    0.6973732842440643,
+    0.6907991555467451
+  ],
+  "bagged_oof_auc": 0.6981784187141095,
+  "note": "V3 10-fold baseline arms reused by V4; parts live in artifacts/worlds10/"
+}

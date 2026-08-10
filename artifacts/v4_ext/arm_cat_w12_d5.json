@@ -1,0 +1,11 @@
+{
+  "arm": "cat_w12_d5",
+  "n_seeds": 4,
+  "bagged_oof_auc": 0.6990330872898918,
+  "parts": [
+    "artifacts/v4_w12_parts/part_w12_d5_s23000_f10.npz/part_w12_d5_logloss_s23000_f10.npz",
+    "artifacts/v4_w12_parts/part_w12_d5_s23001_f10.npz/part_w12_d5_logloss_s23001_f10.npz",
+    "artifacts/v4_w12_parts/part_w12_d5_s23002_f10.npz/part_w12_d5_logloss_s23002_f10.npz",
+    "artifacts/v4_w12_parts/part_w12_d5_s23003_f10.npz/part_w12_d5_logloss_s23003_f10.npz"
+  ]
+}

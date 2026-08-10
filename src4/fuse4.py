@@ -92,7 +92,21 @@ RULES: dict[str, dict[str, float]] = {
         "__max__": 1.0,
         **{k: 1.0 for k in OPUS_MA + OPUS_GAP},
     },
+    # --- Phase2: w12 (main∪alt joint FE), admitted after fast+bag gate ---
+    "views_max_v4_mag_w12": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in V4_CORE + OPUS_MA + OPUS_GAP + ("cat_w12_d5",)},
+    },
+    "views_max_v4_ma_w12": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in V4_CORE + OPUS_MA + ("cat_w12_d5",)},
+    },
+    "views_max_v4_w12": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in V4_CORE + ("cat_w12_d5",)},
+    },
 }
+
 
 
 def _r(v: np.ndarray) -> np.ndarray:

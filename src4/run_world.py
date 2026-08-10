@@ -24,7 +24,16 @@ from sklearn.model_selection import StratifiedKFold
 from arms import alt2_frame, altboost_frame, catboost_frame
 from features import fit_edges, fit_edges_alt, fit_edges_alt2
 from worlds import fit_edges_w4, fit_edges_w5, w4_frame, w5_frame
-from worlds_v4 import fit_edges_w6, fit_edges_w7, w6_frame, w7_frame
+from worlds_v4 import (
+    fit_edges_w6,
+    fit_edges_w7,
+    fit_edges_w8,
+    fit_edges_w9,
+    w6_frame,
+    w7_frame,
+    w8_frame,
+    w9_frame,
+)
 
 WORLDS = {
     "main": (fit_edges, catboost_frame),
@@ -34,6 +43,8 @@ WORLDS = {
     "w5": (fit_edges_w5, w5_frame),
     "w6": (fit_edges_w6, w6_frame),
     "w7": (fit_edges_w7, w7_frame),
+    "w8": (fit_edges_w8, w8_frame),
+    "w9": (fit_edges_w9, w9_frame),
 }
 
 PRESETS = {
@@ -85,6 +96,15 @@ def main() -> int:
                     help="CatBoost loss_function; no eval_set is ever passed")
     ap.add_argument("--train-frac", type=float, default=1.0,
                     help="Fixed stratified fraction of each training fold to fit")
+    ap.add_argument(
+        "--iter-jitter",
+        type=int,
+        nargs=2,
+        metavar=("LO", "HI"),
+        default=None,
+        help="Per-fold fixed iteration draw from [LO, HI] using seed+fold only "
+             "(no eval_set / early stop). Replaces preset iterations.",
+    )
     ap.add_argument("--out", type=Path, default=Path("artifacts/v4_probe"))
     args = ap.parse_args()
 
@@ -104,14 +124,26 @@ def main() -> int:
     params.update(PRESETS[args.preset])
     params["thread_count"] = args.threads
     params["loss_function"] = args.loss
+    if args.iter_jitter is not None:
+        lo, hi = int(args.iter_jitter[0]), int(args.iter_jitter[1])
+        if not (1 <= lo <= hi):
+            raise SystemExit(f"invalid --iter-jitter range [{lo}, {hi}]")
 
     oof = np.zeros(len(y))
     test_parts = []
+    fold_iters = []
     for f, (ti, vi) in enumerate(
         StratifiedKFold(args.folds, shuffle=True, random_state=args.seed).split(Xtr, y)
     ):
+        fold_params = dict(params)
+        if args.iter_jitter is not None:
+            lo, hi = int(args.iter_jitter[0]), int(args.iter_jitter[1])
+            # deterministic draw from seed+fold only — never looks at held-out labels
+            rng = np.random.default_rng(args.seed * 1_000_003 + f * 97 + 13)
+            fold_params["iterations"] = int(rng.integers(lo, hi + 1))
+            fold_iters.append(fold_params["iterations"])
         fit_idx = stratified_subsample(ti, y, args.train_frac, seed=args.seed * 1000 + f)
-        m = CatBoostClassifier(**params, random_seed=args.seed + f)
+        m = CatBoostClassifier(**fold_params, random_seed=args.seed + f)
         m.fit(Xtr.iloc[fit_idx], y[fit_idx], cat_features=cats, verbose=False)
         oof[vi] = m.predict_proba(Xtr.iloc[vi])[:, 1]
         test_parts.append(rankdata(m.predict_proba(Xte)[:, 1]) / len(Xte))
@@ -119,7 +151,10 @@ def main() -> int:
     auc = float(roc_auc_score(y, oof))
     loss_tag = args.loss.lower().replace(":", "")
     frac_tag = "" if args.train_frac == 1.0 else f"_sf{int(round(args.train_frac * 100)):02d}"
-    tag = f"{args.world}_{args.preset}_{loss_tag}{frac_tag}_s{args.seed}_f{args.folds}"
+    rit_tag = ""
+    if args.iter_jitter is not None:
+        rit_tag = f"_rit{int(args.iter_jitter[0])}_{int(args.iter_jitter[1])}"
+    tag = f"{args.world}_{args.preset}_{loss_tag}{frac_tag}{rit_tag}_s{args.seed}_f{args.folds}"
     args.out.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         args.out / f"part_{tag}.npz",
@@ -134,6 +169,8 @@ def main() -> int:
         "folds": args.folds,
         "loss": args.loss,
         "train_frac": args.train_frac,
+        "iter_jitter": list(args.iter_jitter) if args.iter_jitter is not None else None,
+        "fold_iterations": fold_iters,
         "stream_offset": offset,
         "oof_auc": auc,
         "elapsed_sec": round(time.time() - t0, 1),

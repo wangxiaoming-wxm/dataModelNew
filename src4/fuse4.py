@@ -19,9 +19,13 @@ from sklearn.model_selection import StratifiedKFold
 STRONG = ("cat_d5", "cat_d6", "cat_alt")
 STRONG_F20 = ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20")
 STRONG_R16 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r16")
+# Equal-weight pool of the original 8 seeds and the r16 block (16 seeds total).
+STRONG_S16 = ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16")
 SUB85 = ("cat_d6_sf85", "cat_alt_sf85")
 ALT_D5 = ("cat_alt_d5",)
-NEW = ("cat_w6", "cat_w7", "cat_w5")
+NEW = ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9")
+RIT = ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit")
+PAIR = ("cat_d5_pair", "cat_alt_pair")
 
 RULES: dict[str, dict[str, float]] = {
     "views_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG}},
@@ -38,11 +42,24 @@ RULES: dict[str, dict[str, float]] = {
     # Repeated 10-fold seeds: original 8-seed arms plus one extra 8-seed block.
     "views_max_r16": {"__max__": 1.0, **{k: 1.0 for k in STRONG_R16}},
     "views_max_10_r16": {"__max__": 1.0, **{k: 1.0 for k in STRONG + STRONG_R16}},
+    "views_max_s16": {"__max__": 1.0, **{k: 1.0 for k in STRONG_S16}},
+    "views_max_10_20_r16": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16},
+    },
+    "views_max_s16_f20": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG_S16 + STRONG_F20},
+    },
     # Fixed 85% stratified training-fold subsample diversity arms.
     "sub85_max": {"__max__": 1.0, **{k: 1.0 for k in SUB85}},
     "views_max_sub85": {"__max__": 1.0, **{k: 1.0 for k in STRONG + SUB85}},
     # Alt-world depth-5 fixed-iteration arm if the preset screen graduates it.
     "views_max_alt_d5": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ALT_D5}},
+    "views_max_10_20_alt_d5": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + ALT_D5},
+    },
     # V4 extensions (pre-registered)
     "w6_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w6",)}},
     "w7_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w7",)}},
@@ -50,6 +67,36 @@ RULES: dict[str, dict[str, float]] = {
     "w6_mean": {k: 1 / 4 for k in STRONG + ("cat_w6",)},
     "w7_mean": {k: 1 / 4 for k in STRONG + ("cat_w7",)},
     "four_max_w5": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w5",)}},
+    # w8 / w9 encoding worlds — registered before any full-protocol score exists.
+    "w8_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w8",)}},
+    "w9_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w9",)}},
+    "w89_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w8", "cat_w9")}},
+    "views_max_10_20_r16_w8": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w8",)},
+    },
+    "views_max_10_20_r16_w9": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w9",)},
+    },
+    "views_max_10_20_r16_w89": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w8", "cat_w9")},
+    },
+    # Random fixed-iteration diversity (HANDOFF 5.3); no eval_set.
+    "rit_max": {"__max__": 1.0, **{k: 1.0 for k in RIT}},
+    "views_max_rit": {"__max__": 1.0, **{k: 1.0 for k in STRONG + RIT}},
+    "views_max_10_20_r16_rit": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + RIT},
+    },
+    # PairLogit fixed-iter arms (LOSS track).
+    "pair_max": {"__max__": 1.0, **{k: 1.0 for k in PAIR}},
+    "views_max_pair": {"__max__": 1.0, **{k: 1.0 for k in STRONG + PAIR}},
+    "views_max_10_20_r16_pair": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + PAIR},
+    },
 }
 
 

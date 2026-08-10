@@ -23,10 +23,17 @@ def main() -> int:
     ap.add_argument("--folds", type=int, default=20)
     ap.add_argument("--name", default=None, help="arm name to write (default cat_<world>)")
     ap.add_argument("--out", type=Path, default=Path("artifacts/v4"))
+    ap.add_argument(
+        "--extra-tag",
+        default="",
+        help="Optional infix after loss (e.g. _rit400_900 or _sf85) already present in part names",
+    )
     args = ap.parse_args()
 
     parts = sorted(
-        args.dir.glob(f"part_{args.world}_{args.preset}_{args.loss}_s*_f{args.folds}.npz")
+        args.dir.glob(
+            f"part_{args.world}_{args.preset}_{args.loss}{args.extra_tag}_s*_f{args.folds}.npz"
+        )
     )
     if not parts:
         raise SystemExit(

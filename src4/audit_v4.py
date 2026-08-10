@@ -199,6 +199,7 @@ def main() -> int:
     strong = [k for k in ("cat_d5", "cat_d6", "cat_alt") if k in ranks]
     strong_f20 = [k for k in ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20") if k in ranks]
     strong_r16 = [k for k in ("cat_d5_r16", "cat_d6_r16", "cat_alt_r16") if k in ranks]
+    strong_s16 = [k for k in ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16") if k in ranks]
     sub85 = [k for k in ("cat_d6_sf85", "cat_alt_sf85") if k in ranks]
     alt_d5 = [k for k in ("cat_alt_d5",) if k in ranks]
     rules = {}
@@ -220,6 +221,18 @@ def main() -> int:
             "__max__": 1.0,
             **{k: 1.0 for k in strong + strong_r16},
         }
+    if len(strong_s16) >= 2:
+        rules["views_max_s16"] = {"__max__": 1.0, **{k: 1.0 for k in strong_s16}}
+    if len(strong_s16) >= 2 and len(strong_f20) >= 2:
+        rules["views_max_s16_f20"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong_s16 + strong_f20},
+        }
+    if len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16},
+        }
     if len(sub85) >= 1:
         rules["sub85_max"] = {"__max__": 1.0, **{k: 1.0 for k in sub85}}
     if len(strong) >= 2 and len(sub85) >= 1:
@@ -227,9 +240,25 @@ def main() -> int:
     if len(strong) >= 2 and len(alt_d5) == 1:
         rules["views_max_alt_d5"] = {"__max__": 1.0, **{k: 1.0 for k in strong + alt_d5}}
     # optional extras if present and strong enough later
-    for extra in ("cat_w6", "cat_w7", "cat_w5"):
+    for extra in ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9"):
         if extra in ranks and len(strong) >= 2:
             rules[f"max_plus_{extra}"] = {"__max__": 1.0, **{k: 1.0 for k in strong + [extra]}}
+    if "cat_w8" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16_w8"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w8"]},
+        }
+    if "cat_w9" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16_w9"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w9"]},
+        }
+    rit = [k for k in ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit") if k in ranks]
+    if len(rit) >= 1 and len(strong) >= 2:
+        rules["views_max_rit"] = {"__max__": 1.0, **{k: 1.0 for k in strong + rit}}
+    pair = [k for k in ("cat_d5_pair", "cat_alt_pair") if k in ranks]
+    if len(pair) >= 1 and len(strong) >= 2:
+        rules["views_max_pair"] = {"__max__": 1.0, **{k: 1.0 for k in strong + pair}}
 
     if not rules:
         gates["nested_selection"] = False

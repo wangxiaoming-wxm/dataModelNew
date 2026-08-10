@@ -1,0 +1,14 @@
+{
+  "baseline": "v4_max3",
+  "public_lb": 0.71222,
+  "nested_oof": 0.7030731397069769,
+  "full_oof": 0.7033554666943719,
+  "arms": {
+    "merger_ord8": 0.6965958152313668,
+    "v2_cat_alt8": 0.6970387610970329,
+    "ord_noxb_bag_es": 0.7006400473218644
+  },
+  "cv_to_lb_gap": 0.00914686029302303,
+  "target_lb": 0.7155,
+  "needed_nested_approx": 0.706353139706977
+}

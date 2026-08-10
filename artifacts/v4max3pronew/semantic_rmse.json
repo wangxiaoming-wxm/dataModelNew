@@ -1,0 +1,21 @@
+{
+  "arm": "semantic_rmse",
+  "protocol": "es5_rmse_bag10",
+  "n_parts": 5,
+  "seeds": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030
+  ],
+  "pooled_oof_auc": 0.6959687149454772,
+  "per_seed_auc": [
+    0.6861861395660623,
+    0.690520062830443,
+    0.6919426942891331,
+    0.6890089616178601,
+    0.6895665997122792
+  ],
+  "source": "715.zip explore_d_online faithful port"
+}

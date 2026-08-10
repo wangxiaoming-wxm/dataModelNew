@@ -1,0 +1,45 @@
+{
+  "full_oof": {
+    "views_max": 0.6990960311811597,
+    "views_mean": 0.6969290446699611,
+    "top2_mean": 0.6978900710066802,
+    "max_mean_half": 0.6982645000831953,
+    "max_mean_0.7": 0.6986881647173466,
+    "logodds_mean": 0.6973784590778128,
+    "softmax_t0.2": 0.6981818520172697,
+    "softmax_t0.1": 0.6987687478255747,
+    "softmax_t0.05": 0.6992003986214244,
+    "wide_top2": 0.6984062606730945,
+    "wide_top3": 0.6978845976248309,
+    "wide_softmax_t0.1": 0.6983161489046469,
+    "wide_max": 0.6983947416922025
+  },
+  "nested_candidates_only": {
+    "mean": 0.698542975800089,
+    "sd": 0.0004988623641133659,
+    "min": 0.6977625163305812,
+    "max": 0.6993398205845334,
+    "picks": {
+      "softmax_t0.05": 80,
+      "wide_max": 11,
+      "views_max": 7,
+      "wide_top2": 2
+    }
+  },
+  "nested_rules_union_candidates": {
+    "mean": 0.6984475001174288,
+    "sd": 0.0005196441708111915,
+    "picks": {
+      "cand:softmax_t0.05": 76,
+      "rule:four_views_max": 11,
+      "rule:views_max": 6,
+      "rule:worlds3_gap_max": 5,
+      "rule:worlds3_max": 1,
+      "cand:wide_top2": 1
+    }
+  },
+  "delta_vs_v2_pipeline_nested": -1.9773835881475854e-05,
+  "delta_vs_v2_supervisor_nested": 0.0003036147109376497,
+  "target_delta": 0.002,
+  "clears_target": false
+}

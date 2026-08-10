@@ -1,0 +1,9 @@
+{
+  "world": "w11",
+  "preset": "d5",
+  "seed": 22804,
+  "folds": 5,
+  "stream_offset": 10,
+  "oof_auc": 0.6947148129217988,
+  "elapsed_sec": 829.6
+}

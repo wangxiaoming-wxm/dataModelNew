@@ -1,6 +1,10 @@
 # 交接说明
 
-写给下一个接手继续开发和训练的人。读完这一份 + `docs/DATA_STRUCTURE.md` 就能上手。
+写给下一个接手继续开发和训练的人。
+
+> **当前交付是 V3。** 先读 [`docs/V3.md`](V3.md) 与 [`docs/SUPERVISION.md`](SUPERVISION.md)，  
+> 再读本文件（V2 地基）和 [`docs/DATA_STRUCTURE.md`](DATA_STRUCTURE.md)。  
+> 一键重训 V3：`bash run_v3.sh`；复算融合：`PYTHONPATH=src2:src3 python3 src3/fuse2.py --dir artifacts/v3`。
 
 ---
 
@@ -8,10 +12,12 @@
 
 | 项 | 值 |
 |---|---|
-| 提交文件 | `submissions/submission_v2.csv` |
-| **本地诚实 AUC（主报）** | **0.69856**（嵌套选择 OOF） |
-| 同规则全量 OOF | 0.69910 |
-| 采用的融合规则 | `views_max` = `max(rank(cat_d5), rank(cat_d6), rank(cat_alt))` |
+| **当前提交** | **`submissions/submission_v3.csv`** |
+| **V3 诚实嵌套 AUC（主报）** | **0.70124**（20 block seed 均值；见 `docs/V3.md`） |
+| V2 提交（对照，公开榜 0.70878） | `submissions/submission_v2.csv` |
+| V2 嵌套 AUC（管道单 seed） | 0.69856 |
+| V2 监督者嵌套均值 | 0.69824 |
+| 采用的融合规则（V2/V3 相同） | `views_max` = `max(rank(cat_d5), rank(cat_d6), rank(cat_alt))` |
 | 对照：B6 `gap` 视图同协议重跑 | 0.69044 |
 | 对照：B7 旧口径本地分 | 0.702705（**不可比**，含 +0.0025 早停乐观，且口径不同） |
 

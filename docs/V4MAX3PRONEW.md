@@ -54,11 +54,13 @@ python3 src4/train_semantic_rmse.py --seed 2026 --threads 4 --bags 10
 python3 src4/train_semantic_rmse.py --merge-only
 ```
 
-可选多样性臂（同 FE + Logloss，不替代 RMSE 主臂）：
+可选多样性臂（同 FE + Logloss，全量 5×5×10 已训完）：
 
 ```bash
 python3 src4/train_semantic_logloss.py --seed 2026 --threads 4 --bags 10
 ```
+
+**结论：加入 `semantic_logloss` 后嵌套 0.70521 < 0.70557，不进入正式配方**（产物保留供审计）。
 
 ## 复现 / 审核
 

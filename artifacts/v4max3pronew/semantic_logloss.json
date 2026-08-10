@@ -1,0 +1,21 @@
+{
+  "arm": "semantic_logloss",
+  "protocol": "es5_logloss_bag10",
+  "n_parts": 5,
+  "seeds": [
+    2026,
+    2027,
+    2028,
+    2029,
+    2030
+  ],
+  "pooled_oof_auc": 0.6945659866935121,
+  "per_seed_auc": [
+    0.6875507034191322,
+    0.6908557801698778,
+    0.6905230980694685,
+    0.6884262952409841,
+    0.6899370481474493
+  ],
+  "source": "715 FE + Logloss diversity arm (same protocol as RMSE)"
+}

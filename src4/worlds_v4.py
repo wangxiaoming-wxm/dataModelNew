@@ -879,6 +879,13 @@ def w12_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int =
     from features import add_noise_view, _derive
     from jitter import add_jitter_views
     X, cats = build_w12(raw, edges)
+    # jitter / noise helpers expect unprefixed segment columns
+    for col in ("source", "region", "age_cat", "bin_pat", "days_q5", "d7"):
+        src = f"m_{col}" if f"m_{col}" in X.columns else (f"a_{col}" if f"a_{col}" in X.columns else None)
+        if src is not None and col not in X.columns:
+            X[col] = X[src]
+            if src in cats and col not in cats:
+                cats.append(col)
     # noise view once on the union (uses raw columns)
     add_noise_view(X, cats, raw)
     der = _derive(raw, edges["main"]["__scale__"])

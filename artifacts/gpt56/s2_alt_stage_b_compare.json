@@ -1,0 +1,27 @@
+{
+  "parent": "artifacts/gpt56/s2_alt_5f_2s",
+  "candidate": "artifacts/gpt56/s2_alt_10f_2s",
+  "arm": "cat_alt",
+  "parent_auc": 0.6881976820327383,
+  "candidate_auc": 0.6942680605678464,
+  "delta": 0.006070378535108056,
+  "spearman": 0.9678475814529637,
+  "bootstrap": {
+    "delta_mean": 0.006080580483492677,
+    "ci90": [
+      0.00266880108655585,
+      0.009496888481934767
+    ],
+    "ci95": [
+      0.0021105733596373383,
+      0.010073033448732163
+    ],
+    "bootstrap_positive_fraction": 0.9985
+  },
+  "per_seed_delta": [
+    0.008231369205280892,
+    0.0062242303230928275
+  ],
+  "positive_seed_count": 2,
+  "n_seeds": 2
+}

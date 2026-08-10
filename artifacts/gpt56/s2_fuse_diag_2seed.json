@@ -1,0 +1,7 @@
+{
+  "fuse_max_d5_alt_5f": 0.6949778586776786,
+  "fuse_max_d5_alt_10f": 0.7007861119802179,
+  "delta_10f_vs_5f_fuse": 0.005808253302539312,
+  "v2_views_max_12seed_ref": 0.6990960311811597,
+  "note": "2-seed fuse is not comparable in absolute level to 12-seed v2; use delta only"
+}

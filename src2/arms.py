@@ -70,12 +70,11 @@ def altboost_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: 
 
 
 def alt2_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int = 3):
-    """Third encoding world: condition standardised inside region x source."""
+    """Third encoding world: repaired shrunk local condition + preserved ratio."""
     X, cats = build_alt2(raw, edges)
     add_noise_view(X, cats, raw)
-    g = raw.groupby(["source", "region"])["condition"]
-    cz = ((raw["condition"] - g.transform("mean")) / g.transform("std").replace(0, np.nan)).fillna(0.0)
-    add_jitter_views(X, cats, raw, cz, pd.to_numeric(raw["days"]),
+    # Jitter around the proven cond_r signal rather than unstable local z-scores.
+    add_jitter_views(X, cats, raw, X["cond_r"], pd.to_numeric(raw["days"]),
                      n_views=n_views, n_bins=7, stream_offset=100 + stream_offset)
     for c in cats:
         X[c] = X[c].astype(str)

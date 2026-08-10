@@ -1,0 +1,34 @@
+[seed 20260] frame (21328, 149) cats=113 (1s)
+    cat_d5   oof=0.68837 (232s)
+[seed 20261] frame (21328, 149) cats=113 (1s)
+    cat_d5   oof=0.68675 (231s)
+[final] cat_d5: 0.69111
+{
+  "experiment_id": "s2_5f_2s",
+  "git_commit": "ed3dea0a04511447a92eac80a2eb0fff2ab76d7e",
+  "view": "main",
+  "seeds": [
+    20260,
+    20261
+  ],
+  "folds": 5,
+  "stream_base": 0,
+  "save_raw": true,
+  "train_sha256": "494a61073a0438f692914c4868db31df1171e662348e0024e06b120d08d44f28",
+  "test_sha256": "d6ffd26bd4873fa09f6fac361f59170a880e88e331a01d7a6356bd9184ce55ec",
+  "arms": {
+    "cat_d5": {
+      "bagged_oof_auc": 0.6911119344404293,
+      "per_seed_auc": [
+        0.6883693720697504,
+        0.6867457182231371
+      ],
+      "per_seed_rank_auc": [
+        0.6883693720697504,
+        0.6867457182231371
+      ]
+    }
+  },
+  "oof_corr": {},
+  "elapsed_sec": 465.3
+}

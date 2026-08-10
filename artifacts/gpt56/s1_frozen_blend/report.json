@@ -1,0 +1,31 @@
+{
+  "status": "exploratory_biased_b7_oof",
+  "note": "B7 OOF includes outer-fold early stopping; use only as exploratory.",
+  "inputs": {
+    "v2": "01fa19b4233a4f4ea7a793d6e072f26ef2ddb5dcae14caa4cc5c4fd7fdb7a6c3",
+    "b7": "5c9ccfdaaed914c92e153cb9ba2b0fb4e066b462b09406184d3f4ed1e75c1de8",
+    "sample": "83cb0263cc5729f61d0e05c68d673dc3f21b41c24bad68afa35159859054c4bf"
+  },
+  "test_spearman_v2_b7": 0.9676292286947079,
+  "outputs": {
+    "gpt56_s1_frozen_blend.csv": {
+      "path": "submissions/gpt56_s1_frozen_blend.csv",
+      "sha256": "e7ba9ef27cab0ecc306fe3ff0d732547a02fbfa67a8be9a5de02b66604829eaa"
+    },
+    "gpt56_s1_v2_75_b7_25.csv": {
+      "path": "submissions/gpt56_s1_v2_75_b7_25.csv",
+      "sha256": "044a96940aa22c2dffb3bba33dd6081404aa85f6c31ca5c0f1fd837a8e26a975"
+    },
+    "gpt56_s1_rankmax_v2_b7.csv": {
+      "path": "submissions/gpt56_s1_rankmax_v2_b7.csv",
+      "sha256": "4fd850334b3c02b2ec7d4b2775e33a58e4abb6c7836d7ce91e645ac2a284b06a"
+    }
+  },
+  "oof": {
+    "v2": 0.6990960311811597,
+    "75_25": 0.7014493863443303,
+    "50_50": 0.7028496764534715,
+    "max": 0.703578357730684,
+    "warning": "B7 OOF is early-stopping biased; do not use for formal promotion"
+  }
+}

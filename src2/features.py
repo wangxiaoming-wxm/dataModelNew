@@ -333,39 +333,69 @@ def build_alt(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
 # this dataset, so this arm exists purely to be a further decorrelated view.
 
 ALT2_QUANTS = (4, 9, 16)
+ALT2_SHRINK_K = 50.0
+
+
+def _shrunk_condition(df: pd.DataFrame, k: float = ALT2_SHRINK_K) -> pd.Series:
+    """Shrink region×source condition stats toward source-level stats.
+
+    Small cells dominate the old alt2 z-score; this keeps the local structure
+    without letting n<=30 groups dominate the scale estimate.
+    """
+    cond = pd.to_numeric(df["condition"])
+    n = df.groupby(["source", "region"])["condition"].transform("size").astype(float)
+    w = n / (n + k)
+    src_med = df.groupby("source")["condition"].transform("median")
+    cell_med = df.groupby(["source", "region"])["condition"].transform("median")
+    center = w * cell_med + (1.0 - w) * src_med
+
+    q75 = df.groupby(["source", "region"])["condition"].transform(lambda s: s.quantile(0.75))
+    q25 = df.groupby(["source", "region"])["condition"].transform(lambda s: s.quantile(0.25))
+    cell_iqr = (q75 - q25).replace(0, np.nan)
+    src_q75 = df.groupby("source")["condition"].transform(lambda s: s.quantile(0.75))
+    src_q25 = df.groupby("source")["condition"].transform(lambda s: s.quantile(0.25))
+    src_iqr = (src_q75 - src_q25).replace(0, np.nan)
+    scale = (w * cell_iqr + (1.0 - w) * src_iqr).fillna(src_iqr).fillna(1.0).clip(lower=1e-6)
+    return ((cond - center) / scale).fillna(0.0)
 
 
 def fit_edges_alt2(df: pd.DataFrame) -> dict:
-    g = df.groupby(["source", "region"])["condition"]
-    cz = ((df["condition"] - g.transform("mean")) / g.transform("std").replace(0, np.nan)).fillna(0.0)
+    # Keep the proven main-world scale so we never drop cond_r / ratio.
+    scale = df.groupby("source")["condition"].median()
+    der = _derive(df, scale)
+    cz = _shrunk_condition(df)
     dpc = df.groupby("region")["days"].rank(pct=True)
-    load = cz - 2.0 * dpc
-    edges: dict = {}
+    edges: dict = {"__scale__": scale}
     for n in ALT2_QUANTS:
         qs = np.linspace(0, 1, n + 1)[1:-1]
         edges[f"cz_{n}"] = np.quantile(cz, qs)
         edges[f"dpc_{n}"] = np.quantile(dpc, qs)
-        edges[f"load_{n}"] = np.quantile(load, qs)
+        edges[f"ratio_{n}"] = np.quantile(der["ratio"], qs)
+        edges[f"condr_{n}"] = np.quantile(der["cond_r"], qs)
     return edges
 
 
 def build_alt2(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
+    """Repaired third world: keep cond_r/ratio and shrink local condition stats."""
     out = pd.DataFrame(index=df.index)
     days = pd.to_numeric(df["days"])
     cond = pd.to_numeric(df["condition"])
-    g = df.groupby(["source", "region"])["condition"]
-    cz = ((cond - g.transform("mean")) / g.transform("std").replace(0, np.nan)).fillna(0.0)
+    der = _derive(df, edges["__scale__"])
+    cond_r, ratio = der["cond_r"], der["ratio"]
+    cz = _shrunk_condition(df)
     dpc = df.groupby("region")["days"].rank(pct=True)
-    load = cz - 2.0 * dpc
 
     out["cz"] = cz
     out["dpc"] = dpc
-    out["load"] = load
     out["days"] = days
     out["condition"] = cond
+    out["cond_r"] = cond_r
+    out["log_cond_r"] = np.log(cond_r.clip(lower=1e-9))
+    out["ratio"] = ratio
+    out["log_ratio"] = np.log(ratio.clip(lower=1e-9))
+    out["ratio_p75"] = days / cond_r.clip(lower=1e-9) ** 0.75
     out["condition_missing"] = cond.isna().astype(int)
     out["cz_x_age"] = cz * df["age_range"].astype(float)
-    out["load_x_bin"] = load * df[BIN_COLS].sum(axis=1)
     out["age_range"] = df["age_range"].astype(float)
     out["grade_ord"] = df["grades"].map(GRADE_MAP).astype(float)
     for c in BIN_COLS:
@@ -384,8 +414,9 @@ def build_alt2(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
     for n in ALT2_QUANTS:
         out[f"z{n}"] = _qbins(cz, edges[f"cz_{n}"]).astype(str)
         out[f"p{n}"] = _qbins(dpc, edges[f"dpc_{n}"]).astype(str)
-        out[f"l{n}"] = _qbins(load, edges[f"load_{n}"]).astype(str)
-        cats += [f"z{n}", f"p{n}", f"l{n}"]
+        out[f"r{n}"] = _qbins(ratio, edges[f"ratio_{n}"]).astype(str)
+        out[f"cr{n}"] = _qbins(cond_r, edges[f"condr_{n}"]).astype(str)
+        cats += [f"z{n}", f"p{n}", f"r{n}", f"cr{n}"]
 
     def cross(name, *parts):
         s = out[parts[0]].astype(str)
@@ -394,29 +425,33 @@ def build_alt2(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
         out[name] = s
         cats.append(name)
 
+    # Keep source×condition family and segment crosses; drop the old load×* set.
     cross("B_z9_src", "z9", "source")
     cross("B_z16_src", "z16", "source")
     cross("B_z9_reg", "z9", "region")
     cross("B_z4_age", "z4", "age_cat")
+    cross("B_cr9_src", "cr9", "source")
+    cross("B_cr16_src", "cr16", "source")
+    cross("B_cr9_reg", "cr9", "region")
+    cross("B_r9_src", "r9", "source")
+    cross("B_r9_reg", "r9", "region")
+    cross("B_r16_src", "r16", "source")
     cross("B_p9_reg", "p9", "region")
     cross("B_p9_src", "p9", "source")
     cross("B_p16_reg", "p16", "region")
     cross("B_p4_age", "p4", "age_cat")
-    cross("B_l9_reg", "l9", "region")
-    cross("B_l9_src", "l9", "source")
-    cross("B_l16_src", "l16", "source")
-    cross("B_l4_pat", "l4", "bin_pat")
     cross("B_p9_z9", "p9", "z9")
     cross("B_p4_z4", "p4", "z4")
+    cross("B_r9_z9", "r9", "z9")
     cross("B_reg_src", "region", "source")
     cross("B_reg_age", "region", "age_cat")
     cross("B_src_age", "source", "age_cat")
     cross("B_reg_src_age", "region", "source", "age_cat")
     cross("B_p4_reg_src", "p4", "region", "source")
-    cross("B_l4_reg_src", "l4", "region", "source")
+    cross("B_r4_reg_src", "r4", "region", "source")
     cross("B_z4_reg_age", "z4", "region", "age_cat")
     cross("B_p9_pat", "p9", "bin_pat")
     cross("B_reg_pat", "region", "bin_pat")
-    for c in ("region", "source", "bin_pat", "B_reg_src", "B_z9_src", "B_p9_reg"):
+    for c in ("region", "source", "bin_pat", "B_reg_src", "B_z9_src", "B_r9_src"):
         out[f"freq_{c}"] = out[c].map(out[c].value_counts()).astype(float)
     return out, cats

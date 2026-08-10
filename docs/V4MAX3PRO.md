@@ -1,66 +1,81 @@
-# V4max3pro 交付说明（实事求是）
+# V4max3pro
 
-## 结论（先看这里）
+## 一句话结论
 
-**不能诚实声称会到公开榜 0.7155。**
+相对冻结基线 `submission_v4_max3.csv`（公开榜 **0.71222**）做了增量融合，本地嵌套 OOF **0.70522**（+0.00215）。  
+按 max3 的 CV→LB 间隙外推约 **0.7144**。**不能诚实声称会到 0.7155。**  
+独立审核结论为 **PROTOCOL_RISK**（无作弊/无标签泄漏，但含 ES/10 折乐观与选择风险）。
 
-| 项 | 数值 |
-|---|---:|
-| 基线 `submission_v4_max3.csv` 公开榜 | **0.71222** |
-| 基线本地嵌套 OOF | **0.70307** |
-| 同口径 CV→LB 间隙 | **+0.00915** |
-| 要冲 0.7155 约需嵌套 | **≈0.70635**（还需 +0.00328） |
-| 本轮最佳嵌套 | **0.70522**（+0.00215） |
-| 若间隙不变的预期 LB | **≈0.71437** |
-| 是否达到 0.7155 证据门槛 | **否** |
-
-今天只剩 1 次提交时的建议：
-
-1. **若目标必须是 0.7155**：建议**不要交**这一版（证据不够，交了也是赌噪声）。
-2. **若接受“相对 max3 小幅抬期望、但不保证”**：可交 `submissions/submission_v4max3pro.csv`（配方见下），预期大约 **0.7135–0.7145**，且存在 plus 臂可能压缩 CV→LB 间隙的风险（B7 历史间隙只有 +0.0045）。
-
-## 配方
-
-冻结 max3 三臂，再加两只新训练/强化臂：
+## 冻结配方
 
 ```text
 max(
-  merger_ord8,          # 冻结，诚实 Ordered 主世界
-  v2_cat_alt8,          # 冻结，诚实 alt 世界
-  ord_noxb_bag,         # 冻结，ES B5-noxb（max3 原第三臂）
-  plus_strong,          # V10 plus 4seed + 新 Plain10 3seed（剔除坏种子 2033）
-  noxb10                # 新训：B5-noxb Ordered 10 折 ES，4 seed
+  rank(merger_ord8),   # artifacts/v4max3/merger_ord8.npz   honest
+  rank(v2_cat_alt8),   # artifacts/v4max3/v2_cat_alt8.npz   honest
+  rank(ord_noxb_bag),  # artifacts/v4max3/ord_noxb_bag.npz  ES
+  rank(plus_strong),   # artifacts/v4max3pro/plus_strong.npz  10-fold ES family
+  rank(noxb10)         # artifacts/v4max3pro/noxb10.npz       10-fold ES, 8 seeds
 )
+→ clip(label, 0.001, 0.999)
 ```
 
-文件：`submissions/submission_v4max3pro.csv`  
-报告：`artifacts/v4max3pro/status_report.json`
+提交文件：**仅此一个**正式候选  
+`submissions/submission_v4max3pro.csv`
 
-## 试过但无效 / 负向（避免再走）
+基线对照：  
+`submissions/submission_v4_max3.csv`
 
-| 尝试 | 结果 |
-|---|---|
-| V5 编码世界加入 max3 | 嵌套下降（与 V5 榜上 0.71035 一致） |
-| 把 plus 改成 5 折重训 | 单臂变弱，拖累 max3 |
-| merger_ord 的 5 折 ES 升级 | 弱于诚实 fixed-tree |
-| hybrid（主特征+x0–x18） | 与 max3 过共线，几乎无增益 |
-| alt10 | 几乎无增益 |
-| 继续堆 m10/ob/plus_ord | 超过 `max3+plus_strong+noxb10` 后开始掉 |
+## 如何复现 / 审核（下载本分支后）
 
-## 风险（必须说清）
-
-- 本地嵌套里的 `ord_noxb_bag` / `noxb10` / `plus_*` 含 **ES 或 10 折**，OOF 可能偏乐观；测试预测仍未看测试标签。
-- plus 来自 B7 家族；B7 当年本地→榜间隙明显小于 max3。**把 plus 加进 max3 可能让真实公开榜低于“嵌套+0.00915”的乐观外推。**
-- 因此 **0.71428 是乐观点估计，不是承诺。**
-
-## 复现
+只需已提交的臂产物 + 构建脚本，**不必重新长训**：
 
 ```bash
-# 冻结臂已在 artifacts/v4max3/
-# 新臂：
-python3 src4/train_noxb10.py --seed SEED --folds 10
-python3 src4/train_plus10.py --seed SEED --boosting Plain --folds 10
-python3 src4/merge_parts.py --pattern 'part_noxb10_s*.npz' --out noxb10 --pool rank
-python3 src4/build_plus8.py   # 或使用已写入的 plus_strong.npz
-python3 src4/fuse_v4max3pro.py --write
+python3 src4/build_submission_v4max3pro.py --check
+# 期望：frac_diff=0, max_abs ~ 1e-16 量级, ok=True
+
+python3 src4/build_submission_v4max3pro.py --write
+# 重写 submission_v4max3pro.csv 与 artifacts/v4max3pro/recipe_report.json
+# 再 --check 必须仍通过
 ```
+
+报告：
+- `artifacts/v4max3pro/recipe_report.json`（构建脚本生成，与 CSV 同源）
+- `artifacts/v4max3pro/status_report.json`（摘要）
+
+## 数字（与脚本一致）
+
+| 项 | 值 |
+|---|---:|
+| max3 嵌套 OOF | 0.70307 |
+| max3 公开榜 | 0.71222 |
+| CV→LB 间隙 | +0.00915 |
+| V4max3pro 嵌套 OOF | 0.70522 |
+| Δ vs max3 | +0.00215 |
+| 乐观外推 LB | ≈0.71437 |
+| vs max3 提交 Spearman | ≈0.9917 |
+
+## 臂说明（诚实标签）
+
+| 臂 | 协议标签 | 备注 |
+|---|---|---|
+| merger_ord8 | honest | 固定树、5 折、Ordered + v2 主特征 |
+| v2_cat_alt8 | honest | 固定树、5 折、alt 编码世界 |
+| ord_noxb_bag | es | B5 no-xbin Ordered，早停；OOF 可乐观，test 未看标签 |
+| plus_strong | plus10 | V10 plus 家族（10 折 ES）强化袋 |
+| noxb10 | plus10 | 同族 10 折 ES，8 seed；与 ord_noxb_bag 高度共线 |
+
+## 明确不是最终配方的内容
+
+下列训练脚本曾用于探索，**不进入最终提交**，保留仅供对照：
+
+- `src4/train_main10.py` / `train_hybrid10.py` / `train_alt10.py` / `train_plus5.py` / `train_es_arm.py` / `train_alt2fix.py`
+- 旧扫描器 `src4/fuse_v4max3pro.py`（已被 `build_submission_v4max3pro.py` 取代为正式入口）
+
+若需从种子重训 `noxb10` / plus 族，见 `src4/train_noxb10.py`、`src4/train_plus10.py`、`src4/merge_parts.py`（耗时长，审核复现 CSV **不需要**这一步）。
+
+## 风险（提交前必读）
+
+1. ES / 10 折臂会抬高本地 OOF；公开榜不一定同幅度迁移。  
+2. `plus_*` 来自 B7 家族，历史 CV→LB 间隙小于 max3；外推 0.714x 偏乐观。  
+3. `noxb10` 与 max3 第三臂高度相关，本地增益里有一部分几乎不改变 test 排序。  
+4. 今天若只剩 1 次提交且目标必须是 **0.7155**：**不建议交这版**。

@@ -9,9 +9,9 @@
     "nested": 0.7052203722855012,
     "delta": 0.0021472325785242274,
     "exp_lb": 0.7143672325785242,
-    "sp": 0.9917350367776732
+    "sp": 0.9917350374024816
   },
   "noxb10_oof": 0.7003701598386726,
   "admit_for_7155_claim": false,
-  "recommendation": "DO NOT claim 0.7155; optional incremental only (~0.714 under optimistic gap)"
+  "recommendation": "DO NOT claim 0.7155; optional incremental only (~0.714 under optimistic max3 gap; plus/ES arms add PROTOCOL_RISK)"
 }

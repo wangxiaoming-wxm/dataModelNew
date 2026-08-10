@@ -1,11 +1,9 @@
-"""V4max3pro fusion on the frozen max3 ruler (5 nested blocks).
+"""DEPRECATED for the official V4max3pro submission.
 
-Reports BOTH:
-  - honest_nested: arms trained without early stopping / without 10-fold optimism
-  - full_nested: may include ES or V10-plus (10-fold ES) arms whose TEST preds
-    remain valid (test never used in ES). full_nested can be optimistic for
-    local AUC; it is used for submission selection only with that caveat.
-"""
+Use src4/build_submission_v4max3pro.py instead. This file remains as an
+exploratory multi-arm scanner from the research phase; its older
+artifacts/v4max3pro/fuse_report.json is intentionally removed.
+
 from __future__ import annotations
 
 import argparse

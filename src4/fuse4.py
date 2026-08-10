@@ -30,6 +30,7 @@ RIT = ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit")
 PAIR = ("cat_d5_pair", "cat_alt_pair")
 XENT = ("cat_d5_xent", "cat_alt_xent")
 MID = ("cat_d6_mid20", "cat_alt_mid20")
+RANK = ("cat_d5_ranksrc", "cat_alt_ranksrc")
 
 RULES: dict[str, dict[str, float]] = {
     "views_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG}},

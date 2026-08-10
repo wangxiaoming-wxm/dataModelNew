@@ -16,7 +16,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from catboost import CatBoostClassifier
+from catboost import CatBoostClassifier, CatBoostRanker, Pool
 from scipy.stats import rankdata
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
@@ -140,6 +140,13 @@ def main() -> int:
         help="Label-free upsample factor for training rows whose source-median "
              "ratio sits in the global central 50%% (edges from train+test).",
     )
+    ap.add_argument(
+        "--rank-group",
+        choices=["none", "source", "region", "reg_src"],
+        default="none",
+        help="If not none, fit CatBoostRanker PairLogit with this label-free "
+             "group id (fixed iterations, no eval_set). Predicts relevance scores.",
+    )
     ap.add_argument("--out", type=Path, default=Path("artifacts/v4_probe"))
     args = ap.parse_args()
 
@@ -155,6 +162,17 @@ def main() -> int:
     ratio_tr = ratio_all[: len(train)]
     q25, q75 = np.quantile(ratio_all, [0.25, 0.75])
 
+    # label-free group ids for optional pairwise ranking loss
+    if args.rank_group == "source":
+        group_all = raw["source"].astype(str).to_numpy()
+    elif args.rank_group == "region":
+        group_all = raw["region"].astype(str).to_numpy()
+    elif args.rank_group == "reg_src":
+        group_all = (raw["region"].astype(str) + "|" + raw["source"].astype(str)).to_numpy()
+    else:
+        group_all = None
+    group_tr = None if group_all is None else group_all[: len(train)]
+
     fit_e, make = WORLDS[args.world]
     offset = args.stream_offset if args.stream_offset is not None else (args.seed % 97) + 1
     t0 = time.time()
@@ -165,7 +183,13 @@ def main() -> int:
     params = dict(BASE)
     params.update(PRESETS[args.preset])
     params["thread_count"] = args.threads
-    params["loss_function"] = args.loss
+    use_ranker = args.rank_group != "none"
+    if use_ranker:
+        # PairLogit is a ranking loss; classifier API rejects it.
+        params["loss_function"] = "PairLogit"
+        args.loss = "PairLogit"
+    else:
+        params["loss_function"] = args.loss
     if args.iter_jitter is not None:
         lo, hi = int(args.iter_jitter[0]), int(args.iter_jitter[1])
         if not (1 <= lo <= hi):
@@ -189,10 +213,27 @@ def main() -> int:
             fit_idx, ratio_tr, float(q25), float(q75),
             factor=float(args.ratio_mid_focus), seed=args.seed * 1000 + f + 17,
         )
-        m = CatBoostClassifier(**fold_params, random_seed=args.seed + f)
-        m.fit(Xtr.iloc[fit_idx], y[fit_idx], cat_features=cats, verbose=False)
-        oof[vi] = m.predict_proba(Xtr.iloc[vi])[:, 1]
-        test_parts.append(rankdata(m.predict_proba(Xte)[:, 1]) / len(Xte))
+        if use_ranker:
+            # CatBoost ranking requires rows grouped by group_id.
+            order = fit_idx[np.argsort(group_tr[fit_idx], kind="mergesort")]
+            X_fit = Xtr.iloc[order]
+            y_fit = y[order]
+            g_fit = group_tr[order]
+            # map string groups to contiguous ints for Pool
+            _, g_codes = np.unique(g_fit, return_inverse=True)
+            train_pool = Pool(
+                data=X_fit, label=y_fit, cat_features=cats, group_id=g_codes.astype(np.int32),
+            )
+            m = CatBoostRanker(**fold_params, random_seed=args.seed + f)
+            m.fit(train_pool, verbose=False)
+            # predict raw ranking scores; rank-normalize like classifier probs
+            oof[vi] = m.predict(Xtr.iloc[vi])
+            test_parts.append(rankdata(m.predict(Xte)) / len(Xte))
+        else:
+            m = CatBoostClassifier(**fold_params, random_seed=args.seed + f)
+            m.fit(Xtr.iloc[fit_idx], y[fit_idx], cat_features=cats, verbose=False)
+            oof[vi] = m.predict_proba(Xtr.iloc[vi])[:, 1]
+            test_parts.append(rankdata(m.predict_proba(Xte)[:, 1]) / len(Xte))
 
     auc = float(roc_auc_score(y, oof))
     loss_tag = args.loss.lower().replace(":", "")
@@ -203,7 +244,8 @@ def main() -> int:
     mid_tag = ""
     if float(args.ratio_mid_focus) > 1.0:
         mid_tag = f"_mid{int(round(float(args.ratio_mid_focus) * 10)):02d}"
-    tag = f"{args.world}_{args.preset}_{loss_tag}{frac_tag}{rit_tag}{mid_tag}_s{args.seed}_f{args.folds}"
+    grp_tag = "" if args.rank_group == "none" else f"_grp{args.rank_group}"
+    tag = f"{args.world}_{args.preset}_{loss_tag}{frac_tag}{rit_tag}{mid_tag}{grp_tag}_s{args.seed}_f{args.folds}"
     args.out.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         args.out / f"part_{tag}.npz",
@@ -221,6 +263,7 @@ def main() -> int:
         "iter_jitter": list(args.iter_jitter) if args.iter_jitter is not None else None,
         "ratio_mid_focus": float(args.ratio_mid_focus),
         "ratio_mid_bounds": [float(q25), float(q75)],
+        "rank_group": args.rank_group,
         "fold_iterations": fold_iters,
         "stream_offset": offset,
         "oof_auc": auc,

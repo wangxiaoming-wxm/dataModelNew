@@ -285,6 +285,14 @@ def main() -> int:
             "__max__": 1.0,
             **{k: 1.0 for k in strong + strong_f20 + strong_r16 + mid},
         }
+    rank = [k for k in ("cat_d5_ranksrc", "cat_alt_ranksrc") if k in ranks]
+    if len(rank) >= 1 and len(strong) >= 2:
+        rules["views_max_rank"] = {"__max__": 1.0, **{k: 1.0 for k in strong + rank}}
+    if len(rank) >= 1 and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16_rank"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + rank},
+        }
 
     if not rules:
         gates["nested_selection"] = False

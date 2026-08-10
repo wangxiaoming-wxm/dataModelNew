@@ -24,10 +24,16 @@ STRONG_S16 = ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16")
 ALT_R16B = ("cat_alt_r16b",)
 SUB85 = ("cat_d6_sf85", "cat_alt_sf85")
 ALT_D5 = ("cat_alt_d5",)
+# Opus/zcode honest arms (fixed trees, no ES). Copied into artifacts/v4 as
+# arm_merger_ord8.npz / arm_v2_cat_alt8.npz / arm_gap_v5.npz.
+OPUS_MA = ("merger_ord8", "v2_cat_alt8")
+OPUS_GAP = ("gap_v5",)
+V4_CORE = STRONG + STRONG_F20 + STRONG_R16 + ALT_R16B
 
 # Only rules whose member arms exist in artifacts/v4 are kept here.
 # Killed experiments (w6–w12, rit, pair, mid, rank, …) are documented in
 # docs/V4.md and must not re-enter without a fresh pre-registration + audit.
+# V4-ext opus rules were pre-registered BEFORE seeing nested scores (Phase1 plan).
 RULES: dict[str, dict[str, float]] = {
     "views_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG}},
     "views_mean": {k: 1 / 3 for k in STRONG},
@@ -65,6 +71,27 @@ RULES: dict[str, dict[str, float]] = {
         **{k: 1.0 for k in STRONG + STRONG_F20 + ALT_D5},
     },
     "four_max_w5": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w5",)}},
+    # --- V4-ext Phase1: V4 core ∪ opus honest arms (pre-registered) ---
+    "views_max_v4_m": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in V4_CORE + ("merger_ord8",)},
+    },
+    "views_max_v4_a": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in V4_CORE + ("v2_cat_alt8",)},
+    },
+    "views_max_v4_ma": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in V4_CORE + OPUS_MA},
+    },
+    "views_max_v4_mag": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in V4_CORE + OPUS_MA + OPUS_GAP},
+    },
+    "opus_v5_honest_max": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in OPUS_MA + OPUS_GAP},
+    },
 }
 
 

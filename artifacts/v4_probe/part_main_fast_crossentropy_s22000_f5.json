@@ -1,0 +1,13 @@
+{
+  "world": "main",
+  "preset": "fast",
+  "seed": 22000,
+  "folds": 5,
+  "loss": "CrossEntropy",
+  "train_frac": 1.0,
+  "iter_jitter": null,
+  "fold_iterations": [],
+  "stream_offset": 79,
+  "oof_auc": 0.6889156155783195,
+  "elapsed_sec": 275.0
+}

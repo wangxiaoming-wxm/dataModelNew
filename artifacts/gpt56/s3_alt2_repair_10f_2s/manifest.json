@@ -1,0 +1,29 @@
+{
+  "experiment_id": "s3_alt2_repair_10f_2s",
+  "git_commit": "59392513d251c90d639d683d3d0c7429810eb406",
+  "view": "alt2",
+  "seeds": [
+    20300,
+    20301
+  ],
+  "folds": 10,
+  "stream_base": 0,
+  "save_raw": true,
+  "train_sha256": "494a61073a0438f692914c4868db31df1171e662348e0024e06b120d08d44f28",
+  "test_sha256": "d6ffd26bd4873fa09f6fac361f59170a880e88e331a01d7a6356bd9184ce55ec",
+  "arms": {
+    "cat_alt2": {
+      "bagged_oof_auc": 0.6930736940112843,
+      "per_seed_auc": [
+        0.6878883613212227,
+        0.6917373927117642
+      ],
+      "per_seed_rank_auc": [
+        0.6878883613212227,
+        0.6917373927117642
+      ]
+    }
+  },
+  "oof_corr": {},
+  "elapsed_sec": 913.2
+}

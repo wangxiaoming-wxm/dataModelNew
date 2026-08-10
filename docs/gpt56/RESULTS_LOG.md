@@ -106,6 +106,20 @@
 
 **结论：** 达到正式晋级门槛（nested Δ≥0.002）。建议优先提交 `gpt56_s2_10fold.csv`。
 
+
+## S3 快筛：修复后的 alt2（10 折 × 2 seeds）
+
+| 指标 | 值 |
+|---|---:|
+| alt2 repair bagged OOF | 0.69307 |
+| 同口径 cat_d5 2s 10f | 0.69554 |
+| 相对 d5 差距 | -0.00247 |
+| 旧 alt2 5f×8s 参考 | 0.69100 |
+| 与 v3 views_max Spearman | 见 `artifacts/gpt56/s3_alt2_repair_screen.json` |
+| 加入 max / 20% mean | 见同文件 |
+
+**结论：** 强度仍低于门槛（需 ≥ d5-0.0015），暂不进入最终 max。保留作为后续编码世界继续改进的起点。
+
 ## 代码改动
 
 - `src2/run_oof.py`：`--save-raw` 保存逐 seed/fold 概率与 fold id

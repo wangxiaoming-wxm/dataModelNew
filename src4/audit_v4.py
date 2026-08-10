@@ -272,6 +272,11 @@ def main() -> int:
     xent = [k for k in ("cat_d5_xent", "cat_alt_xent") if k in ranks]
     if len(xent) >= 1 and len(strong) >= 2:
         rules["views_max_xent"] = {"__max__": 1.0, **{k: 1.0 for k in strong + xent}}
+    if "cat_alt_r24" in ranks and len(strong) >= 2 and len(strong_f20) >= 2:
+        rules["views_max_10_20_r16_alt_r24"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + ["cat_d5_r16", "cat_d6_r16", "cat_alt_r24"]},
+        }
     mid = [k for k in ("cat_d6_mid20", "cat_alt_mid20") if k in ranks]
     if len(mid) >= 1 and len(strong) >= 2:
         rules["views_max_mid"] = {"__max__": 1.0, **{k: 1.0 for k in strong + mid}}

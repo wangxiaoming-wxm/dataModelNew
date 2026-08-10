@@ -1,8 +1,9 @@
-# 车险索赔预测 — V3（本分支当前交付）
+# 车险索赔预测 — V4（本分支当前交付，已按最优停止）
 
-> **提交文件：`submissions/submission_v3.csv`**  
-> 诚实嵌套 OOF（20 block seed 均值）：**0.70124**（详见 [`docs/V3.md`](docs/V3.md)）  
-> 对照 V2（公开榜 0.70878）：同口径嵌套均值 0.69824 → **+0.003**
+> **提交文件：`submissions/submission_v4.csv`**  
+> 诚实嵌套 OOF（20 block seed 均值）：**0.70303**（详见 [`docs/V4.md`](docs/V4.md)）  
+> 对照 V3：同口径嵌套均值 0.70124 → **+0.00179**；目标 0.707 未达成（诚实性门通过）  
+> V3 产物与文档保持只读：`submissions/submission_v3.csv` / [`docs/V3.md`](docs/V3.md)
 
 赛题：根据保单与车辆等多维信息，预测投保人未来一年内是否发生索赔。评价指标 ROC-AUC。
 数据在 `data/`（`train.csv` 14930 行含 `label`，`test.csv` 6398 行，`submit_sample.csv` 为提交模板）。

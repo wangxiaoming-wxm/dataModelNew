@@ -28,3 +28,15 @@ mine_noxb_honest；w8；w12 d6l6（nested 下降）；8-seed 相对 4-seed **无
 ## 进行中
 
 Ordered 固定树筛 alt / w12 / main。
+
+## 续拒（2026-08-10 晚）
+
+| 方向 | 同种子对照 | 裁决 |
+|---|---|---|
+| Ordered×alt | 0.68738 < Plain 0.68843 | 拒 |
+| Ordered×w12 | 0.69247 < Plain 0.69398 | 拒 |
+| Ordered×main | 0.69296 > Plain 0.68895 | 已有 merger_ord8，不重复 |
+| PairLogit×source/reg_src | OOF ≈0.62–0.65 | 拒 |
+| RMSE 固定树×main/alt | bag ≈0.690 << cls 0.698 | 拒 |
+
+边际收益已进入噪声带（最近一步嵌套 Δ≈0）。

@@ -1,0 +1,13 @@
+{
+  "world": "w10",
+  "preset": "d6l6",
+  "seed": 29002,
+  "folds": 10,
+  "loss": "Logloss",
+  "train_frac": 1.0,
+  "iter_jitter": null,
+  "fold_iterations": [],
+  "stream_offset": 97,
+  "oof_auc": 0.6879771793812333,
+  "elapsed_sec": 2058.3
+}

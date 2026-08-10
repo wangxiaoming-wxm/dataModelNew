@@ -19,6 +19,8 @@ from sklearn.model_selection import StratifiedKFold
 STRONG = ("cat_d5", "cat_d6", "cat_alt")
 STRONG_F20 = ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20")
 STRONG_R16 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r16")
+ALT_R24 = ("cat_alt_r24",)
+STRONG_R24 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r24")  # alt extended; d5/d6 keep r16
 # Equal-weight pool of the original 8 seeds and the r16 block (16 seeds total).
 STRONG_S16 = ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16")
 SUB85 = ("cat_d6_sf85", "cat_alt_sf85")
@@ -121,6 +123,17 @@ RULES: dict[str, dict[str, float]] = {
     "views_max_10_20_r16_xent": {
         "__max__": 1.0,
         **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + XENT},
+    },
+
+    # Extra alt repeated seeds (r24 = prior r16 block + new 8 alt seeds).
+    "views_max_alt_r24": {"__max__": 1.0, **{k: 1.0 for k in STRONG[:2] + ALT_R24}},
+    "views_max_10_20_alt_r24": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG[:2] + STRONG_F20 + ALT_R24 + ("cat_alt",)},
+    },
+    "views_max_10_20_r16_alt_r24": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + ("cat_d5_r16", "cat_d6_r16") + ALT_R24},
     },
     # Mid-ratio upsampling residual focus (label-free central 50% ×2).
     "mid_max": {"__max__": 1.0, **{k: 1.0 for k in MID}},

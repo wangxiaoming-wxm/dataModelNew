@@ -29,10 +29,14 @@ from worlds_v4 import (
     fit_edges_w7,
     fit_edges_w8,
     fit_edges_w9,
+    fit_edges_w10,
+    fit_edges_w11,
     w6_frame,
     w7_frame,
     w8_frame,
     w9_frame,
+    w10_frame,
+    w11_frame,
 )
 
 WORLDS = {
@@ -45,6 +49,8 @@ WORLDS = {
     "w7": (fit_edges_w7, w7_frame),
     "w8": (fit_edges_w8, w8_frame),
     "w9": (fit_edges_w9, w9_frame),
+    "w10": (fit_edges_w10, w10_frame),
+    "w11": (fit_edges_w11, w11_frame),
 }
 
 PRESETS = {

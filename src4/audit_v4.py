@@ -240,7 +240,7 @@ def main() -> int:
     if len(strong) >= 2 and len(alt_d5) == 1:
         rules["views_max_alt_d5"] = {"__max__": 1.0, **{k: 1.0 for k in strong + alt_d5}}
     # optional extras if present and strong enough later
-    for extra in ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9"):
+    for extra in ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11"):
         if extra in ranks and len(strong) >= 2:
             rules[f"max_plus_{extra}"] = {"__max__": 1.0, **{k: 1.0 for k in strong + [extra]}}
     if "cat_w8" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
@@ -253,12 +253,25 @@ def main() -> int:
             "__max__": 1.0,
             **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w9"]},
         }
+    if "cat_w10" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16_w10"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w10"]},
+        }
+    if "cat_w11" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16_w11"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w11"]},
+        }
     rit = [k for k in ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit") if k in ranks]
     if len(rit) >= 1 and len(strong) >= 2:
         rules["views_max_rit"] = {"__max__": 1.0, **{k: 1.0 for k in strong + rit}}
     pair = [k for k in ("cat_d5_pair", "cat_alt_pair") if k in ranks]
     if len(pair) >= 1 and len(strong) >= 2:
         rules["views_max_pair"] = {"__max__": 1.0, **{k: 1.0 for k in strong + pair}}
+    xent = [k for k in ("cat_d5_xent", "cat_alt_xent") if k in ranks]
+    if len(xent) >= 1 and len(strong) >= 2:
+        rules["views_max_xent"] = {"__max__": 1.0, **{k: 1.0 for k in strong + xent}}
 
     if not rules:
         gates["nested_selection"] = False

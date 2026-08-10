@@ -559,3 +559,285 @@ def w9_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int = 
     num = [c for c in X.columns if c not in cats]
     X[num] = X[num].astype(float).fillna(-999.0)
     return X, cats
+
+
+# ---------------------------------------------------------------------------
+# w10 — alt-strength twin with a fresh cut family
+# ---------------------------------------------------------------------------
+# w6–w9 lost too much strength by rewriting the interaction geometry.  w10 keeps
+# alt's proven rank-rate carrier and cross skeleton, only changing:
+#   * bin counts to (11, 21, 31)
+#   * an extra source×age rank of condition
+#   * a power-warped rate days*(1-rk)**1.25
+#   * a distinct jitter stream
+# Goal: bagged strength within ~0.003 of alt, with rank corr low enough for max.
+
+W10_BINS = (11, 21, 31)
+
+
+def _w10_core(df: pd.DataFrame) -> pd.DataFrame:
+    cond = pd.to_numeric(df["condition"])
+    days = pd.to_numeric(df["days"])
+    rk = df.groupby("source")["condition"].rank(pct=True).fillna(0.5)
+    # source × age rank (fallback to source rank when cell is tiny)
+    cell = df["source"].astype(str) + "|" + df["age_range"].astype(str)
+    cell_n = cond.groupby(cell).transform("count")
+    rk_age = cond.groupby(cell).rank(pct=True).fillna(0.5)
+    rk_age = rk_age.where(cell_n >= 40, rk)
+    rate = days * (1.0 - rk)
+    rate_p = days * (1.0 - rk).clip(lower=0) ** 1.25
+    rate_age = days * (1.0 - rk_age)
+    return pd.DataFrame(
+        {
+            "days": days,
+            "sqrt_days": np.sqrt(days.clip(lower=0)),
+            "cond": cond,
+            "rk": rk,
+            "rk_age": rk_age,
+            "rate": rate,
+            "rate_p": rate_p,
+            "rate_age": rate_age,
+            "log_rate": np.log1p(rate.clip(lower=0)),
+        },
+        index=df.index,
+    )
+
+
+def fit_edges_w10(df: pd.DataFrame) -> dict:
+    c = _w10_core(df)
+    edges: dict = {}
+    for n in W10_BINS:
+        qs = np.linspace(0, 1, n + 1)[1:-1]
+        edges[f"d_{n}"] = np.quantile(c["days"], qs)
+        edges[f"k_{n}"] = np.quantile(c["rk"], qs)
+        edges[f"ka_{n}"] = np.quantile(c["rk_age"], qs)
+        edges[f"e_{n}"] = np.quantile(c["rate"], qs)
+        edges[f"ep_{n}"] = np.quantile(c["rate_p"], qs)
+        edges[f"ea_{n}"] = np.quantile(c["rate_age"], qs)
+    return edges
+
+
+def build_w10(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
+    c = _w10_core(df)
+    out = pd.DataFrame(index=df.index)
+    out["days"] = c["days"]
+    out["sqrt_days"] = c["sqrt_days"]
+    out["condition"] = c["cond"]
+    out["cond_rk"] = c["rk"]
+    out["cond_rk_age"] = c["rk_age"]
+    out["rate"] = c["rate"]
+    out["rate_p"] = c["rate_p"]
+    out["rate_age"] = c["rate_age"]
+    out["log_rate"] = c["log_rate"]
+    out["rate_over_age"] = c["rate"] / df["age_range"].astype(float).clip(lower=1e-9)
+    out["condition_missing"] = c["cond"].isna().astype(int)
+    out["age_range"] = df["age_range"].astype(float)
+    out["grade_ord"] = df["grades"].map(GRADE_MAP).astype(float)
+    for b in BIN_COLS:
+        out[b] = df[b].astype(int)
+    out["bin_sum"] = df[BIN_COLS].sum(axis=1)
+
+    cats: list[str] = []
+    out["region"] = df["region"].astype(str)
+    out["source"] = df["source"].astype(str)
+    out["month"] = df["month"].astype(str)
+    out["version"] = df["version"].astype(str)
+    out["grades_c"] = df["grades"].astype(str)
+    out["age_cat"] = df["age_range"].astype(str)
+    out["bin_pat"] = df[BIN_COLS].astype(str).agg("".join, axis=1)
+    cats += ["region", "source", "month", "version", "grades_c", "age_cat", "bin_pat"]
+
+    for n in W10_BINS:
+        out[f"d{n}"] = _qbins(c["days"], edges[f"d_{n}"]).astype(str)
+        out[f"k{n}"] = _qbins(c["rk"], edges[f"k_{n}"]).astype(str)
+        out[f"ka{n}"] = _qbins(c["rk_age"], edges[f"ka_{n}"]).astype(str)
+        out[f"e{n}"] = _qbins(c["rate"], edges[f"e_{n}"]).astype(str)
+        out[f"ep{n}"] = _qbins(c["rate_p"], edges[f"ep_{n}"]).astype(str)
+        out[f"ea{n}"] = _qbins(c["rate_age"], edges[f"ea_{n}"]).astype(str)
+        cats += [f"d{n}", f"k{n}", f"ka{n}", f"e{n}", f"ep{n}", f"ea{n}"]
+
+    # alt-style high-value crosses on the new bins
+    _cross(out, cats, "A_k11_src", "k11", "source")
+    _cross(out, cats, "A_k21_src", "k21", "source")
+    _cross(out, cats, "A_k31_src", "k31", "source")
+    _cross(out, cats, "A_k21_reg", "k21", "region")
+    _cross(out, cats, "A_k11_age", "k11", "age_cat")
+    _cross(out, cats, "A_ka11_src", "ka11", "source")
+    _cross(out, cats, "A_ka21_src", "ka21", "source")
+    _cross(out, cats, "A_d21_reg", "d21", "region")
+    _cross(out, cats, "A_d21_src", "d21", "source")
+    _cross(out, cats, "A_d11_age", "d11", "age_cat")
+    _cross(out, cats, "A_d31_reg", "d31", "region")
+    _cross(out, cats, "A_e21_reg", "e21", "region")
+    _cross(out, cats, "A_e21_src", "e21", "source")
+    _cross(out, cats, "A_e11_age", "e11", "age_cat")
+    _cross(out, cats, "A_e11_pat", "e11", "bin_pat")
+    _cross(out, cats, "A_ep21_src", "ep21", "source")
+    _cross(out, cats, "A_ea21_src", "ea21", "source")
+    _cross(out, cats, "A_d11_k11", "d11", "k11")
+    _cross(out, cats, "A_d21_k21", "d21", "k21")
+    _cross(out, cats, "A_d11_ka11", "d11", "ka11")
+    _cross(out, cats, "A_reg_src", "region", "source")
+    _cross(out, cats, "A_reg_age", "region", "age_cat")
+    _cross(out, cats, "A_src_age", "source", "age_cat")
+    _cross(out, cats, "A_d11_reg_src", "d11", "region", "source")
+    _cross(out, cats, "A_k11_reg_age", "k11", "region", "age_cat")
+    _cross(out, cats, "A_e11_reg_src", "e11", "region", "source")
+    _cross(out, cats, "A_d11_pat", "d11", "bin_pat")
+    _cross(out, cats, "A_reg_pat", "region", "bin_pat")
+    for col in ("region", "source", "bin_pat", "A_reg_src", "A_k21_src", "A_d21_reg"):
+        out[f"freq_{col}"] = out[col].map(out[col].value_counts()).astype(float)
+    return out, cats
+
+
+def w10_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int = 3):
+    X, cats = build_w10(raw, edges)
+    add_noise_view(X, cats, raw)
+    rk = _w10_core(raw)["rk"]
+    add_jitter_views(
+        X, cats, raw, rk, pd.to_numeric(raw["days"]),
+        n_views=n_views, n_bins=21, stream_offset=600 + stream_offset,
+    )
+    for c in cats:
+        X[c] = X[c].astype(str)
+    num = [c for c in X.columns if c not in cats]
+    X[num] = X[num].astype(float).fillna(-999.0)
+    return X, cats
+
+
+# ---------------------------------------------------------------------------
+# w11 — main-strength twin with shifted quantiles + log-equal ratio cuts
+# ---------------------------------------------------------------------------
+# Same carriers as main (source-median cond_r / ratio) but bins (6,12,24,36)
+# and equal-width log-ratio edges.  Keeps main's cross skeleton so strength
+# should clear the screen; diversity comes from the cut geometry + jitter.
+
+W11_BINS = (6, 12, 24, 36)
+
+
+def _w11_core(df: pd.DataFrame) -> pd.DataFrame:
+    cond = pd.to_numeric(df["condition"])
+    days = pd.to_numeric(df["days"])
+    med = df.groupby("source")["condition"].transform("median")
+    cond_r = (cond / med.replace(0, np.nan)).fillna(1.0)
+    ratio = days / cond_r.clip(lower=1e-9)
+    return pd.DataFrame(
+        {
+            "days": days,
+            "log_days": np.log1p(days.clip(lower=0)),
+            "cond": cond,
+            "cond_r": cond_r,
+            "ratio": ratio,
+            "log_ratio": np.log(ratio.clip(lower=1e-9)),
+        },
+        index=df.index,
+    )
+
+
+def fit_edges_w11(df: pd.DataFrame) -> dict:
+    c = _w11_core(df)
+    edges: dict = {"__scale__": df.groupby("source")["condition"].median()}
+    for n in W11_BINS:
+        qs = np.linspace(0, 1, n + 1)[1:-1]
+        edges[f"days_{n}"] = np.quantile(c["days"], qs)
+        edges[f"ratio_{n}"] = np.quantile(c["ratio"], qs)
+        edges[f"condr_{n}"] = np.quantile(c["cond_r"], qs)
+        edges[f"cond_{n}"] = np.quantile(c["cond"].dropna(), qs)
+        lo, hi = np.percentile(c["log_ratio"], [0.5, 99.5])
+        edges[f"lr_{n}"] = np.linspace(lo, hi, n + 1)[1:-1]
+    return edges
+
+
+def build_w11(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
+    c = _w11_core(df)
+    out = pd.DataFrame(index=df.index)
+    out["days"] = c["days"]
+    out["log_days"] = c["log_days"]
+    out["condition"] = c["cond"]
+    out["log_condition"] = np.log1p(c["cond"].clip(lower=0))
+    out["condition_missing"] = c["cond"].isna().astype(int)
+    out["cond_r"] = c["cond_r"]
+    out["log_cond_r"] = np.log(c["cond_r"].clip(lower=1e-9))
+    out["ratio"] = c["ratio"]
+    out["log_ratio"] = c["log_ratio"]
+    out["ratio_p75"] = c["days"] / c["cond_r"].clip(lower=1e-9) ** 0.75
+    out["cond_x_days"] = c["cond"] * c["days"]
+    out["age_range"] = df["age_range"].astype(float)
+    out["days_over_age"] = c["days"] / df["age_range"].astype(float).clip(lower=1e-9)
+    out["grade_ord"] = df["grades"].map(GRADE_MAP).astype(float)
+    for b in BIN_COLS:
+        out[b] = df[b].astype(int)
+    out["bin_sum"] = df[BIN_COLS].sum(axis=1)
+
+    cats: list[str] = []
+    out["region"] = df["region"].astype(str)
+    out["source"] = df["source"].astype(str)
+    out["month"] = df["month"].astype(str)
+    out["version"] = df["version"].astype(str)
+    out["grades_c"] = df["grades"].astype(str)
+    out["age_cat"] = df["age_range"].astype(str)
+    out["bin_pat"] = df[BIN_COLS].astype(str).agg("".join, axis=1)
+    out["days_fx"] = np.digitize(c["days"].to_numpy(dtype=float), DAYS_FIXED_EDGES).astype(str)
+    cats += ["region", "source", "month", "version", "grades_c", "age_cat", "bin_pat", "days_fx"]
+
+    for n in W11_BINS:
+        out[f"days_q{n}"] = _qbins(c["days"], edges[f"days_{n}"]).astype(str)
+        out[f"ratio_q{n}"] = _qbins(c["ratio"], edges[f"ratio_{n}"]).astype(str)
+        out[f"condr_q{n}"] = _qbins(c["cond_r"], edges[f"condr_{n}"]).astype(str)
+        out[f"cond_q{n}"] = _qbins(c["cond"].fillna(-1), edges[f"cond_{n}"]).astype(str)
+        out[f"lr_ew{n}"] = _qbins(c["log_ratio"], edges[f"lr_{n}"]).astype(str)
+        cats += [f"days_q{n}", f"ratio_q{n}", f"condr_q{n}", f"cond_q{n}", f"lr_ew{n}"]
+
+    _cross(out, cats, "reg_src", "region", "source")
+    _cross(out, cats, "d12_reg", "days_q12", "region")
+    _cross(out, cats, "d12_src", "days_q12", "source")
+    _cross(out, cats, "d24_reg", "days_q24", "region")
+    _cross(out, cats, "d24_src", "days_q24", "source")
+    _cross(out, cats, "d12_age", "days_q12", "age_cat")
+    _cross(out, cats, "d12_c12", "days_q12", "cond_q12")
+    _cross(out, cats, "c12_reg", "cond_q12", "region")
+    _cross(out, cats, "c12_src", "cond_q12", "source")
+    _cross(out, cats, "reg_age", "region", "age_cat")
+    _cross(out, cats, "src_age", "source", "age_cat")
+    _cross(out, cats, "d12_pat", "days_q12", "bin_pat")
+    _cross(out, cats, "reg_pat", "region", "bin_pat")
+    _cross(out, cats, "d6_reg_src", "days_q6", "region", "source")
+    _cross(out, cats, "r12_reg", "ratio_q12", "region")
+    _cross(out, cats, "r12_src", "ratio_q12", "source")
+    _cross(out, cats, "r12_age", "ratio_q12", "age_cat")
+    _cross(out, cats, "r24_reg", "ratio_q24", "region")
+    _cross(out, cats, "r12_pat", "ratio_q12", "bin_pat")
+    _cross(out, cats, "cr12_reg", "condr_q12", "region")
+    _cross(out, cats, "cr12_age", "condr_q12", "age_cat")
+    _cross(out, cats, "c6_src", "cond_q6", "source")
+    _cross(out, cats, "c24_src", "cond_q24", "source")
+    _cross(out, cats, "cr6_src", "condr_q6", "source")
+    _cross(out, cats, "cr12_src", "condr_q12", "source")
+    _cross(out, cats, "cr24_src", "condr_q24", "source")
+    _cross(out, cats, "d6_cr6", "days_q6", "condr_q6")
+    _cross(out, cats, "d12_cr12", "days_q12", "condr_q12")
+    _cross(out, cats, "d12c12_reg", "days_q12", "cond_q12", "region")
+    _cross(out, cats, "d12c12_src", "days_q12", "cond_q12", "source")
+    _cross(out, cats, "src_c12_age", "source", "cond_q12", "age_cat")
+    _cross(out, cats, "lr12_reg", "lr_ew12", "region")
+    _cross(out, cats, "lr12_src", "lr_ew12", "source")
+    _cross(out, cats, "dfx_src", "days_fx", "source")
+    _cross(out, cats, "dfx_c12", "days_fx", "cond_q12")
+    for col in ("region", "source", "bin_pat", "reg_src", "d12_reg", "c12_src"):
+        out[f"freq_{col}"] = out[col].map(out[col].value_counts()).astype(float)
+    return out, cats
+
+
+def w11_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int = 4):
+    X, cats = build_w11(raw, edges)
+    add_noise_view(X, cats, raw)
+    der_cr = _w11_core(raw)["cond_r"]
+    add_jitter_views(
+        X, cats, raw, der_cr, pd.to_numeric(raw["days"]),
+        n_views=n_views, n_bins=12, stream_offset=700 + stream_offset,
+    )
+    for c in cats:
+        X[c] = X[c].astype(str)
+    num = [c for c in X.columns if c not in cats]
+    X[num] = X[num].astype(float).fillna(-999.0)
+    return X, cats

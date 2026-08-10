@@ -23,9 +23,10 @@ STRONG_R16 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r16")
 STRONG_S16 = ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16")
 SUB85 = ("cat_d6_sf85", "cat_alt_sf85")
 ALT_D5 = ("cat_alt_d5",)
-NEW = ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9")
+NEW = ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11")
 RIT = ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit")
 PAIR = ("cat_d5_pair", "cat_alt_pair")
+XENT = ("cat_d5_xent", "cat_alt_xent")
 
 RULES: dict[str, dict[str, float]] = {
     "views_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG}},
@@ -83,6 +84,22 @@ RULES: dict[str, dict[str, float]] = {
         "__max__": 1.0,
         **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w8", "cat_w9")},
     },
+    # w10 / w11 strong-twin worlds — registered before screens finish.
+    "w10_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w10",)}},
+    "w11_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w11",)}},
+    "w1011_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w10", "cat_w11")}},
+    "views_max_10_20_r16_w10": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w10",)},
+    },
+    "views_max_10_20_r16_w11": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w11",)},
+    },
+    "views_max_10_20_r16_w1011": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w10", "cat_w11")},
+    },
     # Random fixed-iteration diversity (HANDOFF 5.3); no eval_set.
     "rit_max": {"__max__": 1.0, **{k: 1.0 for k in RIT}},
     "views_max_rit": {"__max__": 1.0, **{k: 1.0 for k in STRONG + RIT}},
@@ -90,12 +107,19 @@ RULES: dict[str, dict[str, float]] = {
         "__max__": 1.0,
         **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + RIT},
     },
-    # PairLogit fixed-iter arms (LOSS track).
+    # PairLogit fixed-iter arms (LOSS track; classifier may skip if unsupported).
     "pair_max": {"__max__": 1.0, **{k: 1.0 for k in PAIR}},
     "views_max_pair": {"__max__": 1.0, **{k: 1.0 for k in STRONG + PAIR}},
     "views_max_10_20_r16_pair": {
         "__max__": 1.0,
         **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + PAIR},
+    },
+    # CrossEntropy fixed-iter arms (LOSS track fallback).
+    "xent_max": {"__max__": 1.0, **{k: 1.0 for k in XENT}},
+    "views_max_xent": {"__max__": 1.0, **{k: 1.0 for k in STRONG + XENT}},
+    "views_max_10_20_r16_xent": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + XENT},
     },
 }
 

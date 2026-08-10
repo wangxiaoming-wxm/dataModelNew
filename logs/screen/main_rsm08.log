@@ -1,0 +1,21 @@
+  rsm08 seed=900 oof=0.68133 (682s)
+  rsm08 seed=901 oof=0.68815 (1374s)
+{
+  "config": "rsm08",
+  "view": "main",
+  "folds": 5,
+  "seeds": [
+    900,
+    901
+  ],
+  "params": {
+    "rsm": "0.8"
+  },
+  "single_mean": 0.6847431321994875,
+  "per_seed": [
+    0.6813340860726116,
+    0.6881521783263632
+  ],
+  "bagged_oof_auc": 0.6882276861168765,
+  "elapsed_sec": 1373.8
+}

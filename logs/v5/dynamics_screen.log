@@ -1,0 +1,14 @@
+main_ordered 0.6898677352300293 sec 109.2
+main_plain 0.6898677352300293 sec 108.9
+main_bern 0.6883445925773776 sec 106.1
+main_leaf 0.6796974453836105 sec 64.3
+alt_ordered 0.6870961639355486 sec 94.1
+alt_plain 0.6870961639355486 sec 94.3
+max(main,alt) 0.6933256437294151
+main_ordered: corr_m=1.0000 corr_a=0.9350 max3=0.69333 delta=+0.00000
+main_plain: corr_m=1.0000 corr_a=0.9350 max3=0.69333 delta=+0.00000
+main_bern: corr_m=0.9860 corr_a=0.9351 max3=0.69307 delta=-0.00025
+main_leaf: corr_m=0.9600 corr_a=0.9238 max3=0.69156 delta=-0.00176
+alt_ordered: corr_m=0.9350 corr_a=1.0000 max3=0.69333 delta=+0.00000
+alt_plain: corr_m=0.9350 corr_a=1.0000 max3=0.69333 delta=+0.00000
+DONE

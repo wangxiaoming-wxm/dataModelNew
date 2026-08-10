@@ -1,0 +1,16 @@
+{
+  "submission_aligned": true,
+  "spearman_v5_v2": 0.9959055814904986,
+  "shuffle_fused_mean": 0.49898370146304494,
+  "shuffle_fused_std": 0.008116780218016458,
+  "gap_oof_auc": 0.6963640423890536,
+  "admit": true,
+  "supervisor_nested20_mean": 0.7007565470105781,
+  "delta_vs_v2_pipeline": 0.0021937973746076755,
+  "notes": [
+    "Gap trained with fixed 1000 trees, no early stopping, 5-fold.",
+    "Gap bagging = mean of raw OOF probabilities (8 seeds); fusion uses ranks.",
+    "Nested rule selection among pre-registered RULES only.",
+    "Shuffle check on frozen fused OOF ~0.5 (no label leakage in fusion formula)."
+  ]
+}

@@ -240,7 +240,7 @@ def main() -> int:
     if len(strong) >= 2 and len(alt_d5) == 1:
         rules["views_max_alt_d5"] = {"__max__": 1.0, **{k: 1.0 for k in strong + alt_d5}}
     # optional extras if present and strong enough later
-    for extra in ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11"):
+    for extra in ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11", "cat_w12"):
         if extra in ranks and len(strong) >= 2:
             rules[f"max_plus_{extra}"] = {"__max__": 1.0, **{k: 1.0 for k in strong + [extra]}}
     if "cat_w8" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
@@ -284,6 +284,12 @@ def main() -> int:
         rules["views_max_10_20_r16_mid"] = {
             "__max__": 1.0,
             **{k: 1.0 for k in strong + strong_f20 + strong_r16 + mid},
+        }
+
+    if "cat_w12" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16_w12"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w12"]},
         }
     if "cat_alt_r16b" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
         rules["views_max_10_20_r16_r16b"] = {

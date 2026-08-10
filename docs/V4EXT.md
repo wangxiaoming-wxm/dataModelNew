@@ -40,3 +40,4 @@ Ordered 固定树筛 alt / w12 / main。
 | RMSE 固定树×main/alt | bag ≈0.690 << cls 0.698 | 拒 |
 
 边际收益已进入噪声带（最近一步嵌套 Δ≈0）。
+| 语义 FE 固定树 | OOF≈0.682 | 拒 |

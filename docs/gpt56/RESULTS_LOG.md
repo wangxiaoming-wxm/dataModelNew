@@ -92,7 +92,11 @@
 
 与 v2 `views_max` 的配对 bootstrap（全量 OOF）：
 
-见 `artifacts/gpt56/v3/compare_views_max_vs_v2.json`。
+| 指标 | 值 |
+|---|---:|
+| ΔAUC | +0.00230 |
+| 90% CI | [+0.00040, +0.00421] |
+| bootstrap 正差比例 | 0.9765 |
 
 提交文件：
 

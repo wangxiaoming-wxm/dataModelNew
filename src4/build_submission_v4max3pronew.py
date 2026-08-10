@@ -44,7 +44,10 @@ PRO_EXTRA = [
     ("plus_strong", ART_PRO / "plus_strong.npz", "plus10"),
     ("noxb10", ART_PRO / "noxb10.npz", "plus10"),
 ]
-NEW_ARM = ("semantic_rmse", ART_NEW / "semantic_rmse.npz", "es5_rmse")
+NEW_ARMS = [
+    ("semantic_rmse", ART_NEW / "semantic_rmse.npz", "es5_rmse"),
+    ("semantic_logloss", ART_NEW / "semantic_logloss.npz", "es5_logloss"),
+]
 
 
 def load_npz(path: Path):
@@ -177,7 +180,7 @@ def pick_winner(rows, max3_nested, pro_nested, min_delta=0.0005):
     """Pick the strongest max-fusion that beats max3 & pro with real test change.
 
     Preference order:
-      1) max recipes containing semantic_rmse, nested >= pro, delta_vs_max3 >= min_delta
+      1) max recipes containing a semantic_* arm, nested >= pro, delta_vs_max3 >= min_delta
       2) same but allow tiny margin over pro
       3) best nested max recipe with semantic that still beats max3
     Prefer higher nested; tie-break by larger |1-spearman| (more real change) then more members diversity.
@@ -185,7 +188,7 @@ def pick_winner(rows, max3_nested, pro_nested, min_delta=0.0005):
     def ok_base(r):
         if r["kind"] != "max":
             return False
-        if "semantic_rmse" not in r["members"]:
+        if not any(str(m).startswith("semantic_") for m in r["members"]):
             return False
         if r["spearman_vs_max3_sub"] >= 0.9995:
             return False
@@ -221,8 +224,10 @@ def build(write: bool = False):
     pro_sub = pd.read_csv(pro_sub_path)["label"].values if pro_sub_path.exists() else None
 
     arms = {}
-    for name, path, tag in MAX3_ARMS + PRO_EXTRA + [NEW_ARM]:
+    for name, path, tag in MAX3_ARMS + PRO_EXTRA + NEW_ARMS:
         if not path.exists():
+            if name.startswith("semantic_") and name != "semantic_rmse":
+                continue  # optional diversity arm
             raise FileNotFoundError(path)
         arms[name] = pack_arm(name, path, tag, y)
         print(f"  [{tag:10s}] {name:16s} oof={arms[name]['oof_auc']:.5f}")
@@ -328,7 +333,9 @@ def check():
     test = pd.read_csv(DATA / "test.csv")
     base_sub = pd.read_csv(SUB / "submission_v4_max3.csv")["label"].values
     arms = {}
-    for name, path, tag in MAX3_ARMS + PRO_EXTRA + [NEW_ARM]:
+    for name, path, tag in MAX3_ARMS + PRO_EXTRA + NEW_ARMS:
+        if not path.exists():
+            continue
         arms[name] = pack_arm(name, path, tag, y)
     max3_oof = fuse("max", [n for n, _, _ in MAX3_ARMS], arms, "oof")
     pro_oof = fuse("max", [n for n, _, _ in MAX3_ARMS + PRO_EXTRA], arms, "oof")

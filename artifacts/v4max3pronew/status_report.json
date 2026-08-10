@@ -1,0 +1,8 @@
+{
+  "admission": "ADMIT",
+  "nested": 0.7055697233215428,
+  "delta_vs_max3": 0.0024965836145658393,
+  "delta_vs_pro": 0.0003493510360416119,
+  "recipe": "max(merger_ord8, v2_cat_alt8, ord_noxb_bag, plus_strong, noxb10, semantic_rmse)",
+  "optimistic_lb_vs_max3": 0.7147165836145658
+}

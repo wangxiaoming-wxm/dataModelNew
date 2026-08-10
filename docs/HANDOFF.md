@@ -2,9 +2,9 @@
 
 写给下一个接手继续开发和训练的人。
 
-> **当前交付是 V3。** 先读 [`docs/V3.md`](V3.md) 与 [`docs/SUPERVISION.md`](SUPERVISION.md)，  
-> 再读本文件（V2 地基）和 [`docs/DATA_STRUCTURE.md`](DATA_STRUCTURE.md)。  
-> 一键重训 V3：`bash run_v3.sh`；复算融合：`PYTHONPATH=src2:src3 python3 src3/fuse2.py --dir artifacts/v3`。
+> **当前交付是 V4。** 先读 [`docs/V4.md`](V4.md) 与 [`docs/V4_SUPERVISION.md`](V4_SUPERVISION.md)，  
+> 再读 [`docs/DATA_STRUCTURE.md`](DATA_STRUCTURE.md) 与本文件（V2 地基仍有效）。  
+> 秒级复现 V4：`bash run_v4.sh`。V3 对照：`bash run_v3.sh` / [`docs/V3.md`](V3.md)。
 
 ---
 
@@ -12,14 +12,15 @@
 
 | 项 | 值 |
 |---|---|
-| **当前提交** | **`submissions/submission_v3.csv`** |
-| **V3 诚实嵌套 AUC（主报）** | **0.70124**（20 block seed 均值；见 `docs/V3.md`） |
+| **当前提交** | **`submissions/submission_v4.csv`** |
+| **V4 诚实嵌套 AUC（主报）** | **0.70303**（20 block seed 均值；见 `docs/V4.md`） |
+| V4 提交规则 | `views_max_10_20_r16_r16b` |
+| V3 提交（对照） | `submissions/submission_v3.csv`，嵌套 **0.70124** |
 | V2 提交（对照，公开榜 0.70878） | `submissions/submission_v2.csv` |
-| V2 嵌套 AUC（管道单 seed） | 0.69856 |
 | V2 监督者嵌套均值 | 0.69824 |
-| 采用的融合规则（V2/V3 相同） | `views_max` = `max(rank(cat_d5), rank(cat_d6), rank(cat_alt))` |
 | 对照：B6 `gap` 视图同协议重跑 | 0.69044 |
 | 对照：B7 旧口径本地分 | 0.702705（**不可比**，含 +0.0025 早停乐观，且口径不同） |
+| 目标 0.707 | **未达成**（诚实性门通过；见 `docs/V4_SUPERVISION.md`） |
 
 所有中间产物都在仓库里，**不需要重跑就能复现融合和提交**：
 

@@ -195,115 +195,14 @@ def main() -> int:
     gates["arm_sanity"] = sane
     detail["arm_oof_auc"] = arm_auc
 
-    # pre-registered minimal rule set for V4 (mirrors V3 views_max family)
-    strong = [k for k in ("cat_d5", "cat_d6", "cat_alt") if k in ranks]
-    strong_f20 = [k for k in ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20") if k in ranks]
-    strong_r16 = [k for k in ("cat_d5_r16", "cat_d6_r16", "cat_alt_r16") if k in ranks]
-    strong_s16 = [k for k in ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16") if k in ranks]
-    sub85 = [k for k in ("cat_d6_sf85", "cat_alt_sf85") if k in ranks]
-    alt_d5 = [k for k in ("cat_alt_d5",) if k in ranks]
-    rules = {}
-    if len(strong) >= 2:
-        rules["views_max"] = {"__max__": 1.0, **{k: 1.0 for k in strong}}
-        rules["views_mean"] = {k: 1 / len(strong) for k in strong}
-    if len(strong_f20) >= 2:
-        rules["views_max_f20"] = {"__max__": 1.0, **{k: 1.0 for k in strong_f20}}
-        rules["views_mean_f20"] = {k: 1 / len(strong_f20) for k in strong_f20}
-    if len(strong) >= 2 and len(strong_f20) >= 2:
-        rules["views_max_10_20"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20},
-        }
-    if len(strong_r16) >= 2:
-        rules["views_max_r16"] = {"__max__": 1.0, **{k: 1.0 for k in strong_r16}}
-    if len(strong) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_r16"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_r16},
-        }
-    if len(strong_s16) >= 2:
-        rules["views_max_s16"] = {"__max__": 1.0, **{k: 1.0 for k in strong_s16}}
-    if len(strong_s16) >= 2 and len(strong_f20) >= 2:
-        rules["views_max_s16_f20"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong_s16 + strong_f20},
-        }
-    if len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16},
-        }
-    if len(sub85) >= 1:
-        rules["sub85_max"] = {"__max__": 1.0, **{k: 1.0 for k in sub85}}
-    if len(strong) >= 2 and len(sub85) >= 1:
-        rules["views_max_sub85"] = {"__max__": 1.0, **{k: 1.0 for k in strong + sub85}}
-    if len(strong) >= 2 and len(alt_d5) == 1:
-        rules["views_max_alt_d5"] = {"__max__": 1.0, **{k: 1.0 for k in strong + alt_d5}}
-    # optional extras if present and strong enough later
-    for extra in ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11", "cat_w12"):
-        if extra in ranks and len(strong) >= 2:
-            rules[f"max_plus_{extra}"] = {"__max__": 1.0, **{k: 1.0 for k in strong + [extra]}}
-    if "cat_w8" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_w8"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w8"]},
-        }
-    if "cat_w9" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_w9"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w9"]},
-        }
-    if "cat_w10" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_w10"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w10"]},
-        }
-    if "cat_w11" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_w11"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w11"]},
-        }
-    rit = [k for k in ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit") if k in ranks]
-    if len(rit) >= 1 and len(strong) >= 2:
-        rules["views_max_rit"] = {"__max__": 1.0, **{k: 1.0 for k in strong + rit}}
-    pair = [k for k in ("cat_d5_pair", "cat_alt_pair") if k in ranks]
-    if len(pair) >= 1 and len(strong) >= 2:
-        rules["views_max_pair"] = {"__max__": 1.0, **{k: 1.0 for k in strong + pair}}
-    xent = [k for k in ("cat_d5_xent", "cat_alt_xent") if k in ranks]
-    if len(xent) >= 1 and len(strong) >= 2:
-        rules["views_max_xent"] = {"__max__": 1.0, **{k: 1.0 for k in strong + xent}}
-    if "cat_alt_r24" in ranks and len(strong) >= 2 and len(strong_f20) >= 2:
-        rules["views_max_10_20_r16_alt_r24"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + ["cat_d5_r16", "cat_d6_r16", "cat_alt_r24"]},
-        }
-    mid = [k for k in ("cat_d6_mid20", "cat_alt_mid20") if k in ranks]
-    if len(mid) >= 1 and len(strong) >= 2:
-        rules["views_max_mid"] = {"__max__": 1.0, **{k: 1.0 for k in strong + mid}}
-    if len(mid) >= 1 and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_mid"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + mid},
-        }
+    # Keep audit rule set identical to fuse4 (skip rules whose arms are absent).
+    from fuse4 import RULES as FUSE_RULES
 
-    if "cat_w12" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_w12"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_w12"]},
-        }
-    if "cat_alt_r16b" in ranks and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_r16b"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + ["cat_alt_r16b"]},
-        }
-    rank = [k for k in ("cat_d5_ranksrc", "cat_alt_ranksrc") if k in ranks]
-    if len(rank) >= 1 and len(strong) >= 2:
-        rules["views_max_rank"] = {"__max__": 1.0, **{k: 1.0 for k in strong + rank}}
-    if len(rank) >= 1 and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
-        rules["views_max_10_20_r16_rank"] = {
-            "__max__": 1.0,
-            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + rank},
-        }
+    rules = {}
+    for name, rule in FUSE_RULES.items():
+        members = [k for k in rule if k != "__max__"]
+        if all(m in ranks for m in members):
+            rules[name] = rule
 
     if not rules:
         gates["nested_selection"] = False

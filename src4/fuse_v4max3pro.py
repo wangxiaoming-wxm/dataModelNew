@@ -41,6 +41,13 @@ ARM_SPECS = {
     "plus10_ord": ("v4max3pro/plus10_ord.npz", "plus10"),
     "alt2fix8": ("v4max3pro/alt2fix8.npz", "honest"),
     "main_ord_es": ("v4max3pro/main_ord_es.npz", "es"),
+    "main10_ord_es": ("v4max3pro/main10_ord_es.npz", "plus10"),
+    "hybrid10": ("v4max3pro/hybrid10.npz", "plus10"),
+    "alt10": ("v4max3pro/alt10.npz", "plus10"),
+    "noxb10": ("v4max3pro/noxb10.npz", "plus10"),
+    "plus_v10_8": ("v4max3pro/plus_v10_8.npz", "plus10"),
+    "plus_strong": ("v4max3pro/plus_strong.npz", "plus10"),
+    "plus10_ord": ("v4max3pro/plus10_ord.npz", "plus10"),
 }
 
 
@@ -179,7 +186,10 @@ def main():
     if best_upgrade and best_upgrade["delta_vs_max3"] >= args.min_delta:
         members = set(best_upgrade["members"])
         recycles_only = members <= set(max3_members) | {"ordered_bag", "b7_closest", "plus_v10"}
-        has_new_train = any(m.startswith(("plus_ord", "plus_plain", "merger_ord_es", "cat_alt_es", "alt2fix", "main_ord")) for m in members)
+        has_new_train = any(
+            m.startswith(("plus_ord", "plus_plain", "plus_strong", "plus10", "plus_v10_", "merger_ord_es", "cat_alt_es", "alt2fix", "main_ord", "main10", "hybrid10", "alt10", "noxb10"))
+            for m in members
+        )
         if 0.97 <= best_upgrade["spearman_vs_max3"] <= 0.9995 and (has_new_train or not recycles_only):
             # still require new trained arms before burning the last submit
             if has_new_train:

@@ -31,12 +31,14 @@ from worlds_v4 import (
     fit_edges_w9,
     fit_edges_w10,
     fit_edges_w11,
+    fit_edges_w12,
     w6_frame,
     w7_frame,
     w8_frame,
     w9_frame,
     w10_frame,
     w11_frame,
+    w12_frame,
 )
 
 WORLDS = {
@@ -51,6 +53,7 @@ WORLDS = {
     "w9": (fit_edges_w9, w9_frame),
     "w10": (fit_edges_w10, w10_frame),
     "w11": (fit_edges_w11, w11_frame),
+    "w12": (fit_edges_w12, w12_frame),
 }
 
 PRESETS = {
@@ -186,7 +189,8 @@ def main() -> int:
     use_ranker = args.rank_group != "none"
     if use_ranker:
         # PairLogit is a ranking loss; classifier API rejects it.
-        params["loss_function"] = "PairLogit"
+        # Cap pairs via loss_function suffix (constructor rejects max_pairs kw).
+        params["loss_function"] = "PairLogit:max_pairs=10000"
         args.loss = "PairLogit"
     else:
         params["loss_function"] = args.loss

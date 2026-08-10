@@ -26,7 +26,7 @@ STRONG_R24 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r24")  # alt extended; d5/d6 
 STRONG_S16 = ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16")
 SUB85 = ("cat_d6_sf85", "cat_alt_sf85")
 ALT_D5 = ("cat_alt_d5",)
-NEW = ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11")
+NEW = ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11", "cat_w12")
 RIT = ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit")
 PAIR = ("cat_d5_pair", "cat_alt_pair")
 XENT = ("cat_d5_xent", "cat_alt_xent")
@@ -164,6 +164,17 @@ RULES: dict[str, dict[str, float]] = {
             + ("cat_w10", "cat_w11")
             + MID
         },
+    },
+
+    # w12 main∪alt union world
+    "w12_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG + ("cat_w12",)}},
+    "views_max_10_20_r16_w12": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ("cat_w12",)},
+    },
+    "views_max_10_20_r16_r16b_w12": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ALT_R16B + ("cat_w12",)},
     },
     # Source-grouped PairLogit ranker arms (LOSS track via CatBoostRanker).
     "rank_max": {"__max__": 1.0, **{k: 1.0 for k in RANK}},

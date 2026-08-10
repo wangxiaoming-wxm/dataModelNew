@@ -841,3 +841,53 @@ def w11_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int =
     num = [c for c in X.columns if c not in cats]
     X[num] = X[num].astype(float).fillna(-999.0)
     return X, cats
+
+
+# ---------------------------------------------------------------------------
+# w12 — union of main + alt encodings in one CatBoost model
+# ---------------------------------------------------------------------------
+# Instead of averaging worlds at the score level only, feed both expression
+# systems to a single model.  Prefix columns so names never collide.  Strength
+# should track the better of main/alt; diversity vs each alone comes from the
+# joint representation.
+
+def fit_edges_w12(df: pd.DataFrame) -> dict:
+    from features import fit_edges, fit_edges_alt
+    return {"main": fit_edges(df), "alt": fit_edges_alt(df)}
+
+
+def build_w12(df: pd.DataFrame, edges: dict) -> tuple[pd.DataFrame, list[str]]:
+    from features import build, build_alt
+    Xm, cm = build(df, edges["main"], "cross2")
+    Xa, ca = build_alt(df, edges["alt"])
+    out = pd.DataFrame(index=df.index)
+    cats: list[str] = []
+    for c in Xm.columns:
+        name = f"m_{c}"
+        out[name] = Xm[c]
+        if c in cm:
+            cats.append(name)
+    for c in Xa.columns:
+        name = f"a_{c}"
+        out[name] = Xa[c]
+        if c in ca:
+            cats.append(name)
+    return out, cats
+
+
+def w12_frame(raw: pd.DataFrame, edges: dict, stream_offset: int, n_views: int = 4):
+    from features import add_noise_view, _derive
+    from jitter import add_jitter_views
+    X, cats = build_w12(raw, edges)
+    # noise view once on the union (uses raw columns)
+    add_noise_view(X, cats, raw)
+    der = _derive(raw, edges["main"]["__scale__"])
+    add_jitter_views(
+        X, cats, raw, der["cond_r"], pd.to_numeric(raw["days"]),
+        n_views=n_views, n_bins=10, stream_offset=800 + stream_offset,
+    )
+    for c in cats:
+        X[c] = X[c].astype(str)
+    num = [c for c in X.columns if c not in cats]
+    X[num] = X[num].astype(float).fillna(-999.0)
+    return X, cats

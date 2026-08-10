@@ -1,11 +1,25 @@
 {
   "arm": "cat_w12_d5",
-  "n_seeds": 4,
-  "bagged_oof_auc": 0.6990330872898918,
-  "parts": [
-    "artifacts/v4_w12_parts/part_w12_d5_s23000_f10.npz/part_w12_d5_logloss_s23000_f10.npz",
-    "artifacts/v4_w12_parts/part_w12_d5_s23001_f10.npz/part_w12_d5_logloss_s23001_f10.npz",
-    "artifacts/v4_w12_parts/part_w12_d5_s23002_f10.npz/part_w12_d5_logloss_s23002_f10.npz",
-    "artifacts/v4_w12_parts/part_w12_d5_s23003_f10.npz/part_w12_d5_logloss_s23003_f10.npz"
+  "n_seeds": 8,
+  "bagged_oof_auc": 0.6998572790803763,
+  "per_seed_auc": [
+    0.6925712375575104,
+    0.6985479715049769,
+    0.6945945477951625,
+    0.6944376110101356,
+    0.6996843948509608,
+    0.6908576212164999,
+    0.6954315771539847,
+    0.6939580432440954
+  ],
+  "seeds": [
+    23004,
+    23005,
+    23006,
+    23007,
+    23000,
+    23001,
+    23002,
+    23003
   ]
 }

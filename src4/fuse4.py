@@ -20,6 +20,7 @@ STRONG = ("cat_d5", "cat_d6", "cat_alt")
 STRONG_F20 = ("cat_d5_f20", "cat_d6_f20", "cat_alt_f20")
 STRONG_R16 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r16")
 ALT_R24 = ("cat_alt_r24",)
+ALT_R16B = ("cat_alt_r16b",)
 STRONG_R24 = ("cat_d5_r16", "cat_d6_r16", "cat_alt_r24")  # alt extended; d5/d6 keep r16
 # Equal-weight pool of the original 8 seeds and the r16 block (16 seeds total).
 STRONG_S16 = ("cat_d5_s16", "cat_d6_s16", "cat_alt_s16")
@@ -136,6 +137,16 @@ RULES: dict[str, dict[str, float]] = {
         "__max__": 1.0,
         **{k: 1.0 for k in STRONG + STRONG_F20 + ("cat_d5_r16", "cat_d6_r16") + ALT_R24},
     },
+
+    # Second alt repeated-seed block kept separate (not averaged into r16).
+    "views_max_10_20_r16_r16b": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + ALT_R16B},
+    },
+    "views_max_r16_r16b": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG_R16 + ALT_R16B},
+    },
     # Mid-ratio upsampling residual focus (label-free central 50% ×2).
     "mid_max": {"__max__": 1.0, **{k: 1.0 for k in MID}},
     "views_max_mid": {"__max__": 1.0, **{k: 1.0 for k in STRONG + MID}},
@@ -153,6 +164,13 @@ RULES: dict[str, dict[str, float]] = {
             + ("cat_w10", "cat_w11")
             + MID
         },
+    },
+    # Source-grouped PairLogit ranker arms (LOSS track via CatBoostRanker).
+    "rank_max": {"__max__": 1.0, **{k: 1.0 for k in RANK}},
+    "views_max_rank": {"__max__": 1.0, **{k: 1.0 for k in STRONG + RANK}},
+    "views_max_10_20_r16_rank": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + RANK},
     },
 }
 

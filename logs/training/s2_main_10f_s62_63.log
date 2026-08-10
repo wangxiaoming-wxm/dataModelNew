@@ -1,0 +1,50 @@
+[seed 20262] frame (21328, 149) cats=113 (1s)
+    cat_d5   oof=0.69526 (511s)
+    cat_d6   oof=0.69472 (450s)
+[seed 20263] frame (21328, 149) cats=113 (1s)
+    cat_d5   oof=0.69142 (509s)
+    cat_d6   oof=0.69269 (461s)
+[final] cat_d5: 0.69600
+[final] cat_d6: 0.69614
+{
+  "experiment_id": "s2_main_10f_s62_63",
+  "git_commit": "289ee8909a5aa856498228ef5edd1f5cfdd92774",
+  "view": "main",
+  "seeds": [
+    20262,
+    20263
+  ],
+  "folds": 10,
+  "stream_base": 10,
+  "save_raw": true,
+  "train_sha256": "494a61073a0438f692914c4868db31df1171e662348e0024e06b120d08d44f28",
+  "test_sha256": "d6ffd26bd4873fa09f6fac361f59170a880e88e331a01d7a6356bd9184ce55ec",
+  "arms": {
+    "cat_d5": {
+      "bagged_oof_auc": 0.6959981468124218,
+      "per_seed_auc": [
+        0.6952600612700317,
+        0.6914214790630206
+      ],
+      "per_seed_rank_auc": [
+        0.6952600612700317,
+        0.6914214790630206
+      ]
+    },
+    "cat_d6": {
+      "bagged_oof_auc": 0.6961386634519007,
+      "per_seed_auc": [
+        0.6947191916272782,
+        0.6926921992963818
+      ],
+      "per_seed_rank_auc": [
+        0.6947191916272782,
+        0.6926921992963818
+      ]
+    }
+  },
+  "oof_corr": {
+    "cat_d5~cat_d6": 0.9908706413542362
+  },
+  "elapsed_sec": 1933.2
+}

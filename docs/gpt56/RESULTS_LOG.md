@@ -69,6 +69,39 @@
 
 即使只有 2 个种子，10 折融合已超过 12 种子 5 折的 v2。下一步扩到 6–8 种子生产版。
 
+## S2 生产候选：10 折 × 4 seeds（20260–20263）
+
+| 臂 | bagged OOF |
+|---|---:|
+| cat_d5 | 0.69723 |
+| cat_d6 | 0.69677 |
+| cat_alt | 0.69631 |
+
+融合（`artifacts/gpt56/v3/fusion_report.json`）：
+
+| 规则 | OOF |
+|---|---:|
+| views_max | **0.70139** |
+| safe 0.75*v3+0.25*v2 | 0.70129 |
+| views_half | 0.69922 |
+| nested OOF | **0.70147** |
+| v2 nested 基线 | 0.69856 |
+| **Δ nested** | **+0.00291** |
+
+嵌套选择：5/5 外层块全部选中 `views_max`。
+
+与 v2 `views_max` 的配对 bootstrap（全量 OOF）：
+
+见 `artifacts/gpt56/v3/compare_views_max_vs_v2.json`。
+
+提交文件：
+
+- 主候选：`submissions/gpt56_s2_10fold.csv`
+- 保守备份：`submissions/gpt56_s2_10fold_safe.csv`
+- verify：全部通过
+
+**结论：** 达到正式晋级门槛（nested Δ≥0.002）。建议优先提交 `gpt56_s2_10fold.csv`。
+
 ## 代码改动
 
 - `src2/run_oof.py`：`--save-raw` 保存逐 seed/fold 概率与 fold id

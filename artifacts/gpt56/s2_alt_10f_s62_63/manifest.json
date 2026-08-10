@@ -1,0 +1,29 @@
+{
+  "experiment_id": "s2_alt_10f_s62_63",
+  "git_commit": "289ee8909a5aa856498228ef5edd1f5cfdd92774",
+  "view": "alt",
+  "seeds": [
+    20262,
+    20263
+  ],
+  "folds": 10,
+  "stream_base": 10,
+  "save_raw": true,
+  "train_sha256": "494a61073a0438f692914c4868db31df1171e662348e0024e06b120d08d44f28",
+  "test_sha256": "d6ffd26bd4873fa09f6fac361f59170a880e88e331a01d7a6356bd9184ce55ec",
+  "arms": {
+    "cat_alt": {
+      "bagged_oof_auc": 0.6949402664959767,
+      "per_seed_auc": [
+        0.6928466481805683,
+        0.6902425623706789
+      ],
+      "per_seed_rank_auc": [
+        0.6928466481805683,
+        0.6902425623706789
+      ]
+    }
+  },
+  "oof_corr": {},
+  "elapsed_sec": 736.6
+}

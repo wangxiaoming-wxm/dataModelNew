@@ -1,0 +1,28 @@
+{
+  "arm_oof_auc": {
+    "cat_alt": 0.6963059499044248,
+    "cat_d5": 0.6972290606323329,
+    "cat_d6": 0.6967682765176393
+  },
+  "rule_full_oof_auc": {
+    "cat_d5_only": 0.6972290606323329,
+    "cat_pair_max": 0.6973852012890909,
+    "views_half": 0.6992233619461832,
+    "views_thirds": 0.6991479785507122,
+    "views_max": 0.7013929856322731,
+    "safe_blend_v2": 0.7012945891540261
+  },
+  "nested_selection_picks": [
+    "views_max",
+    "views_max",
+    "views_max",
+    "views_max",
+    "views_max"
+  ],
+  "nested_oof_auc": 0.7014739916836441,
+  "submitted_rule": "views_max",
+  "v2_views_max_oof": 0.6990960311811597,
+  "delta_vs_v2_nested_proxy": 0.002911242047673679,
+  "submission": "submissions/gpt56_s2_10fold.csv",
+  "safe_submission": "submissions/gpt56_s2_10fold_safe.csv"
+}

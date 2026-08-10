@@ -2,9 +2,8 @@
 
 Branch: `cursor/honest-auc-v4-145a`
 
-Scope: adversarial audit of the current V4 artefacts under `artifacts/v4`.
-No V3 files were edited. The audit uses train labels and OOF arms only; it does
-not read test labels or leaderboard feedback.
+Scope: adversarial audit of current V4 artefacts under `artifacts/v4`.
+No V3 files were edited. Train labels + OOF arms only; no test labels; no LB feedback.
 
 ## Commands run
 
@@ -16,7 +15,7 @@ PYTHONPATH=src2:src3:src4 python3 src4/audit_v4.py \
   --out artifacts/audit_v4/audit.json
 ```
 
-Additional evidence was recomputed into:
+Additional recomputation (fuse4 rule set, Bayes, arm risks):
 
 ```text
 artifacts/audit_v4/evidence_v4.json
@@ -26,133 +25,84 @@ artifacts/audit_v4/evidence_v4.json
 
 | Gate | Result | Evidence |
 |---|---:|---|
-| Data integrity | PASS | `train.csv`, `test.csv`, and `submit_sample.csv` SHA256 match expected hashes. |
-| Protocol scan | PASS | `src4/**/*.py` token scan found no `eval_set`, early stopping, `use_best_model`, `od_wait`, `od_type`, or test-label reads. |
-| Arms present | PASS | Current arms: `cat_alt`, `cat_alt2`, `cat_d5`, `cat_d6`, `cat_w5`, `gap`. |
-| Arm sanity | PASS | Arm OOF AUCs are plausible: 0.69044 to 0.69818. No arm has suspicious near-perfect AUC. |
-| Nested selection | PASS | Pre-registered nested rule selection is active. |
-| Permutation no-signal | PASS | Audit permutation nested mean = 0.5116308568; direct permuted-label `views_max` AUC = 0.4995007281. |
-| Submission format | PASS | `submissions/submission_v4.csv` has aligned ids, 6398 rows, finite labels in [0, 1]. |
-| Target reached (`>= 0.707`) | FAIL | Current honest nested OOF mean = 0.7015141215. |
+| Data integrity | PASS | `train.csv` / `test.csv` / `submit_sample.csv` SHA256 match expected. |
+| Protocol scan | PASS | `src4/**/*.py` token scan: no `eval_set`, `use_best_model`, `od_wait`, `od_type`, `early_stopping_rounds`, or `test["label"]`. |
+| Arms present | PASS | 18 arms including new `*_f20`, `*_r16`, `*_s16`, `*_sf85`, `cat_alt_d5`. |
+| Arm sanity | PASS | Arm OOF AUC in `[0.69044, 0.69926]` — no near-perfect / leak-shaped arm. |
+| Nested selection | PASS | Nested multi-seed selection is active in `fuse4.py` and audit. |
+| Permutation no-signal | PASS | Audit perm nested mean `0.5114961768`; fuse4-rule perm mean `0.5117344182` (both ≪ 0.55). |
+| Submission format | PASS | `submissions/submission_v4.csv`: 6398 rows, id-aligned, finite labels in `[0,1]`. |
+| Target reached (`>= 0.707`) | FAIL | Endorsed honest nested OOF mean = **0.7030017071**. |
 
-## Current headline
+`honesty_passed = true`, `target_reached = false`, overall `passed = false`.
 
-The only honest headline I can endorse right now is:
+## Endorsed headline (exact)
+
+Do **not** cite the raw `audit_v4.py` nested number as the competition headline.
+That script’s rule set **lags** `fuse4.RULES` (missing `views_max_10_20_r16`, `views_max_s16`, `views_max_s16_f20`, `views_max_10_20_alt_d5`, `views_half*`, …), so it always locks onto `views_max_10_r16` and reports a flat `0.7032505768`.
+
+The honest, submission-aligned headline I endorse is the fuse4 20-seed nested mean over the **full usable pre-registered/working rule set**:
 
 ```text
-nested_oof_mean = 0.7015141215
-nested_oof_sd   = 0.0
+nested_oof_mean = 0.7030017070980409
+nested_oof_sd   = 0.0000983027559991
+nested_oof_min  = 0.7028542541910182
+nested_oof_max  = 0.7031766861399642
+best_full_rule  = views_max_10_20_r16
+best_full_oof   = 0.7032789637435225
+optimism        = 0.0002772566454816
+submitted_rule  = views_max_10_20_r16
 honesty_passed  = true
 target_reached  = false
+gap_to_0.707    = 0.0039982929019591
 ```
 
-This is below the required V4 gate by:
+Matches `artifacts/v4/fusion_report_v4.json`.
 
-```text
-0.707 - 0.7015141215 = 0.0054858785
-```
+## New-arm adversarial review
 
-Honesty passes; the target does not. This must not be rebranded as a V4 target
-success.
+| Arm family | Protocol | Selection-bias finding |
+|---|---|---|
+| `cat_*_f20` | PASS — fixed iters, no `eval_set`, label-free FE, 20-fold only | OK if rules pre-registered (`c9a4771`). Mild multiplicity vs 10-fold twins. |
+| `cat_*_r16` | PASS — same trainer, new seed block `s2700x` | `views_max_r16` / `views_max_10_r16` registered in `f926d12` before these artefacts landed → acceptable. |
+| `cat_*_s16` | PASS on fit protocol | **WARN**: `s16` rank ≈ equal mix of base + `r16` (corr ≈ 1.0). Not new signal; doubles rule surface. |
+| `cat_*_sf85` | PASS — fixed `train_frac=0.85`, still no early stop | Weaker alone (`~0.69`); only diversity. |
+| `cat_alt_d5` | PASS — preset `d5`, fixed 1000 iters | Incremental; no leak pattern. |
 
-## Bayes ceiling recomputation
+Hard red lines checked in `src4/run_world.py`, `worlds_v4.py`, `fuse4.py`, `merge_seeds.py`, `audit_v4.py`:
 
-Using the current V4/V3-copied strongest score
-`views_max(rank(cat_d5), rank(cat_d6), rank(cat_alt))`, cross-fitted isotonic
-calibration gives:
+- no early stopping on scored fold
+- no test-label reads
+- FE edges on train+test without labels
+- fusion via nested selection, not full-OOF cherry-pick as headline
+
+Soft concern (not a hard honesty FAIL): working-tree `fuse4.py` adds `views_max_10_20_r16` / `views_max_s16*` / `views_max_10_20_alt_d5` **after** related arms exist. Nested scoring still bills the selection cost (`optimism ≈ 2.8e-4`). I do **not** upgrade this to cheating, but I reject treating full-OOF `0.70328` as the headline.
+
+## Bayes ceiling (best fusion score)
+
+Score: `views_max_10_20_r16` (full OOF `0.7032789637`), cross-fit / in-sample isotonic on that score:
 
 | Quantity | Value |
 |---|---:|
-| Score OOF AUC | 0.7015141215 |
 | Base rate | 0.1002009377 |
-| Cross-fitted calibrated p(x) mean | 0.1002139484 |
-| Implied Bayes AUC of this risk function | 0.7056591125 |
-| Same-score redrawn-label AUC mean | 0.7049130208 |
-| Same-score redrawn-label AUC sd | 0.0070744398 |
-| Redrawn-label 95% interval | [0.6906487736, 0.7190831892] |
+| CV-calibrated p mean | 0.1002366413 |
+| Theoretical Bayes AUC from CV p | 0.7070541231 |
+| Theoretical Bayes AUC from in-sample p | 0.7062524265 |
+| Redrawn-label AUC using S (mean) | 0.7065229119 |
+| Redrawn-label AUC using S (sd) | 0.0069367966 |
+| Redrawn-label 95% interval | [0.6933251270, 0.7199931252] |
 
-Interpretation: the calibrated current risk function is already close to the
-0.707 gate but estimates a ceiling below it by about 0.00134. This is evidence
-against the target, not a mathematical proof that no new label-free signal can
-exist.
-
-## Neighbourhood concordance
-
-Nearest-neighbour concordance was recomputed in the established signal space
-(`days`, source-normalised condition, log-ratio, age, region, source, grade, and
-binary flags).
-
-| 1-NN distance percentile | n | P(same label) | Chance | Lift |
-|---|---:|---:|---:|---:|
-| 0-5 | 748 | 0.8302139037 | 0.7644628099 | +0.0657510938 |
-| 5-25 | 2987 | 0.8101774356 | 0.7885151021 | +0.0216623335 |
-| 25-50 | 3733 | 0.8432895794 | 0.8348701631 | +0.0084194163 |
-| 50-75 | 3733 | 0.8207875703 | 0.8184161089 | +0.0023714614 |
-| 75-100 | 3733 | 0.8435574605 | 0.8432526229 | +0.0003048376 |
-
-The in-sample optimistic 10-NN label-rate AUC is only 0.6019177038. If labels
-were close to deterministic functions of the available signal space, the nearest
-rows would share labels far more strongly than this.
-
-## Selection optimism
-
-I recomputed selection over the usable pre-registered V4/fuse4 rule set:
-
-| Rule | Full OOF AUC |
-|---|---:|
-| `views_max` | 0.7015141215 |
-| `four_max_w5` | 0.7004805480 |
-| `views_half` | 0.7002505416 |
-| `views_mean` | 0.6999299507 |
-| `cat_pair_max` | 0.6979007939 |
-| `cat_d5_only` | 0.6977134052 |
-
-Nested 20-seed mean over the same rules is 0.7015141215, with `views_max`
-picked in all 100 inner selections. Measured optimism
-(`best_full_oof_auc - nested_20seed_mean`) is 0.0 for the current artefacts.
-
-## Protocol scan notes
-
-Manual and token-based scans of `src4/**/*.py` found no hard-rule violation:
-
-- `src4/run_world.py` fits CatBoost with fixed iterations and no `eval_set`.
-- `src4/worlds_v4.py` constructs label-free edges/features; train+test use is
-  unsupervised and does not include test labels.
-- `src4/fuse4.py` performs nested selection over explicit rule dictionaries.
-- `src4/audit_v4.py` now serializes NumPy scalar booleans/floats/ints in all
-  report paths and records submission-gate diagnostics.
-
-Negative-control thought experiment, not implanted in live code: a line like
-`m.fit(..., eval_set=[...], use_best_model=True)` or
-`test["label"]` would be detected by the current token scan. No such violating
-code is present.
+Interpretation: **0.707 is barely at the edge of the current risk-function ceiling**, not comfortably below it. Hitting nested ≥ 0.707 under honesty is still *possible* only with **new label-free signal** (encoding / loss / world), not by more seed-bagging of the same CatBoost family (mean off-diagonal rank corr among strong/diversity arms ≈ 0.973).
 
 ## Risks and veto
 
-1. Current V4 artefacts are essentially the V3-copied arm family; no new strong
-   W6/W7 arm is present in `artifacts/v4`.
-2. The 0.707 target is above the calibrated-risk Bayes estimate from the current
-   strongest score.
-3. Neighbourhood concordance shows substantial irreducible label noise.
-4. The current selection rule is clean, but it also has no hidden gain: `views_max`
-   wins every nested split and remains at 0.7015141215.
+1. Endorsed nested `0.7030017071` is **+0.0015** over prior `views_max` `0.7015141215`, still **−0.0040** vs target.
+2. `audit_v4.py` rule lag can overstate nested by ~`2.5e-4` if someone quotes it as the headline — veto that quote.
+3. `s16` arms are remixes; further `max` pools of correlated clones are diminishing and selection-noisy.
+4. No w6/w7 graduating into `artifacts/v4` as strong orthogonal arms yet.
+5. Neighbourhood / noise picture from prior audits still applies: labels are far from deterministic in the available signal space.
 
-Verdict: honesty PASS, target FAIL. I veto any claim that the current V4 push has
-reached the required honest nested OOF >= 0.707.
+**Verdict:** honesty **PASS**, target **FAIL**.
+I veto any claim that V4 has reached honest nested OOF ≥ 0.707.
 
-## Monitoring poll
-
-After the audit, I polled `artifacts/v4/`, `artifacts/v4_probe/`, and `logs/v4/`.
-No new final `artifacts/v4/arm_*.npz` or replacement submission appeared. The
-available fast probe summaries were:
-
-| Probe | OOF AUC |
-|---|---:|
-| `main_fast_logloss_s22000_f5` | 0.6889156156 |
-| `alt_fast_logloss_s22000_f5` | 0.6897393098 |
-| `w6_fast_logloss_s22000_f5` | 0.6792893301 |
-| `w7_fast_logloss_s22000_f5` | 0.6823615891 |
-
-These probe outputs are screening evidence only, not headline arms. They do not
-support changing the target verdict.
-
+**Work-agent continue?** **YES** — continue is allowed under honesty. Required direction: new label-free signal / orthogonal world, then keep nested multi-seed as the only headline. Do not claim target success on full-OOF or on the stale audit nested number. Sync `audit_v4.py` rules to `fuse4.RULES` before the next audit cycle.

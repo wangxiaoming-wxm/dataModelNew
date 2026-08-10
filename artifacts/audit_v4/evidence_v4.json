@@ -1,174 +1,78 @@
 {
-  "inputs": {
-    "arms": [
-      "cat_alt",
-      "cat_alt2",
-      "cat_d5",
-      "cat_d6",
-      "cat_w5",
-      "gap"
-    ],
-    "strong_views_max_members": [
-      "cat_d5",
-      "cat_d6",
-      "cat_alt"
-    ],
-    "signal_columns": [
-      "days",
-      "cond_r",
-      "log_ratio",
-      "age_range",
-      "region",
-      "source",
-      "grade",
-      "t1",
-      "t2",
-      "r1",
-      "r2",
-      "c1",
-      "c2",
-      "w1",
-      "w2"
-    ],
-    "used_test_labels": false,
-    "submission_stats": {
-      "rows": 6398,
-      "label_min": 0.0004688232536333,
-      "label_max": 0.9998437255821222,
-      "label_mean": 0.5319902990664424
-    }
+  "timestamp_note": "supervisor recomputation 2026-08-10",
+  "honesty_gates_from_audit_v4": {
+    "data_integrity": true,
+    "protocol_scan": true,
+    "arms_present": true,
+    "arm_sanity": true,
+    "nested_selection": true,
+    "permutation_no_signal": true,
+    "submission": true,
+    "target_reached": false
   },
-  "bayes_ceiling": {
-    "score": "views_max(rank(cat_d5), rank(cat_d6), rank(cat_alt))",
-    "score_oof_auc": 0.7015141215242033,
-    "crossfit_isotonic_folds": 10,
-    "p_mean": 0.10021394836060508,
-    "base_rate": 0.10020093770931011,
-    "p_min": 1e-06,
-    "p_max": 0.999999,
-    "p_percentiles": {
-      "0": 1e-06,
-      "1": 0.028625954198473285,
-      "5": 0.031390134529147976,
-      "25": 0.04456521739130435,
-      "50": 0.08333333333333333,
-      "75": 0.13976377952755906,
-      "95": 0.2111913357400722,
-      "99": 0.3404255319148936,
-      "100": 0.999999
-    },
-    "implied_bayes_auc": 0.7056591125111092,
-    "same_score_redrawn_label_auc": {
-      "mean": 0.7049130208086402,
-      "sd": 0.007074439772845731,
-      "p2.5": 0.6906487736436603,
-      "p97.5": 0.7190831891574294
-    }
-  },
-  "neighbourhood_concordance": {
-    "rows": [
-      {
-        "dist_pct": "0-5",
-        "n": 748,
-        "positive_rate": 0.13636363636363635,
-        "p_same_label": 0.8302139037433155,
-        "chance": 0.7644628099173554,
-        "lift": 0.06575109382596012
-      },
-      {
-        "dist_pct": "5-25",
-        "n": 2987,
-        "positive_rate": 0.12018747907599599,
-        "p_same_label": 0.8101774355540676,
-        "chance": 0.7885151021012939,
-        "lift": 0.021662333452773685
-      },
-      {
-        "dist_pct": "25-50",
-        "n": 3733,
-        "positive_rate": 0.09081167961425127,
-        "p_same_label": 0.8432895794267345,
-        "chance": 0.8348701630802202,
-        "lift": 0.00841941634651433
-      },
-      {
-        "dist_pct": "50-75",
-        "n": 3733,
-        "positive_rate": 0.1009911599249933,
-        "p_same_label": 0.8207875703187785,
-        "chance": 0.8184161089160045,
-        "lift": 0.002371461402774
-      },
-      {
-        "dist_pct": "75-100",
-        "n": 3733,
-        "positive_rate": 0.08572193945888025,
-        "p_same_label": 0.8435574604875435,
-        "chance": 0.8432526228914232,
-        "lift": 0.000304837596120322
-      }
-    ],
-    "ten_nn_label_rate_auc_in_sample_optimistic": 0.6019177038227692
-  },
-  "selection_optimism": {
-    "candidate_rules": {
-      "views_max": {
-        "__max__": 1.0,
-        "cat_d5": 1.0,
-        "cat_d6": 1.0,
-        "cat_alt": 1.0
-      },
-      "views_mean": {
-        "cat_d5": 0.3333333333333333,
-        "cat_d6": 0.3333333333333333,
-        "cat_alt": 0.3333333333333333
-      },
-      "views_half": {
-        "cat_d5": 0.25,
-        "cat_d6": 0.25,
-        "cat_alt": 0.5
-      },
-      "cat_pair_max": {
-        "__max__": 1.0,
-        "cat_d5": 1.0,
-        "cat_d6": 1.0
-      },
-      "cat_d5_only": {
-        "cat_d5": 1.0
-      },
-      "four_max_w5": {
-        "__max__": 1.0,
-        "cat_d5": 1.0,
-        "cat_d6": 1.0,
-        "cat_alt": 1.0,
-        "cat_w5": 1.0
-      }
-    },
-    "full_oof_auc": {
-      "views_max": 0.7015141215242033,
-      "four_max_w5": 0.7004805479989714,
-      "views_half": 0.700250541566255,
-      "views_mean": 0.6999299506639312,
-      "cat_pair_max": 0.6979007938593035,
-      "cat_d5_only": 0.6977134051679871
-    },
-    "best_full_oof_rule": "views_max",
-    "best_full_oof_auc": 0.7015141215242033,
-    "nested_20seed_mean": 0.7015141215242033,
-    "nested_20seed_sd": 0.0,
-    "nested_20seed_min": 0.7015141215242033,
-    "nested_20seed_max": 0.7015141215242033,
+  "endorsed_nested": {
+    "source": "fuse4.py RULES over current artifacts/v4 (20 seeds 1000..1019)",
+    "nested_oof_mean": 0.7030017070980409,
+    "nested_oof_sd": 9.830275599910356e-05,
+    "nested_oof_min": 0.7028542541910182,
+    "nested_oof_max": 0.7031766861399642,
     "pick_counts": {
-      "views_max": 100
+      "views_max_10_20_r16": 56,
+      "views_max_10_r16": 44
     },
-    "full_minus_nested_mean": 0.0
+    "best_full_rule": "views_max_10_20_r16",
+    "best_full_oof_auc": 0.7032789637435225,
+    "optimism_best_minus_nested": 0.0002772566454816161
   },
-  "negative_controls": {
-    "permuted_label_auc_for_views_max_score": 0.49950072805930207
+  "audit_script_nested_note": {
+    "audit_nested_oof_mean": 0.7032505767949309,
+    "reason_differs": "audit_v4.py rule set lags fuse4 (missing views_max_10_20_r16, s16*, views_max_10_20_alt_d5, views_half*). Audit always picks views_max_10_r16; endorse fuse4 nested instead."
   },
-  "pairwise_arm_rank_correlation": {
-    "cat_alt__cat_d5": 0.9550255464909714,
-    "cat_alt__cat_d6": 0.9560929752968734,
-    "cat_d5__cat_d6": 0.9972903054178125
+  "bayes_ceiling_best_fusion": {
+    "score_oof_auc": 0.7032789637435225,
+    "cv_isotonic_auc_vs_observed_y": 0.6972417738056285,
+    "in_sample_isotonic_auc_vs_observed_y": 0.7062834274356946,
+    "theoretical_bayes_auc_from_cv_p": 0.7070541231336556,
+    "theoretical_bayes_auc_from_insample_p": 0.706252426523386,
+    "redrawn_label_auc_using_S_mean": 0.7065229118534972,
+    "redrawn_label_auc_using_S_sd": 0.006936796615624065,
+    "redrawn_label_auc_using_S_p025": 0.693325126995224,
+    "redrawn_label_auc_using_S_p975": 0.7199931251862803,
+    "redrawn_label_auc_using_p_mean": 0.707051508094129,
+    "p_mean_cv": 0.10023664131345388,
+    "base_rate": 0.10020093770931011
+  },
+  "bayes_ceiling_views_max_baseline": {
+    "score_oof_auc": 0.7015141215242033,
+    "cv_isotonic_auc_vs_observed_y": 0.6952231657005652,
+    "in_sample_isotonic_auc_vs_observed_y": 0.7049237398682726,
+    "theoretical_bayes_auc_from_cv_p": 0.705811346772738,
+    "theoretical_bayes_auc_from_insample_p": 0.7048926496163661,
+    "redrawn_label_auc_using_S_mean": 0.7052631716449799,
+    "redrawn_label_auc_using_S_sd": 0.0069310352628199285,
+    "redrawn_label_auc_using_S_p025": 0.6924406886741439,
+    "redrawn_label_auc_using_S_p975": 0.7189837102376668,
+    "redrawn_label_auc_using_p_mean": 0.7058292158492957,
+    "p_mean_cv": 0.10025172278721502,
+    "base_rate": 0.10020093770931011
+  },
+  "arm_risks": {
+    "s16_is_deterministic_mix_of_base_and_r16": true,
+    "s16_corr_with_equal_mix": 1.0,
+    "strong_family_mean_offdiag_rank_corr": 0.9732959942702867,
+    "new_arms_are_same_encoding_family_diversity": true,
+    "uncommitted_posthoc_rules_in_working_fuse4": [
+      "views_max_s16",
+      "views_max_10_20_r16",
+      "views_max_s16_f20",
+      "views_max_10_20_alt_d5"
+    ],
+    "hard_protocol_violations": []
+  },
+  "target": 0.707,
+  "gap_to_target": 0.003998292901959077,
+  "plausible_under_honesty": {
+    "verdict": "barely_plausible_but_not_supported_by_current_score_ceiling",
+    "reason": "in-sample isotonic Bayes of best score ~0.7063; redrawn-label mean ~0.7066; CV theoretical Bayes ~0.702. 0.707 sits above current risk-function ceiling; needs new label-free signal, not more seed averaging."
   }
 }

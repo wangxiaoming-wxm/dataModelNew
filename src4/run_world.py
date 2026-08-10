@@ -90,6 +90,28 @@ def stratified_subsample(idx: np.ndarray, y: np.ndarray, frac: float, seed: int)
     return out
 
 
+def ratio_mid_focus_upsample(
+    idx: np.ndarray,
+    ratio: np.ndarray,
+    lo: float,
+    hi: float,
+    factor: float,
+    seed: int,
+) -> np.ndarray:
+    """Repeat mid-ratio training rows. Cuts and membership are label-free."""
+    if factor <= 1.0:
+        return idx
+    rng = np.random.default_rng(seed)
+    mid = idx[(ratio[idx] >= lo) & (ratio[idx] <= hi)]
+    if len(mid) == 0:
+        return idx
+    n_extra = int(round(len(mid) * (factor - 1.0)))
+    extra = rng.choice(mid, size=n_extra, replace=True)
+    out = np.concatenate([idx, extra])
+    rng.shuffle(out)
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--world", required=True, choices=sorted(WORLDS))
@@ -111,6 +133,13 @@ def main() -> int:
         help="Per-fold fixed iteration draw from [LO, HI] using seed+fold only "
              "(no eval_set / early stop). Replaces preset iterations.",
     )
+    ap.add_argument(
+        "--ratio-mid-focus",
+        type=float,
+        default=1.0,
+        help="Label-free upsample factor for training rows whose source-median "
+             "ratio sits in the global central 50%% (edges from train+test).",
+    )
     ap.add_argument("--out", type=Path, default=Path("artifacts/v4_probe"))
     args = ap.parse_args()
 
@@ -118,6 +147,13 @@ def main() -> int:
     test = pd.read_csv("data/test.csv")
     y = train["label"].to_numpy()
     raw = pd.concat([train.drop(columns=["label"]), test], ignore_index=True)
+
+    # label-free ratio for optional mid-band upsampling
+    med = raw.groupby("source")["condition"].transform("median")
+    cond_r = (pd.to_numeric(raw["condition"]) / med.replace(0, np.nan)).fillna(1.0)
+    ratio_all = (pd.to_numeric(raw["days"]) / cond_r.clip(lower=1e-9)).to_numpy(dtype=float)
+    ratio_tr = ratio_all[: len(train)]
+    q25, q75 = np.quantile(ratio_all, [0.25, 0.75])
 
     fit_e, make = WORLDS[args.world]
     offset = args.stream_offset if args.stream_offset is not None else (args.seed % 97) + 1
@@ -149,6 +185,10 @@ def main() -> int:
             fold_params["iterations"] = int(rng.integers(lo, hi + 1))
             fold_iters.append(fold_params["iterations"])
         fit_idx = stratified_subsample(ti, y, args.train_frac, seed=args.seed * 1000 + f)
+        fit_idx = ratio_mid_focus_upsample(
+            fit_idx, ratio_tr, float(q25), float(q75),
+            factor=float(args.ratio_mid_focus), seed=args.seed * 1000 + f + 17,
+        )
         m = CatBoostClassifier(**fold_params, random_seed=args.seed + f)
         m.fit(Xtr.iloc[fit_idx], y[fit_idx], cat_features=cats, verbose=False)
         oof[vi] = m.predict_proba(Xtr.iloc[vi])[:, 1]
@@ -160,7 +200,10 @@ def main() -> int:
     rit_tag = ""
     if args.iter_jitter is not None:
         rit_tag = f"_rit{int(args.iter_jitter[0])}_{int(args.iter_jitter[1])}"
-    tag = f"{args.world}_{args.preset}_{loss_tag}{frac_tag}{rit_tag}_s{args.seed}_f{args.folds}"
+    mid_tag = ""
+    if float(args.ratio_mid_focus) > 1.0:
+        mid_tag = f"_mid{int(round(float(args.ratio_mid_focus) * 10)):02d}"
+    tag = f"{args.world}_{args.preset}_{loss_tag}{frac_tag}{rit_tag}{mid_tag}_s{args.seed}_f{args.folds}"
     args.out.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         args.out / f"part_{tag}.npz",
@@ -176,6 +219,8 @@ def main() -> int:
         "loss": args.loss,
         "train_frac": args.train_frac,
         "iter_jitter": list(args.iter_jitter) if args.iter_jitter is not None else None,
+        "ratio_mid_focus": float(args.ratio_mid_focus),
+        "ratio_mid_bounds": [float(q25), float(q75)],
         "fold_iterations": fold_iters,
         "stream_offset": offset,
         "oof_auc": auc,

@@ -27,6 +27,7 @@ NEW = ("cat_w6", "cat_w7", "cat_w5", "cat_w8", "cat_w9", "cat_w10", "cat_w11")
 RIT = ("cat_d5_rit", "cat_d6_rit", "cat_alt_rit")
 PAIR = ("cat_d5_pair", "cat_alt_pair")
 XENT = ("cat_d5_xent", "cat_alt_xent")
+MID = ("cat_d6_mid20", "cat_alt_mid20")
 
 RULES: dict[str, dict[str, float]] = {
     "views_max": {"__max__": 1.0, **{k: 1.0 for k in STRONG}},
@@ -120,6 +121,24 @@ RULES: dict[str, dict[str, float]] = {
     "views_max_10_20_r16_xent": {
         "__max__": 1.0,
         **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + XENT},
+    },
+    # Mid-ratio upsampling residual focus (label-free central 50% ×2).
+    "mid_max": {"__max__": 1.0, **{k: 1.0 for k in MID}},
+    "views_max_mid": {"__max__": 1.0, **{k: 1.0 for k in STRONG + MID}},
+    "views_max_10_20_r16_mid": {
+        "__max__": 1.0,
+        **{k: 1.0 for k in STRONG + STRONG_F20 + STRONG_R16 + MID},
+    },
+    "views_max_10_20_r16_w1011_mid": {
+        "__max__": 1.0,
+        **{
+            k: 1.0
+            for k in STRONG
+            + STRONG_F20
+            + STRONG_R16
+            + ("cat_w10", "cat_w11")
+            + MID
+        },
     },
 }
 

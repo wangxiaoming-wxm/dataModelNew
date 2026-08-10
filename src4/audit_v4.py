@@ -272,6 +272,14 @@ def main() -> int:
     xent = [k for k in ("cat_d5_xent", "cat_alt_xent") if k in ranks]
     if len(xent) >= 1 and len(strong) >= 2:
         rules["views_max_xent"] = {"__max__": 1.0, **{k: 1.0 for k in strong + xent}}
+    mid = [k for k in ("cat_d6_mid20", "cat_alt_mid20") if k in ranks]
+    if len(mid) >= 1 and len(strong) >= 2:
+        rules["views_max_mid"] = {"__max__": 1.0, **{k: 1.0 for k in strong + mid}}
+    if len(mid) >= 1 and len(strong) >= 2 and len(strong_f20) >= 2 and len(strong_r16) >= 2:
+        rules["views_max_10_20_r16_mid"] = {
+            "__max__": 1.0,
+            **{k: 1.0 for k in strong + strong_f20 + strong_r16 + mid},
+        }
 
     if not rules:
         gates["nested_selection"] = False

@@ -163,6 +163,8 @@ def main():
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--seed", type=int, default=None, help="train a single seed part")
     ap.add_argument("--threads", type=int, default=4)
+    ap.add_argument("--bags", type=int, default=None, help="override bagging count (default 10)")
+    ap.add_argument("--tag", type=str, default="semantic_rmse", help="artifact name stem")
     ap.add_argument("--merge-only", action="store_true", help="merge part_*.npz into semantic_rmse.npz")
     args = ap.parse_args()
 
@@ -170,11 +172,14 @@ def main():
     ART.mkdir(parents=True, exist_ok=True)
     log = logging.getLogger("semantic_rmse")
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    if args.bags is not None:
+        BAG_SEEDS = tuple(range(int(args.bags)))
 
+    tag = args.tag
     if args.merge_only:
-        parts = sorted(ART.glob("part_semantic_rmse_s*.npz"))
+        parts = sorted(ART.glob(f"part_{tag}_s*.npz"))
         if not parts:
-            raise SystemExit("no part_semantic_rmse_s*.npz found")
+            raise SystemExit(f"no part_{tag}_s*.npz found")
         oofs, tes, seeds = [], [], []
         for p in parts:
             d = np.load(p)
@@ -185,7 +190,7 @@ def main():
         te = np.mean(np.vstack(tes), axis=0)
         y = pd.read_csv(DATA / "train.csv")["label"].astype(int).values
         auc = float(roc_auc_score(y, oof))
-        out = ART / "semantic_rmse.npz"
+        out = ART / f"{tag}.npz"
         np.savez_compressed(
             out,
             oof=oof,
@@ -195,15 +200,15 @@ def main():
             pool=np.array([auc]),
         )
         meta = {
-            "arm": "semantic_rmse",
-            "protocol": "es5_rmse_bag10",
+            "arm": tag,
+            "protocol": f"es5_rmse_bag{len(BAG_SEEDS)}",
             "n_parts": len(parts),
             "seeds": seeds,
             "pooled_oof_auc": auc,
             "per_seed_auc": [float(roc_auc_score(y, o)) for o in oofs],
             "source": "715.zip explore_d_online faithful port",
         }
-        (ART / "semantic_rmse.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+        (ART / f"{tag}.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
         print(f"merged {len(parts)} parts -> {out} pooled_oof={auc:.5f}", flush=True)
         return 0
 
@@ -226,12 +231,13 @@ def main():
         oof_map[s], te_map[s] = o, t
         a = float(roc_auc_score(y, o))
         aucs.append(a)
-        print(f"[semantic_rmse] seed={s} OOF={a:.5f}", flush=True)
+        print(f"[{tag}] seed={s} OOF={a:.5f}", flush=True)
         if not args.smoke:
-            part = ART / f"part_semantic_rmse_s{s}.npz"
+            part = ART / f"part_{tag}_s{s}.npz"
             np.savez_compressed(part, oof=o, test=t, seed=s, y=y)
-            (ART / f"part_semantic_rmse_s{s}.json").write_text(
-                json.dumps({"seed": s, "oof_auc": a}, indent=2), encoding="utf-8"
+            (ART / f"part_{tag}_s{s}.json").write_text(
+                json.dumps({"seed": s, "oof_auc": a, "bags": len(BAG_SEEDS)}, indent=2),
+                encoding="utf-8",
             )
             print(f"  wrote {part}", flush=True)
 
@@ -241,13 +247,13 @@ def main():
     print(f">>> pooled OOF={pa:.5f}  mean±std={np.mean(aucs):.5f}±{np.std(aucs):.5f}", flush=True)
 
     if args.smoke:
-        smoke_path = ART / "semantic_rmse_smoke.npz"
+        smoke_path = ART / f"{tag}_smoke.npz"
         np.savez_compressed(smoke_path, oof=pooled, test_pred=te, y=y)
         print(f"smoke artifact -> {smoke_path}", flush=True)
         return 0
 
     if args.seed is None:
-        out = ART / "semantic_rmse.npz"
+        out = ART / f"{tag}.npz"
         np.savez_compressed(
             out,
             oof=pooled,
@@ -257,8 +263,8 @@ def main():
             pool=np.array([pa]),
         )
         meta = {
-            "arm": "semantic_rmse",
-            "protocol": "es5_rmse_bag10",
+            "arm": tag,
+            "protocol": f"es5_rmse_bag{len(BAG_SEEDS)}",
             "seeds": seeds,
             "n_splits": N_SPLITS,
             "bagging": len(BAG_SEEDS),
@@ -275,7 +281,7 @@ def main():
             "per_seed_auc": aucs,
             "source": "715.zip explore_d_online faithful port",
         }
-        (ART / "semantic_rmse.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+        (ART / f"{tag}.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
         print(f"wrote {out}", flush=True)
     return 0
 

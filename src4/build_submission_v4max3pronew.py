@@ -102,40 +102,59 @@ def fuse(kind: str, members: list[str], arms: dict, which: str):
 
 
 def evaluate_candidates(y, arms, max3_nested, pro_nested, base_sub):
+    """Enumerate strong max/rmean recipes that keep max3 core and add semantic."""
+    from itertools import combinations
+
+    max3 = ["merger_ord8", "v2_cat_alt8", "ord_noxb_bag"]
+    extras = [n for n in arms if n not in max3]
     catalogs = {
-        "max3+sem": ["merger_ord8", "v2_cat_alt8", "ord_noxb_bag", "semantic_rmse"],
-        "pro+sem": [
-            "merger_ord8",
-            "v2_cat_alt8",
-            "ord_noxb_bag",
-            "plus_strong",
-            "noxb10",
-            "semantic_rmse",
-        ],
-        "max3+plus+sem": [
-            "merger_ord8",
-            "v2_cat_alt8",
-            "ord_noxb_bag",
-            "plus_strong",
-            "semantic_rmse",
-        ],
+        "max3": max3,
+        "pro": max3 + ["plus_strong", "noxb10"],
         "sem_only": ["semantic_rmse"],
-        "max3": ["merger_ord8", "v2_cat_alt8", "ord_noxb_bag"],
-        "pro": ["merger_ord8", "v2_cat_alt8", "ord_noxb_bag", "plus_strong", "noxb10"],
     }
+    # All supersets of max3 that include semantic_rmse (and optional extras)
+    for r in range(0, len(extras) + 1):
+        for extra in combinations(extras, r):
+            members = max3 + list(extra)
+            if "semantic_rmse" not in members and r > 0:
+                # still keep baselines without semantic for reference only when r covers known
+                pass
+            label = "+".join(members)
+            catalogs[label] = members
+    # Explicit short labels for the main report
+    catalogs.update(
+        {
+            "max3+sem": max3 + ["semantic_rmse"],
+            "pro+sem": max3 + ["plus_strong", "noxb10", "semantic_rmse"],
+            "max3+plus+sem": max3 + ["plus_strong", "semantic_rmse"],
+            "max3+noxb+sem": max3 + ["noxb10", "semantic_rmse"],
+            "plus+sem": ["plus_strong", "semantic_rmse"],
+            "honest2+sem": ["merger_ord8", "v2_cat_alt8", "semantic_rmse"],
+        }
+    )
+
     rows = []
+    seen = set()
     for label, members in catalogs.items():
+        key = tuple(sorted(members))
+        if key in seen:
+            continue
+        seen.add(key)
         for kind in ("max", "rmean"):
-            if label == "sem_only" and kind == "rmean":
+            if len(members) == 1 and kind == "rmean":
                 continue
             oof = fuse(kind, members, arms, "oof")
             te = fuse(kind, members, arms, "te")
             nest = nested_auc(y, oof)
             full = float(roc_auc_score(y, oof))
             sp_max3 = float(spearmanr(te, base_sub).correlation)
+            short = label if label in {
+                "max3", "pro", "sem_only", "max3+sem", "pro+sem",
+                "max3+plus+sem", "max3+noxb+sem", "plus+sem", "honest2+sem",
+            } else "combo:" + "+".join(members)
             rows.append(
                 {
-                    "label": f"{kind}:{label}",
+                    "label": f"{kind}:{short}",
                     "kind": kind,
                     "members": members,
                     "nested": nest,
@@ -145,7 +164,7 @@ def evaluate_candidates(y, arms, max3_nested, pro_nested, base_sub):
                     "spearman_vs_max3_sub": sp_max3,
                     "block_deltas_vs_max3": block_deltas(
                         y,
-                        fuse("max", catalogs["max3"], arms, "oof"),
+                        fuse("max", max3, arms, "oof"),
                         oof,
                     ),
                 }
@@ -155,26 +174,41 @@ def evaluate_candidates(y, arms, max3_nested, pro_nested, base_sub):
 
 
 def pick_winner(rows, max3_nested, pro_nested, min_delta=0.0005):
-    """Prefer max fusion that beats both max3 and pro with real test change."""
-    for r in rows:
+    """Pick the strongest max-fusion that beats max3 & pro with real test change.
+
+    Preference order:
+      1) max recipes containing semantic_rmse, nested >= pro, delta_vs_max3 >= min_delta
+      2) same but allow tiny margin over pro
+      3) best nested max recipe with semantic that still beats max3
+    Prefer higher nested; tie-break by larger |1-spearman| (more real change) then more members diversity.
+    """
+    def ok_base(r):
         if r["kind"] != "max":
-            continue
-        if r["label"] in ("max:max3", "max:pro", "max:sem_only"):
-            continue
-        if r["nested"] < max3_nested + min_delta:
-            continue
-        if r["nested"] < pro_nested + 1e-6:
-            continue
+            return False
+        if "semantic_rmse" not in r["members"]:
+            return False
         if r["spearman_vs_max3_sub"] >= 0.9995:
-            continue
-        return r
-    # fallback: best nested among additive max recipes even if barely beats pro
-    for r in rows:
-        if r["kind"] != "max":
-            continue
-        if r["label"] in ("max:max3", "max:pro", "max:sem_only"):
-            continue
-        if r["nested"] > max3_nested and r["spearman_vs_max3_sub"] < 0.9995:
+            return False
+        return True
+
+    cands = [r for r in rows if ok_base(r)]
+    cands.sort(
+        key=lambda r: (
+            r["nested"],
+            r["delta_vs_pro"],
+            abs(1.0 - r["spearman_vs_max3_sub"]),
+            len(r["members"]),
+        ),
+        reverse=True,
+    )
+    for r in cands:
+        if r["nested"] >= pro_nested + 1e-6 and r["nested"] >= max3_nested + min_delta:
+            return r
+    for r in cands:
+        if r["nested"] >= pro_nested - 1e-6 and r["nested"] > max3_nested:
+            return r
+    for r in cands:
+        if r["nested"] > max3_nested:
             return r
     return None
 

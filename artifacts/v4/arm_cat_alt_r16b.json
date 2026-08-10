@@ -1,0 +1,29 @@
+{
+  "arm": "cat_alt_r16b",
+  "world": "alt",
+  "preset": "d6l6",
+  "loss": "logloss",
+  "folds": 10,
+  "n_seeds": 8,
+  "parts": [
+    "part_alt_d6l6_logloss_s28000_f10.npz",
+    "part_alt_d6l6_logloss_s28001_f10.npz",
+    "part_alt_d6l6_logloss_s28002_f10.npz",
+    "part_alt_d6l6_logloss_s28003_f10.npz",
+    "part_alt_d6l6_logloss_s28004_f10.npz",
+    "part_alt_d6l6_logloss_s28005_f10.npz",
+    "part_alt_d6l6_logloss_s28006_f10.npz",
+    "part_alt_d6l6_logloss_s28007_f10.npz"
+  ],
+  "per_seed_auc": [
+    0.6885444207728972,
+    0.6854805708876591,
+    0.6916210087104393,
+    0.690123043614295,
+    0.6917875487927113,
+    0.6914326746168036,
+    0.6878976163123498,
+    0.6941651361100695
+  ],
+  "bagged_oof_auc": 0.6962084988284972
+}

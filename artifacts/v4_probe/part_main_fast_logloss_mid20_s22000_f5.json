@@ -1,0 +1,19 @@
+{
+  "world": "main",
+  "preset": "fast",
+  "seed": 22000,
+  "folds": 5,
+  "loss": "Logloss",
+  "train_frac": 1.0,
+  "iter_jitter": null,
+  "ratio_mid_focus": 2.0,
+  "ratio_mid_bounds": [
+    1957.9605697400198,
+    10174.499154888132
+  ],
+  "rank_group": "none",
+  "fold_iterations": [],
+  "stream_offset": 79,
+  "oof_auc": 0.6766320032418344,
+  "elapsed_sec": 388.8
+}

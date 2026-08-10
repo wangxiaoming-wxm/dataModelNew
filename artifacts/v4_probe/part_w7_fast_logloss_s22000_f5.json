@@ -1,0 +1,10 @@
+{
+  "world": "w7",
+  "preset": "fast",
+  "seed": 22000,
+  "folds": 5,
+  "loss": "Logloss",
+  "stream_offset": 79,
+  "oof_auc": 0.6823615891197926,
+  "elapsed_sec": 187.3
+}

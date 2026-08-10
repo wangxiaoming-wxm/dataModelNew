@@ -1,0 +1,19 @@
+{
+  "world": "alt",
+  "preset": "d6l6",
+  "seed": 28005,
+  "folds": 10,
+  "loss": "Logloss",
+  "train_frac": 1.0,
+  "iter_jitter": null,
+  "ratio_mid_focus": 1.0,
+  "ratio_mid_bounds": [
+    1957.9605697400198,
+    10174.499154888132
+  ],
+  "rank_group": "none",
+  "fold_iterations": [],
+  "stream_offset": 70,
+  "oof_auc": 0.6914326746168036,
+  "elapsed_sec": 1685.6
+}

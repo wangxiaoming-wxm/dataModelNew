@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+catboost_info/
+*.zip
+# ignore root symlinks only (real data lives in data/)
+/train.csv
+/test.csv
+/submit_sample.csv
+artifacts/**/*.log
+artifacts/b6_retrain/
+artifacts/b7_plus_retrain/
+
+# local experiment scratch
+exp/*.npy
+!logs/
+artifacts/tmp_*
+train.csv
+test.csv
+submit_sample.csv
+
+# incomplete / scratch V4 experiment logs (not part of delivery)
+logs/v4/w12/
+logs/v4/f30/
+artifacts/v4_w12_parts/
+artifacts/v4_weak/

@@ -1,0 +1,11 @@
+{
+  "world": "alt",
+  "preset": "d5",
+  "seed": 25001,
+  "folds": 5,
+  "loss": "Logloss",
+  "train_frac": 1.0,
+  "stream_offset": 73,
+  "oof_auc": 0.6871891119109547,
+  "elapsed_sec": 508.4
+}

@@ -1,0 +1,13 @@
+{
+  "world": "w8",
+  "preset": "fast",
+  "seed": 22000,
+  "folds": 5,
+  "loss": "Logloss",
+  "train_frac": 1.0,
+  "iter_jitter": null,
+  "fold_iterations": [],
+  "stream_offset": 79,
+  "oof_auc": 0.6852344677365039,
+  "elapsed_sec": 256.0
+}

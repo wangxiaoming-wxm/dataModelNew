@@ -1,0 +1,78 @@
+{
+  "timestamp_note": "supervisor recomputation 2026-08-10",
+  "honesty_gates_from_audit_v4": {
+    "data_integrity": true,
+    "protocol_scan": true,
+    "arms_present": true,
+    "arm_sanity": true,
+    "nested_selection": true,
+    "permutation_no_signal": true,
+    "submission": true,
+    "target_reached": false
+  },
+  "endorsed_nested": {
+    "source": "fuse4.py RULES over current artifacts/v4 (20 seeds 1000..1019)",
+    "nested_oof_mean": 0.7030017070980409,
+    "nested_oof_sd": 9.830275599910356e-05,
+    "nested_oof_min": 0.7028542541910182,
+    "nested_oof_max": 0.7031766861399642,
+    "pick_counts": {
+      "views_max_10_20_r16": 56,
+      "views_max_10_r16": 44
+    },
+    "best_full_rule": "views_max_10_20_r16",
+    "best_full_oof_auc": 0.7032789637435225,
+    "optimism_best_minus_nested": 0.0002772566454816161
+  },
+  "audit_script_nested_note": {
+    "audit_nested_oof_mean": 0.7032505767949309,
+    "reason_differs": "audit_v4.py rule set lags fuse4 (missing views_max_10_20_r16, s16*, views_max_10_20_alt_d5, views_half*). Audit always picks views_max_10_r16; endorse fuse4 nested instead."
+  },
+  "bayes_ceiling_best_fusion": {
+    "score_oof_auc": 0.7032789637435225,
+    "cv_isotonic_auc_vs_observed_y": 0.6972417738056285,
+    "in_sample_isotonic_auc_vs_observed_y": 0.7062834274356946,
+    "theoretical_bayes_auc_from_cv_p": 0.7070541231336556,
+    "theoretical_bayes_auc_from_insample_p": 0.706252426523386,
+    "redrawn_label_auc_using_S_mean": 0.7065229118534972,
+    "redrawn_label_auc_using_S_sd": 0.006936796615624065,
+    "redrawn_label_auc_using_S_p025": 0.693325126995224,
+    "redrawn_label_auc_using_S_p975": 0.7199931251862803,
+    "redrawn_label_auc_using_p_mean": 0.707051508094129,
+    "p_mean_cv": 0.10023664131345388,
+    "base_rate": 0.10020093770931011
+  },
+  "bayes_ceiling_views_max_baseline": {
+    "score_oof_auc": 0.7015141215242033,
+    "cv_isotonic_auc_vs_observed_y": 0.6952231657005652,
+    "in_sample_isotonic_auc_vs_observed_y": 0.7049237398682726,
+    "theoretical_bayes_auc_from_cv_p": 0.705811346772738,
+    "theoretical_bayes_auc_from_insample_p": 0.7048926496163661,
+    "redrawn_label_auc_using_S_mean": 0.7052631716449799,
+    "redrawn_label_auc_using_S_sd": 0.0069310352628199285,
+    "redrawn_label_auc_using_S_p025": 0.6924406886741439,
+    "redrawn_label_auc_using_S_p975": 0.7189837102376668,
+    "redrawn_label_auc_using_p_mean": 0.7058292158492957,
+    "p_mean_cv": 0.10025172278721502,
+    "base_rate": 0.10020093770931011
+  },
+  "arm_risks": {
+    "s16_is_deterministic_mix_of_base_and_r16": true,
+    "s16_corr_with_equal_mix": 1.0,
+    "strong_family_mean_offdiag_rank_corr": 0.9732959942702867,
+    "new_arms_are_same_encoding_family_diversity": true,
+    "uncommitted_posthoc_rules_in_working_fuse4": [
+      "views_max_s16",
+      "views_max_10_20_r16",
+      "views_max_s16_f20",
+      "views_max_10_20_alt_d5"
+    ],
+    "hard_protocol_violations": []
+  },
+  "target": 0.707,
+  "gap_to_target": 0.003998292901959077,
+  "plausible_under_honesty": {
+    "verdict": "barely_plausible_but_not_supported_by_current_score_ceiling",
+    "reason": "in-sample isotonic Bayes of best score ~0.7063; redrawn-label mean ~0.7066; CV theoretical Bayes ~0.702. 0.707 sits above current risk-function ceiling; needs new label-free signal, not more seed averaging."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "world": "w11",
+  "preset": "d6",
+  "seed": 29103,
+  "folds": 10,
+  "loss": "Logloss",
+  "train_frac": 1.0,
+  "iter_jitter": null,
+  "ratio_mid_focus": 1.0,
+  "ratio_mid_bounds": [
+    1957.9605697400198,
+    10174.499154888132
+  ],
+  "fold_iterations": [],
+  "stream_offset": 4,
+  "oof_auc": 0.6868508071546455,
+  "elapsed_sec": 3018.9
+}

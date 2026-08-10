@@ -1,0 +1,17 @@
+{
+  "arm": "cat_d6_f20",
+  "world": "main",
+  "preset": "d6",
+  "loss": "logloss",
+  "folds": 20,
+  "n_seeds": 2,
+  "parts": [
+    "part_main_d6_logloss_s23000_f20.npz",
+    "part_main_d6_logloss_s23001_f20.npz"
+  ],
+  "per_seed_auc": [
+    0.6930142331811932,
+    0.6923978806269352
+  ],
+  "bagged_oof_auc": 0.6945231947990533
+}

@@ -2,24 +2,24 @@
 
 ## 一句话结论
 
-忠实移植声称公开榜 **0.71504** 的 `715.zip` 语义臂（全量 **5 seed × 5 fold × 10 bagging**，不减配），再与冻结 max3 / v4max3pro 在同一嵌套尺子下做 max 融合。
-
-正式候选：**准入**  
-`submissions/submission_v4max3pronew.csv`
+忠实移植外部 `715.zip` 语义臂（全量 **5×5×10**，不减配）并融合到 v4max3pro。  
+**独立审核 VERDICT：PROTOCOL_RISK**（见 `docs/INDEPENDENT_AUDIT_V4MAX3PRONEW.md`）。
 
 | 项 | 值 |
 |---|---:|
 | max3 嵌套 | 0.70307 |
 | v4max3pro 嵌套 | 0.70522 |
-| **v4max3proNew 嵌套** | **0.70557** |
-| Δ vs max3 | **+0.00250** |
-| Δ vs pro | **+0.00035** |
-| vs max3 提交 Spearman | 0.98920 |
-| vs pro 提交 Spearman | 0.99727 |
-| 相对 max3 的 5-block | 4/5 为正 |
-| 乐观外推 LB（沿用 max3 间隙 +0.00915） | ≈ **0.71472** |
+| New 嵌套 | 0.70557 |
+| Δ vs max3 | +0.00250（4/5 block 正，较稳） |
+| Δ vs pro | **+0.00035**（仅 3/5 正，P≈0.78，不稳） |
+| vs pro Spearman | **0.997**（几乎同秩微调） |
+| 乐观外推 LB | ≈0.7147（**非已验证公开榜**） |
 
-**不宣称等于 0.71504。** zip 内只有单臂代码（本地 pooled OOF ~0.696），无其提交 CSV / 融合脚本；本仓外推 ≈0.7147，接近但未核验到其声称分数。
+**外部声称 0.71504：无法核验，不可信。** zip 无提交/融合；本地 semantic nested 仅 **0.69578**。
+
+**提交建议：主推仍用 `submission_v4max3pro.csv`；New 仅探索位，勿包装成 0.715 复现。**
+
+产物文件（探索）：`submissions/submission_v4max3pronew.csv`
 
 ## 冻结配方
 

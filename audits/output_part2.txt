@@ -1,0 +1,46 @@
+max3 nested = 0.703073
+
+=== 1. INCREMENTAL CONTRIBUTION (nested delta vs max3) ===
+  +plus_strong                nested=0.704533 delta=+0.001460 sp_te=0.99167
+  +noxb10                     nested=0.703895 delta=+0.000821 sp_te=0.99973
+  +ordered_bag                nested=0.703211 delta=+0.000138 sp_te=0.99978
+  +plus_v10                   nested=0.704293 delta=+0.001220 sp_te=0.99145
+  +main10_ord_es              nested=0.703545 delta=+0.000472 sp_te=0.99945
+  +plus_strong+noxb10         nested=0.705220 delta=+0.002147 sp_te=0.99174
+
+=== 2. OOF vs TEST asymmetry of the max operator ===
+   (each arm is rank-uniform on its own side; if an arm wins the max on a
+    much larger share of OOF rows than TEST rows, its OOF is inflated)
+  oof  win-share merger_ord8=0.1834  v2_cat_alt8=0.2599  ord_noxb_bag=0.1267  plus_strong=0.2845  noxb10=0.1455
+  te   win-share merger_ord8=0.1868  v2_cat_alt8=0.2931  ord_noxb_bag=0.1035  plus_strong=0.3010  noxb10=0.1157
+  delta(oof-test) win-share:
+    merger_ord8    -0.0034
+    v2_cat_alt8    -0.0332
+    ord_noxb_bag   +0.0233
+    plus_strong    -0.0165
+    noxb10         +0.0298
+
+  rank-displacement caused by the two new arms:
+    spearman(max3_oof, recipe_oof) = 0.990600
+    spearman(max3_te , recipe_te ) = 0.991735
+
+  pairwise spearman of arms (oof / test):
+    ord_noxb_bag   vs noxb10         oof=0.9920 te=0.9988
+    plus_strong    vs plus_v10       oof=0.9975 te=0.9998
+    merger_ord8    vs noxb10         oof=0.9706 te=0.9794
+    plus_strong    vs ord_noxb_bag   oof=0.9482 te=0.9539
+
+=== 3. PAIRED BOOTSTRAP of nested delta (recipe - max3) ===
+  point delta = +0.002147
+  bootstrap mean=+0.002139 sd=0.001111 CI95=[-0.000057, +0.004301]
+  P(delta<=0) = 0.0280
+
+=== 4. AGGREGATION RULE: max vs rank-mean ===
+  max3    nested_max=0.703073  nested_rmean=0.700645  diff=+0.002428
+  recipe  nested_max=0.705220  nested_rmean=0.700192  diff=+0.005028
+
+=== 5. SEED-COUNT / bagging honesty of noxb10 ===
+  stored seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031), np.int64(2032), np.int64(2033)] pool=rank
+  part files on disk = 8: ['s2026', 's2027', 's2028', 's2029', 's2030', 's2031', 's2032', 's2033']
+  rebuild-from-parts spearman oof=1.00000000 test=1.00000000
+  rebuild oof auc=0.700370 stored=0.700370

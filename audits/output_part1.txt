@@ -1,0 +1,88 @@
+train n=14930 pos=1496 rate=0.10020  test n=6398
+
+=== ARM INVENTORY (my own AUC recompute) ===
+  merger_ord8      oof_auc=0.696596 y_matches_train=True seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031), np.int64(2032), np.int64(2033)]
+      per_seed=['0.69004', '0.68785', '0.68945', '0.68660', '0.69001', '0.68763', '0.68886', '0.69164']
+  v2_cat_alt8      oof_auc=0.697039 y_matches_train=True seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031), np.int64(2032), np.int64(2033)]
+      per_seed=['0.68858', '0.68740', '0.68831', '0.68580', '0.68916', '0.68995', '0.68852', '0.69158']
+  ord_noxb_bag     oof_auc=0.700640 y_matches_train=n/a seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031), np.int64(2032), np.int64(2033)]
+      per_seed=['0.69141', '0.69169', '0.69292', '0.69104', '0.69281', '0.69136', '0.68756', '0.69196']
+  ordered_bag      oof_auc=0.699107 y_matches_train=n/a seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031), np.int64(2032), np.int64(2033)]
+      per_seed=['0.68859', '0.69143', '0.68956', '0.69092', '0.69421', '0.68927', '0.68658', '0.69190']
+  plus_v10         oof_auc=0.688617 y_matches_train=True seeds=None
+  b7_closest       oof_auc=0.702705 y_matches_train=True seeds=None
+  mine_noxb8       oof_auc=0.694988 y_matches_train=True seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031), np.int64(2032), np.int64(2033)]
+      per_seed=['0.68724', '0.68381', '0.68489', '0.68218', '0.68679', '0.68387', '0.68284', '0.68492']
+  plus_strong      oof_auc=0.689105 y_matches_train=True seeds=None
+  noxb10           oof_auc=0.700370 y_matches_train=True seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031), np.int64(2032), np.int64(2033)]
+      per_seed=['0.69430', '0.69695', '0.69569', '0.69171', '0.69537', '0.69560', '0.69554', '0.69526']
+  main10_ord_es    oof_auc=0.699297 y_matches_train=True seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029), np.int64(2030), np.int64(2031)]
+      per_seed=['0.69567', '0.69515', '0.69601', '0.69395', '0.69496', '0.69467']
+  hybrid10         oof_auc=0.697802 y_matches_train=True seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029)]
+      per_seed=['0.69446', '0.69479', '0.69561', '0.69255']
+  alt10            oof_auc=0.697754 y_matches_train=True seeds=[np.int64(2026), np.int64(2027)]
+      per_seed=['0.69392', '0.69714']
+  merger_ord_es    oof_auc=0.694879 y_matches_train=True seeds=[np.int64(2026), np.int64(2027), np.int64(2028), np.int64(2029)]
+      per_seed=['0.68903', '0.69166', '0.69193', '0.68699']
+
+=== BASELINE max3 ===
+  nested(5blk)=0.703073  full_oof=0.703355
+  submission_v4_max3.csv rows=6398 cols=['id', 'label']
+  id order identical to test.csv: True
+  spearman(recomputed max3 test, submission_v4_max3.csv) = 1.00000000
+
+=== CLAIMED RECIPE max5 ===
+  nested=0.705220  full_oof=0.705719  delta_vs_max3=+0.002147
+  spearman(recipe_te, max3_te) = 0.991735
+
+  submission_v4max3pro.csv rows=6398 cols=['id', 'label']
+  id order identical to test.csv: True
+  label range [0.001000, 0.999000]  unique=4463
+  >>> spearman(claimed recipe rebuild, submission file) = 1.00000000
+  max abs diff = 1.110e-16
+  exact equal (1e-12) = True
+  spearman(submission file, submission_v4_max3.csv) = 0.991735
+  identical to _best_so_far.csv: True
+  shuffled-label OOF AUC = 0.516643
+
+  honest-only max2 nested = 0.699926
+
+=== NESTED RULER SENSITIVITY (max3 vs recipe under other block counts) ===
+  blocks=  1  max3=0.703355  recipe=0.705719  delta=+0.002364
+  blocks=  2  max3=0.703365  recipe=0.705698  delta=+0.002333
+  blocks=  3  max3=0.703209  recipe=0.705519  delta=+0.002310
+  blocks=  5  max3=0.703073  recipe=0.705220  delta=+0.002147
+  blocks=  8  max3=0.703046  recipe=0.705230  delta=+0.002184
+  blocks= 10  max3=0.703341  recipe=0.705519  delta=+0.002177
+  blocks= 20  max3=0.703588  recipe=0.705772  delta=+0.002183
+
+=== SELECTION-BIAS PROBE: how many candidate recipes beat the gate? ===
+  enumerated candidates = 584
+  best  = 0.705430  merger_ord8+v2_cat_alt8+b7_closest+plus_strong+noxb10
+  #candidates with nested >= max3+0.0015 (0.704573) = 66
+  #candidates with nested >= max3+0.0021 = 4
+  top 8:
+    0.705430  merger_ord8+v2_cat_alt8+b7_closest+plus_strong+noxb10
+    0.705220  merger_ord8+v2_cat_alt8+ord_noxb_bag+plus_strong+noxb10
+    0.705210  v2_cat_alt8+ord_noxb_bag+plus_strong+noxb10+main10_ord_es
+    0.705185  merger_ord8+v2_cat_alt8+b7_closest+noxb10+main10_ord_es
+    0.705167  merger_ord8+v2_cat_alt8+plus_v10+b7_closest+noxb10
+    0.705143  v2_cat_alt8+ord_noxb_bag+b7_closest+noxb10+main10_ord_es
+    0.705129  merger_ord8+v2_cat_alt8+b7_closest+noxb10
+    0.705128  merger_ord8+v2_cat_alt8+b7_closest+noxb10+alt10
+  rank of claimed recipe among enumerated = 1
+
+=== CV->LB EXTRAPOLATION CHECK ===
+  gap(max3) = 0.71222 - 0.703073 = 0.009147
+  exp_lb(recipe) = 0.705220 + 0.009147 = 0.714367
+  needed nested for 0.7155 = 0.706353  -> shortfall +0.001133
+
+=== STATUS REPORT CROSS-CHECK ===
+  OK  max3_nested      mine=0.703073  claimed=0.703073
+  OK  gap              mine=0.009147  claimed=0.009147
+  OK  needed_nested    mine=0.706353  claimed=0.706353
+  OK  best.nested      mine=0.705220  claimed=0.705220
+  OK  best.delta       mine=0.002147  claimed=0.002147
+  OK  best.exp_lb      mine=0.714367  claimed=0.714367
+  OK  best.sp          mine=0.991735  claimed=0.991735
+  OK  noxb10_oof       mine=0.700370  claimed=0.700370

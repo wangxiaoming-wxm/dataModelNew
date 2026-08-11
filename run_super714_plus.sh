@@ -16,6 +16,10 @@ done
 
 echo "SUPER714-Plus mode=${mode} DATA_DIR=${DATA_DIR:-$PWD/data}"
 if [[ "$mode" == "smoke" ]]; then
-  exec "$PYTHON_BIN" -u src_super/train_super714_plus.py --smoke "${args[@]}"
+  "$PYTHON_BIN" -u src_super/train_super714_plus.py --smoke "${args[@]}"
+  "$PYTHON_BIN" -u src_super/fuse_plus_weights.py --suffix _smoke
+  exit 0
 fi
-exec "$PYTHON_BIN" -u src_super/train_super714_plus.py "${args[@]}"
+"$PYTHON_BIN" -u src_super/train_super714_plus.py "${args[@]}"
+# 兼容「训练中途升级脚本」的旧跑次：再跑一遍后处理，确保 w62/wbest 落盘
+"$PYTHON_BIN" -u src_super/fuse_plus_weights.py

@@ -411,6 +411,9 @@ def main() -> int:
         True, 6, 10, seeds, n_splits, bag_seeds, iterations,
     )
     log.info("main_plus pooled OOF = %.5f", a1)
+    # 臂级 checkpoint：主臂极慢，中断后可手工恢复
+    np.save(art / f"plus_main{suffix}.npy", {"oof": o1, "test": t1, "auc": a1})
+    log.info("checkpoint: %s", art / f"plus_main{suffix}.npy")
 
     log.info("--- alt: +ratio/cond_r, 分箱(6,12,24), Plain d6, l2=5 ---")
     o2, t2, a2 = run_arm(
@@ -418,12 +421,26 @@ def main() -> int:
         False, 6, 5, seeds, n_splits, bag_seeds, iterations,
     )
     log.info("alt_plus pooled OOF = %.5f", a2)
+    np.save(art / f"plus_alt{suffix}.npy", {"oof": o2, "test": t2, "auc": a2})
+    log.info("checkpoint: %s", art / f"plus_alt{suffix}.npy")
 
     fuse_oof = np.maximum(o1, o2)
     fuse_te = np.maximum(t1, t2)
     fuse_auc = float(roc_auc_score(y, fuse_oof))
     corr = float(pearsonr(o1, o2).statistic)
     log.info("max2 OOF = %.5f | corr=%.4f", fuse_auc, corr)
+
+    # W62 预注册权重（best_v1 臂线上 0.71503）；另存 OOF 网格最优
+    w62_oof = 0.62 * o1 + 0.38 * o2
+    w62_te = 0.62 * t1 + 0.38 * t2
+    w62_auc = float(roc_auc_score(y, w62_oof))
+    best_w, best_auc = 0.62, w62_auc
+    for w in np.round(np.arange(0.50, 0.801, 0.01), 2):
+        auc_w = float(roc_auc_score(y, w * o1 + (1.0 - w) * o2))
+        if auc_w > best_auc:
+            best_auc, best_w = auc_w, float(w)
+    best_te = best_w * t1 + (1.0 - best_w) * t2
+    log.info("w62 OOF = %.5f | wbest(w=%.2f) OOF = %.5f", w62_auc, best_w, best_auc)
 
     # 对照冻结冠军
     champ_path = ROOT / "artifacts" / "super714" / "best_v1_oof.npy"
@@ -443,16 +460,24 @@ def main() -> int:
             spear_test,
         )
 
-    out_sub = sub / f"submission_super714_plus{suffix}.csv"
     if list(sample.columns) != ["id", "label"]:
         raise ValueError("submit_sample 列错误")
-    submission = sample[["id"]].copy()
-    submission["label"] = np.clip(fuse_te, 0.001, 0.999)
-    # 保证与冠军提交不同（smoke 也可能碰巧接近，正式训练几乎必然不同）
-    submission.to_csv(out_sub, index=False)
 
-    np.save(art / f"plus_oof{suffix}.npy", {"main": o1, "alt": o2, "fuse": fuse_oof})
-    np.save(art / f"plus_test{suffix}.npy", {"main": t1, "alt": t2, "fuse": fuse_te})
+    def _write_sub(path: Path, scores: np.ndarray) -> str:
+        submission = sample[["id"]].copy()
+        submission["label"] = np.clip(scores, 0.001, 0.999)
+        submission.to_csv(path, index=False)
+        return sha256(path)
+
+    out_sub = sub / f"submission_super714_plus{suffix}.csv"
+    out_w62 = sub / f"submission_super714_plus_w62{suffix}.csv"
+    out_best = sub / f"submission_super714_plus_wbest{suffix}.csv"
+    sha_max2 = _write_sub(out_sub, fuse_te)
+    sha_w62 = _write_sub(out_w62, w62_te)
+    sha_best = _write_sub(out_best, best_te)
+
+    np.save(art / f"plus_oof{suffix}.npy", {"main": o1, "alt": o2, "fuse": fuse_oof, "w62": w62_oof})
+    np.save(art / f"plus_test{suffix}.npy", {"main": t1, "alt": t2, "fuse": fuse_te, "w62": w62_te})
     metrics = {
         "mode": "smoke" if args.smoke else "full",
         "recipe": {
@@ -461,23 +486,35 @@ def main() -> int:
             "iterations": iterations,
             "main": "Ordered d6 l2=10 +rate",
             "alt": "Plain d6 l2=5 +ratio/cond_r bins(6,12,24)",
-            "fusion": "max2(rank)",
+            "fusion": "max2(rank) + w62(0.62/0.38) + oof-wbest",
         },
-        "auc": {"main": a1, "alt": a2, "max2": fuse_auc},
+        "auc": {
+            "main": a1,
+            "alt": a2,
+            "max2": fuse_auc,
+            "w62": w62_auc,
+            "wbest": best_auc,
+            "wbest_w_main": best_w,
+        },
         "pearson_main_alt": corr,
         "champ_max2_auc": champ_auc,
         "delta_vs_champ": (None if champ_auc is None else fuse_auc - champ_auc),
         "test_spearman_vs_champ": spear_test,
         "submission": str(out_sub.relative_to(ROOT)),
-        "submission_sha256": sha256(out_sub),
+        "submission_sha256": sha_max2,
+        "submission_w62": str(out_w62.relative_to(ROOT)),
+        "submission_w62_sha256": sha_w62,
+        "submission_wbest": str(out_best.relative_to(ROOT)),
+        "submission_wbest_sha256": sha_best,
         "elapsed_minutes": (time.time() - t0) / 60,
+        "lb_anchor": {"best_v1_max2": 0.71453, "best_v1_w62": 0.71503},
     }
     if champ_path.is_file():
         champ_sub = ROOT / "submissions" / "submission_super714.csv"
         if champ_sub.is_file():
-            metrics["different_from_champ_submission"] = sha256(out_sub) != sha256(champ_sub)
+            metrics["different_from_champ_submission"] = sha_max2 != sha256(champ_sub)
     (art / f"metrics{suffix}.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    log.info("已保存 %s", out_sub)
+    log.info("已保存 %s / %s / %s", out_sub, out_w62, out_best)
     log.info("总耗时 %.1f 分钟", (time.time() - t0) / 60)
     return 0
 

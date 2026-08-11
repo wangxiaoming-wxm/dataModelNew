@@ -300,20 +300,34 @@ def run_arm(
     n_splits: int,
     threads: int,
     fold_local_edges: bool,
+    faithful: bool = True,
 ):
+    """If faithful=True: match explore_best.py — edges + FE on train∥test concat (label-free)."""
     ART.mkdir(parents=True, exist_ok=True)
     oof_seeds, te_parts, per = [], [], []
-    raw_tr = train.drop(columns=["label"])
-    # global edges on train only (default; matches recipe spirit without test leak)
-    edges_global = fit_edges_fn(raw_tr)
+    raw_tr = train.drop(columns=["label"]).reset_index(drop=True)
+    raw_te = test.reset_index(drop=True)
+    n_tr = len(raw_tr)
+
     if not fold_local_edges:
-        # build once with train-freq
-        Xtr_tmp, cats = build_fn(raw_tr, edges_global)
-        Xte_tmp, _ = build_fn(test, edges_global, freq_ref=Xtr_tmp)
-        for c in cats:
-            Xtr_tmp[c] = Xtr_tmp[c].astype(str)
-            Xte_tmp[c] = Xte_tmp[c].astype(str)
-        Xtr_g, Xte_g, cats_g = Xtr_tmp, Xte_tmp, cats
+        if faithful:
+            # Exact explore_best protocol: edges & FE on concat (no labels involved)
+            raw_all = pd.concat([raw_tr, raw_te], ignore_index=True)
+            edges_global = fit_edges_fn(raw_all)
+            X_all, cats = build_fn(raw_all, edges_global)
+            for c in cats:
+                X_all[c] = X_all[c].astype(str)
+            Xtr_g = X_all.iloc[:n_tr].reset_index(drop=True)
+            Xte_g = X_all.iloc[n_tr:].reset_index(drop=True)
+            cats_g = cats
+        else:
+            edges_global = fit_edges_fn(raw_tr)
+            Xtr_tmp, cats = build_fn(raw_tr, edges_global)
+            Xte_tmp, _ = build_fn(raw_te, edges_global, freq_ref=Xtr_tmp)
+            for c in cats:
+                Xtr_tmp[c] = Xtr_tmp[c].astype(str)
+                Xte_tmp[c] = Xte_tmp[c].astype(str)
+            Xtr_g, Xte_g, cats_g = Xtr_tmp, Xte_tmp, cats
 
     for seed in seeds:
         part = ART / f"part_{arm_name}_s{seed}.npz"
@@ -332,7 +346,7 @@ def run_arm(
                 if fold_local_edges:
                     edges = fit_edges_fn(raw_tr.iloc[tri])
                     Xtr_all, cats = build_fn(raw_tr, edges)
-                    Xte_all, _ = build_fn(test, edges, freq_ref=Xtr_all.iloc[tri])
+                    Xte_all, _ = build_fn(raw_te, edges, freq_ref=Xtr_all.iloc[tri])
                     for c in cats:
                         Xtr_all[c] = Xtr_all[c].astype(str)
                         Xte_all[c] = Xte_all[c].astype(str)
@@ -393,6 +407,7 @@ def main():
     ap.add_argument("--bags", type=int, default=3)
     ap.add_argument("--folds", type=int, default=5)
     ap.add_argument("--fold-local-edges", action="store_true")
+    ap.add_argument("--honest-edges", action="store_true", help="edges/FE on train-only (weaker match to claimed LB)")
     ap.add_argument("--threads", type=int, default=0)
     args = ap.parse_args()
 
@@ -406,13 +421,17 @@ def main():
         folds = args.folds
 
     threads = args.threads or max(1, (os.cpu_count() or 4) // 2)
+    faithful = not args.honest_edges and not args.fold_local_edges
     ART.mkdir(parents=True, exist_ok=True)
     train = pd.read_csv(DATA / "train.csv")
     test = pd.read_csv(DATA / "test.csv")
     y = train["label"].astype(int).values
     tid = test["id"]
 
-    print(f"=== best_v1 seeds={seeds} bags={bags} folds={folds} fold_local={args.fold_local_edges} ===", flush=True)
+    print(
+        f"=== best_v1 seeds={seeds} bags={bags} folds={folds} fold_local={args.fold_local_edges} faithful={faithful} ===",
+        flush=True,
+    )
     t0 = time.time()
 
     o1, t1, a1, p1 = run_arm(
@@ -431,6 +450,7 @@ def main():
         folds,
         threads,
         args.fold_local_edges,
+        faithful=faithful,
     )
     print(f"臂1 pooled OOF={a1:.5f} per={p1}", flush=True)
 
@@ -450,6 +470,7 @@ def main():
         folds,
         threads,
         args.fold_local_edges,
+        faithful=faithful,
     )
     print(f"臂2 pooled OOF={a2:.5f} per={p2}", flush=True)
 
@@ -490,9 +511,10 @@ def main():
         "bags": list(bags),
         "folds": folds,
         "fold_local_edges": args.fold_local_edges,
+        "faithful_concat_fe": faithful,
         "elapsed_min": round((time.time() - t0) / 60, 2),
         "claimed_lb": 0.71464,
-        "note": "714 best_v1 port; edges/freq on train-only",
+        "note": "714 best_v1 port; faithful=concat FE like explore_best.py",
     }
     if (ART.parent / "merger_ord8.npz").exists():
         mo = np.load(ART.parent / "merger_ord8.npz")["oof"]

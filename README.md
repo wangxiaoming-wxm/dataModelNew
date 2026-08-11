@@ -85,3 +85,16 @@ requirements.txt           依赖
 
 协议与约束：[`docs/PROTOCOL.md`](docs/PROTOCOL.md)  
 方案细节：[`docs/SOLUTION.md`](docs/SOLUTION.md)
+
+---
+
+## SUPER714-Plus（另交差异化版）
+
+在冠军配方上改 depth / 分箱 / 跨世界特征 / 10×4×1000，生成**不同**提交：
+
+```bash
+bash run_super714_plus.sh          # 完整训练
+# 产出 submissions/submission_super714_plus.csv
+```
+
+说明见 [`docs/SOLUTION_PLUS.md`](docs/SOLUTION_PLUS.md)。

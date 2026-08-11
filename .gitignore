@@ -20,3 +20,7 @@ logs/
 *.zip
 .DS_Store
 __MACOSX/
+
+artifacts/super714_plus/*_smoke.*
+artifacts/super714_plus/train*.log
+submissions/*_plus_smoke.csv

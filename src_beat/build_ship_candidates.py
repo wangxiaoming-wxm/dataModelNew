@@ -95,11 +95,15 @@ def eval_and_maybe_ship(tag, arms_oof, arms_te, y, tid, base_o, base_t, allow_wr
     return meta, ft if passed else None
 
 
-def maybe_admit_probe(name: str) -> tuple[np.ndarray, np.ndarray] | None:
+def maybe_admit_probe(name: str):
     """Only admit strategy probes that passed the hard gate."""
     rep = ART / "probes" / f"report_{name}.json"
     npz = ART / f"probe_{name}.npz"
-    if not rep.exists() or not npz.exists():
+    if not npz.exists():
+        # parts-only ortho arm
+        alt = ART / "probes" / f"part_{name}_s*.npz"
+        return None
+    if not rep.exists():
         return None
     meta = json.loads(rep.read_text())
     if not meta.get("admit_to_max"):
@@ -163,7 +167,7 @@ def main():
             record(tag, oo, tt)
 
         # Admitted strategy probes as alternative 4th arm (never stacked with plus)
-        for pname in ("exp1", "exp2", "exp3"):
+        for pname in ("exp1", "exp2", "exp3", "exp_ortho", "ortho_hard"):
             adm = maybe_admit_probe(pname)
             if adm is None:
                 continue

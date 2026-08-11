@@ -1,0 +1,18 @@
+{
+  "mode": "exp2",
+  "pooled_oof_auc": 0.6940505931553669,
+  "per_seed": [
+    0.6905648450455744,
+    0.6886096535329385
+  ],
+  "corr_spearman_mo8": 0.9595097890415,
+  "corr_spearman_ca8": 0.9375398485914201,
+  "gate": {
+    "auc_gt_0.690": true,
+    "corr_mo8_lt_0.88": false,
+    "corr_ca8_lt_0.88": false
+  },
+  "admit_to_max": false,
+  "elapsed_sec": 1180.7,
+  "note": "Strategy \u00a76 exp; refuse max entry if gate fails"
+}

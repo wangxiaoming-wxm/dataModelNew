@@ -1,0 +1,13 @@
+{
+  "mode": "exp3",
+  "corrected_auc": 0.6872269280037323,
+  "residual_auc": 0.4017579208791804,
+  "corr_spearman_mo8": 0.9402201203460804,
+  "gate": {
+    "auc_gt_0.690": false,
+    "corr_mo8_lt_0.88": false,
+    "raw_auc_gt_0.55": false
+  },
+  "admit_to_max": false,
+  "q10_ratio": 679.8220701715053
+}

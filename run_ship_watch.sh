@@ -23,9 +23,18 @@ while true; do
       fi
     fi
   fi
-  # Stop when P1 done AND plus done (or plus already present) AND probes done
+  # After P1 finished, run ortho hard-example arm if not done
   p1_alive=$(pgrep -f 'train_ord_noxb.py' >/dev/null && echo 1 || echo 0)
-  probe_alive=$(pgrep -f 'run_strategy_probes.py' >/dev/null && echo 1 || echo 0)
+  if [[ "$n" -ge 16 && "$p1_alive" -eq 0 ]]; then
+    if ! pgrep -f 'train_ortho_resid.py' >/dev/null; then
+      if [[ ! -f artifacts/beat_max3/probes/report_ortho_hard.json ]]; then
+        echo "[watch] launching ortho_hard"
+        nohup python3 src_beat/train_ortho_resid.py --tag ortho_hard --seeds 3100 3101 \
+          > logs/beat_max3/ortho_hard.log 2>&1 &
+      fi
+    fi
+  fi
+  probe_alive=$(pgrep -f 'run_strategy_probes.py|train_ortho_resid.py|train_plus.py' >/dev/null && echo 1 || echo 0)
   if [[ "$n" -ge 16 && "$p1_alive" -eq 0 && "$probe_alive" -eq 0 ]]; then
     python3 src_beat/build_ship_candidates.py | tee -a logs/beat_max3/ship_watch.log
     echo "[watch] final refresh done"

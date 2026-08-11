@@ -1,8 +1,8 @@
 {
   "tag": "ship_max3s_rmean_plus",
-  "nested": 0.704851565864886,
-  "delta": 0.0017784261579090188,
-  "spearman_vs_max3": 0.9915361044175252,
+  "nested": 0.704758070551295,
+  "delta": 0.0016849308443180888,
+  "spearman_vs_max3": 0.9915442032791054,
   "blocks_plus": "4/5",
   "passed": true,
   "n_arms": 4

@@ -1,3 +1,5 @@
+> 交付入口：[`docs/DELIVERY.md`](DELIVERY.md) · 提交文件 `submissions/submission_v4ext.csv`
+
 # 诚实推高状态（对照你的全量公开榜）
 
 更新：2026-08-10（分支 `cursor/honest-push-v4ext-6de7`）

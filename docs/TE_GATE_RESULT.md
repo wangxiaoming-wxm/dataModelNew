@@ -1,21 +1,25 @@
-# TE 第三臂门槛结果
+# TE 第三臂门槛结果（完整 8×5×3）
 
-## Smoke（通路检查，非最终判定）
+命令：`bash run_super714.sh`（8 seeds × 5 folds × 3 bags，耗时 93.1 分钟）
 
-命令：`bash run_super714.sh --smoke`（2 folds × 1 seed × 1 bag）
+| 指标 | 结果 | 门槛 | 判定 |
+|---|---:|---|:---:|
+| TE OOF AUC | **0.69964** | > 0.697 | ✅ |
+| Spearman(TE, main) | **0.99767** | < 0.90 | ❌ |
+| max3 − max2 | **−0.00018** | > 0.001 | ❌ |
 
-| 指标 | 结果 | 完整门槛 | smoke 观测 |
-|---|---:|---|---|
-| TE OOF AUC | 0.67661 | > 0.697 | 未达 |
-| Spearman(TE, main) | 0.88223 | < 0.90 | 达到 |
-| max3 − max2 | −0.00371 | > 0.001 | 未达 |
+**结论：拒绝 TE 第三臂；主交付保持 best_v1 max2。**
 
-Smoke **不会覆盖**主提交（代码强制 `accepted = (not smoke) and gates`）。  
-**完整 8×5×3 门槛仍在运行/待产出 `artifacts/super714/metrics.json`；在完整结果落盘前，不得宣称 TE 已被最终拒绝或接受。**
+解读：TE 被 CatBoost 主臂 CTR / `d10s` 交叉完全吸收，与 main 几乎共线（Spearman≈0.998），max3 无增益。与数据挖掘预告一致。
 
-## 补充探针（信息性，不替代门槛）
+证据：`artifacts/super714/metrics.json`、`artifacts/super714/main_te.npz`
 
-- 2seed×5fold×2bag×400iter，main+折内 TE：AUC=0.68757，corr(main)=0.9466，max3 Δ=−0.00143
-- TE-lite 弱特征：AUC=0.656，max3 Δ=−0.0079
+## Smoke（历史通路检查）
 
-证据：`artifacts/super714/metrics_smoke.json`
+| 指标 | 结果 |
+|---|---:|
+| TE OOF | 0.67661 |
+| Spearman(TE, main) | 0.88223 |
+| max3 − max2 | −0.00371 |
+
+Smoke 未覆盖主提交；最终判定以本页完整门槛为准。

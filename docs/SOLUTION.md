@@ -34,23 +34,14 @@ main 的连续 `ratio=days/cond_r` 描述个体相对车群状态；候选 TE �
 
 ## 4. 复现
 
+一步验收与环境说明见 [`REPRODUCE.md`](REPRODUCE.md)。
+
 ```bash
 pip install -r requirements.txt
-
-# 秒级验收（不训练）
-bash run_super714.sh --verify
-
-# TE 通路检查；输出带 _smoke 后缀，不覆盖主交付
-bash run_super714.sh --smoke
-
-# 完整训练唯一候选 TE 臂；基座直接读取已校验冻结产物
-bash run_super714.sh
-
-# 可选：单独从头复现 best_v1 双臂
-bash run_super714.sh --baseline-only
+bash run_super714.sh --verify          # 秒级验收（交付必须）
+bash run_super714.sh --smoke           # TE 通路，不覆盖主提交
+bash run_super714.sh --baseline-only   # 可选：从头重训双臂
 ```
-
-可通过 `DATA_DIR` 或 `--data-dir` 指向含 `train.csv/test.csv` 的目录。
 
 ## 5. 产物
 

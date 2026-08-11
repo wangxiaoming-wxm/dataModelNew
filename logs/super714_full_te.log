@@ -1,4 +1,0 @@
-SUPER714 mode=full DATA_DIR=/workspace/data
-2026-08-11 06:46:04,377 [INFO] === SUPER714（冻结 best_v1 + 折内 TE）smoke=False baseline_only=False ===
-2026-08-11 06:46:04,491 [INFO] 冻结基座: main=0.699917 alt=0.697704 max2=0.701275 Spearman=0.94755
-2026-08-11 06:46:04,491 [INFO] --- 候选臂: main + 双层诚实 TE(source×days_bin10) ---

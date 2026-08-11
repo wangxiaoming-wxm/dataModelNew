@@ -61,7 +61,10 @@ def bag_new16_parts():
 
 
 def bag_plus_parts():
-    parts = sorted(TRAIN_DIR.glob("part_plus_new*_s*.npz"))
+    # Prefer Ordered retrain parts; ignore weak Plain plus_new* leftovers.
+    parts = sorted(TRAIN_DIR.glob("part_plus_ord*_s*.npz"))
+    if len(parts) < 2:
+        parts = sorted(TRAIN_DIR.glob("part_plus_new*_s*.npz"))
     if len(parts) < 2:
         return None
     o = np.mean([np.load(p)["oof"] for p in parts], 0)
@@ -121,14 +124,38 @@ def main():
     od_o, od_t = load_raw("ord_noxb_bag")
     pl_o, pl_t = load_raw("plus_strong")
 
-    # Optional stronger plus bag (same logical arm — mean, not max twin stack)
+    # Optional stronger plus bag (same logical arm — mean, not max twin stack).
+    # Only blend if new bag is not weaker than plus_strong (avoid diluting 0.689 with ~0.677 Plain runs).
     bag_pl = bag_plus_parts()
+    pl_base_auc = float(roc_auc_score(y, pl_o))
     if bag_pl is not None:
         new_pl_o, new_pl_t, npl = bag_pl
-        pl_o = 0.5 * pl_o + 0.5 * new_pl_o
-        pl_t = 0.5 * pl_t + 0.5 * new_pl_t
-        np.savez(ART / "plus_stronger.npz", oof=pl_o, test_pred=pl_t, n_new_parts=npl)
-        print(f"plus stronger bag n_new={npl}", flush=True)
+        new_auc = float(roc_auc_score(y, new_pl_o))
+        if new_auc + 1e-6 >= pl_base_auc - 0.001:
+            blend_o = 0.5 * pl_o + 0.5 * new_pl_o
+            blend_t = 0.5 * pl_t + 0.5 * new_pl_t
+            blend_auc = float(roc_auc_score(y, blend_o))
+            if blend_auc + 1e-6 >= pl_base_auc - 0.0005:
+                pl_o, pl_t = blend_o, blend_t
+                np.savez(
+                    ART / "plus_stronger.npz",
+                    oof=pl_o,
+                    test_pred=pl_t,
+                    n_new_parts=npl,
+                    new_auc=new_auc,
+                    blend_auc=blend_auc,
+                )
+                print(f"plus stronger bag n_new={npl} new_auc={new_auc:.5f} blend={blend_auc:.5f}", flush=True)
+            else:
+                print(
+                    f"plus bag skip blend: blend_auc={blend_auc:.5f} < base={pl_base_auc:.5f}",
+                    flush=True,
+                )
+        else:
+            print(
+                f"plus bag skip: new_auc={new_auc:.5f} << base={pl_base_auc:.5f} (n={npl})",
+                flush=True,
+            )
 
     base_o = np.maximum.reduce([rk(mo_o), rk(ca_o), rk(od_o)])
     base_t = np.maximum.reduce([rk(mo_t), rk(ca_t), rk(od_t)])

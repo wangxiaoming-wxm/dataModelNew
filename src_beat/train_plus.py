@@ -31,6 +31,7 @@ PARAMS = dict(
     depth=7,
     l2_leaf_reg=20,
     random_strength=1.0,
+    boosting_type="Ordered",  # match plus_strong / max3 ES family
     od_type="Iter",
     od_wait=150,
     verbose=False,

@@ -38,3 +38,4 @@ artifacts/v4_mid_screen/
 artifacts/v4_rmse_screen/*.npz
 artifacts/v4_semantic_screen/*.npz
 logs/v4_world_screen/
+.cursor/

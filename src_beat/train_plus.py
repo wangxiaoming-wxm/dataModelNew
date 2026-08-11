@@ -56,6 +56,8 @@ def main() -> None:
     params.update(
         depth=args.depth,
         learning_rate=args.lr,
+        iterations=3000 if args.depth >= 7 else 2500,
+        od_wait=200,
         thread_count=max(1, (os.cpu_count() or 4) // 2),
     )
 

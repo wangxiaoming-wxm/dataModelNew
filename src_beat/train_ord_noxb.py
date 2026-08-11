@@ -60,6 +60,7 @@ def main() -> None:
     ap.add_argument("--iterations", type=int, default=1200)
     ap.add_argument("--lr", type=float, default=0.03)
     ap.add_argument("--l2", type=float, default=10.0)
+    ap.add_argument("--od-wait", type=int, default=150)
     ap.add_argument("--view", default="b5", choices=list(VIEWS))
     args = ap.parse_args()
 
@@ -78,6 +79,8 @@ def main() -> None:
         learning_rate=args.lr,
         l2_leaf_reg=args.l2,
         boosting_type="Ordered",
+        od_type="Iter",
+        od_wait=args.od_wait,
         thread_count=max(1, ncpu // 2),
     )
 

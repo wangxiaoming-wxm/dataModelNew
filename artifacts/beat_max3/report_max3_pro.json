@@ -1,0 +1,53 @@
+{
+  "tag": "max3_pro",
+  "arms": [
+    "merger_ord8",
+    "v2_cat_alt8",
+    "ord_noxb_bag",
+    "plus_strong",
+    "noxb10"
+  ],
+  "fusion": "max(rank)",
+  "base_nested": 0.7030731397069769,
+  "cand_nested": 0.7052203722855012,
+  "delta": 0.0021472325785242274,
+  "spearman_vs_max3": 0.9917350374015357,
+  "blocks_plus": "4/5",
+  "base_blocks": [
+    0.6896617066996351,
+    0.699177383703406,
+    0.704746221113682,
+    0.7226868457542557,
+    0.6985005882667523
+  ],
+  "cand_blocks": [
+    0.6892833313709329,
+    0.6995981111222747,
+    0.7081581873365989,
+    0.7263474183171279,
+    0.7021612118295096
+  ],
+  "new_arm_win_rate": {
+    "plus_strong": 0.30790354989953117,
+    "noxb10": 0.21942397856664433
+  },
+  "arm_oof_auc": {
+    "merger_ord8": 0.6965958152313668,
+    "v2_cat_alt8": 0.6970387610970329,
+    "ord_noxb_bag": 0.7006400473218644,
+    "plus_strong": 0.6891053677754345,
+    "noxb10": 0.7003701598386726
+  },
+  "gate": {
+    "G1_spearman": true,
+    "G2_delta": true,
+    "G3_blocks_plus": true,
+    "G4_keep_noxb": true,
+    "G5_new_win": true,
+    "G6_keep_base": true
+  },
+  "passed": true,
+  "max3_lb_anchor": 0.71222,
+  "caution": "Nested is optimistic when ES arms are present. Do NOT add +0.0095 gap. Expect LB \u2248 max3 + fraction of delta.",
+  "submission": "submissions/submission_max3_pro.csv"
+}

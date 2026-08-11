@@ -1,22 +1,26 @@
-# 公开榜实测板（用户回执，2026-08-10）
+# 公开榜实测板（用户回执）
 
-按时间新→旧：
+| 时间 | 公开榜 | 文件 | 备注 |
+|---|---:|---|---|
+| 08-11 | **0.71123** | submission_v4ext.csv | nested 0.70381；预估 0.713 **失败**（高估≈0.002） |
+| 08-10 21:41 | 0.71207 | submission_v5_honest.csv | |
+| 08-10 07:41 | **0.71222 ★** | submission_v4_max3.csv | **仍为冠军** |
+| 08-10 07:39 | 0.71035 | submission_v5.csv | |
+| 08-09 22:35 | 0.71064 | submission_v3.csv | |
+| 08-09 16:20 | 0.71184 | submission_v3_max3.csv | |
+| 08-09 12:59 | 0.70878 | submission_v2.csv | |
+| 更早 | ≤0.70722 | B7 / v10 等 | |
 
-| 时间 | 公开榜 | 文件 |
-|---|---:|---|
-| 08-10 21:41 | **0.71207** | submission_v5_honest.csv |
-| 08-10 07:41 | **0.71222 ★** | submission_v4_max3.csv |
-| 08-10 07:39 | 0.71035 | submission_v5.csv |
-| 08-09 22:35 | 0.71064 | submission_v3.csv |
-| 08-09 16:20 | 0.71184 | submission_v3_max3.csv |
-| 08-09 12:59 | 0.70878 | submission_v2.csv |
-| 08-08 23:51 | 0.70710 | submission_best.csv |
-| 08-08 21:11 | 0.70722 | codexdp_v1.csv |
-| 08-08 18:12 | 0.70208 | submission_b6pro.csv |
-| 08-07 22:15 | 0.70722 | submission_b7_closest_honest.csv |
-| 08-07 18:55 | 0.68749 | submission_0807.csv |
-| 08-07 15:22 | 0.70570 | submission_v10.csv |
+**教训**：诚实 nested 外推不可靠。冲超 max3 必须以 max3 三臂为底座，融合必须是 `max(rank)`。
 
-另：用户确认 `v4_honest` = **0.71104**（未出现在上表时间戳中，仍作校准锚）。
+## 冲超候选（本地门禁已过，待交榜）
 
-目标 0.725 相对现冠军差 **+0.01278**。
+| 文件 | nested Δ vs max3 | Spearman | 备注 |
+|---|---:|---:|---|
+| **submission_max3_best.csv** | **+0.00282** | 0.9918 | plus+noxb10+cat_w12_d5；**首选交榜** |
+| submission_max3_pro.csv | +0.00215 | 0.9917 | plus+noxb10 |
+| submission_max3_plus_w12.csv | +0.00238 | 0.9917 | plus+w12 |
+| submission_max3_pro_sem.csv | +0.00250 | 0.9892 | plus+noxb10+semantic_rmse |
+| submission_max3_plus.csv | +0.00146 | 0.9917 | 最小改动 |
+
+详见 `docs/BEAT_MAX3.md`。未回执前不宣称已超过 0.71222。

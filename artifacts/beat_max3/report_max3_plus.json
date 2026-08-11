@@ -1,0 +1,50 @@
+{
+  "tag": "max3_plus",
+  "arms": [
+    "merger_ord8",
+    "v2_cat_alt8",
+    "ord_noxb_bag",
+    "plus_strong"
+  ],
+  "fusion": "max(rank)",
+  "base_nested": 0.7030731397069769,
+  "cand_nested": 0.7045333882263775,
+  "delta": 0.00146024851940052,
+  "spearman_vs_max3": 0.9916716478506613,
+  "blocks_plus": "4/5",
+  "base_blocks": [
+    0.6896617066996351,
+    0.699177383703406,
+    0.704746221113682,
+    0.7226868457542557,
+    0.6985005882667523
+  ],
+  "cand_blocks": [
+    0.6882837336630167,
+    0.7000420727418868,
+    0.7070048381765183,
+    0.7248967290583939,
+    0.7019840633188941
+  ],
+  "new_arm_win_rate": {
+    "plus_strong": 0.30790354989953117
+  },
+  "arm_oof_auc": {
+    "merger_ord8": 0.6965958152313668,
+    "v2_cat_alt8": 0.6970387610970329,
+    "ord_noxb_bag": 0.7006400473218644,
+    "plus_strong": 0.6891053677754345
+  },
+  "gate": {
+    "G1_spearman": true,
+    "G2_delta": true,
+    "G3_blocks_plus": true,
+    "G4_keep_noxb": true,
+    "G5_new_win": true,
+    "G6_keep_base": true
+  },
+  "passed": true,
+  "max3_lb_anchor": 0.71222,
+  "caution": "Nested is optimistic when ES arms are present. Do NOT add +0.0095 gap. Expect LB \u2248 max3 + fraction of delta.",
+  "submission": "submissions/submission_max3_plus.csv"
+}

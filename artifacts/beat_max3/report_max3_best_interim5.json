@@ -1,0 +1,59 @@
+{
+  "tag": "max3_best_interim5",
+  "arms": [
+    "merger_ord8",
+    "v2_cat_alt8",
+    "ord_noxb_bag",
+    "plus_strong",
+    "noxb10",
+    "cat_w12_d5",
+    "ord_noxb_new_interim"
+  ],
+  "fusion": "max(rank)",
+  "base_nested": 0.7030731397069769,
+  "cand_nested": 0.7062270267236377,
+  "delta": 0.0031538870166607502,
+  "spearman_vs_max3": 0.9918075469499336,
+  "blocks_plus": "4/5",
+  "base_blocks": [
+    0.6896617066996351,
+    0.699177383703406,
+    0.704746221113682,
+    0.7226868457542557,
+    0.6985005882667523
+  ],
+  "cand_blocks": [
+    0.6895323109227206,
+    0.7009055058776248,
+    0.7098440364215524,
+    0.7265221054820339,
+    0.70383977752821
+  ],
+  "new_arm_win_rate": {
+    "plus_strong": 0.30790354989953117,
+    "noxb10": 0.21942397856664433,
+    "cat_w12_d5": 0.1722036168787676,
+    "ord_noxb_new_interim": 0.24876088412592096
+  },
+  "arm_oof_auc": {
+    "merger_ord8": 0.6965958152313668,
+    "v2_cat_alt8": 0.6970387610970329,
+    "ord_noxb_bag": 0.7006400473218644,
+    "plus_strong": 0.6891053677754345,
+    "noxb10": 0.7003701598386726,
+    "cat_w12_d5": 0.6998572790803763,
+    "ord_noxb_new_interim": 0.6969952725903387
+  },
+  "gate": {
+    "G1_spearman": true,
+    "G2_delta": true,
+    "G3_blocks_plus": true,
+    "G4_keep_noxb": true,
+    "G5_new_win": true,
+    "G6_keep_base": true
+  },
+  "passed": true,
+  "max3_lb_anchor": 0.71222,
+  "caution": "Nested is optimistic when ES arms are present. Do NOT add +0.0095 gap. Expect LB \u2248 max3 + fraction of delta.",
+  "submission": "submissions/submission_max3_best_interim5.csv"
+}

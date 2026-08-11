@@ -14,9 +14,10 @@ V4ext 实测 **0.71123**，证明「丢掉 ord_noxb_bag + 用诚实 nested 外�
 ## 当前本地最优（相对 max3 nested 0.70307）
 | 配方 | nested Δ | Spearman | 文件 |
 |---|---:|---:|---|
-| +plus+noxb10+cat_w12_d5 | **+0.00282** | 0.9918 | `submission_max3_best.csv` |
-| +plus+noxb10 | +0.00215 | 0.9917 | `submission_max3_pro.csv` |
+| +plus+noxb10+w12+**noxb_new5** | **+0.00315** | 0.9918 | `submission_max3_stage_best.csv`（P1 进行中 interim） |
+| +plus+noxb10+cat_w12_d5 | +0.00282 | 0.9918 | `submission_max3_best.csv` |
 | +plus+cat_w12_d5 | +0.00238 | 0.9917 | `submission_max3_plus_w12.csv` |
+| +plus+noxb10 | +0.00215 | 0.9917 | `submission_max3_pro.csv` |
 | +plus_strong | +0.00146 | 0.9917 | `submission_max3_plus.csv` |
 
 ## 推荐交榜顺序

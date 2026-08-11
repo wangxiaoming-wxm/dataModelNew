@@ -6,6 +6,7 @@
 |---|---|
 | 提交文件 | [`submissions/submission_w62.csv`](submissions/submission_w62.csv) |
 | 本地 OOF | **0.70159** |
+| 线上 AUC | **0.71503**（已提交确认） |
 | 对照 max2 | 0.70128（`submission_super714.csv`） |
 | 耗时 | **秒级**（不重训） |
 

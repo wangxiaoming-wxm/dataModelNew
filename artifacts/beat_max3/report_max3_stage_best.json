@@ -1,0 +1,14 @@
+{
+  "extra": [
+    "plus_strong",
+    "noxb10",
+    "cat_w12_d5",
+    "ord_noxb_new_interim"
+  ],
+  "nested": 0.7061739349196986,
+  "delta": 0.003100795212721663,
+  "sp": 0.9918028205362356,
+  "blocks_plus": 4,
+  "passed": true,
+  "tag": "max3_stage_best"
+}

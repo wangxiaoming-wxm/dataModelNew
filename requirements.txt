@@ -4,3 +4,4 @@ pandas>=2.0
 scikit-learn>=1.3
 scipy>=1.10
 lightgbm>=4.0
+features-goldmine>=1.0.1

@@ -26,3 +26,16 @@ logs/v4/w12/
 logs/v4/f30/
 artifacts/v4_w12_parts/
 artifacts/v4_weak/
+
+# V4-ext experiment screens (not delivery)
+artifacts/v4_w12_parts/
+artifacts/v4_w12_f20/
+artifacts/v4_w12_screen/
+artifacts/v4_world_screen/
+artifacts/v4_ordered_parts/
+artifacts/v4_rank_screen/
+artifacts/v4_mid_screen/
+artifacts/v4_rmse_screen/*.npz
+artifacts/v4_semantic_screen/*.npz
+logs/v4_world_screen/
+.cursor/

@@ -63,6 +63,9 @@ PRESETS = {
     # slightly more trees when each fold sees more data (20-fold); still fixed
     "d5x": dict(depth=5, iterations=1200),
     "d6x": dict(depth=6, iterations=900, bagging_temperature=1.0),
+    # Ordered boosting, fixed trees (no ES) — matches opus merger_ord8 protocol
+    "ordered_d5": dict(depth=5, iterations=800, boosting_type="Ordered"),
+    "ordered_d6": dict(depth=6, iterations=700, boosting_type="Ordered"),
     # screening only — never used for headline numbers
     "fast": dict(depth=5, iterations=400),
 }

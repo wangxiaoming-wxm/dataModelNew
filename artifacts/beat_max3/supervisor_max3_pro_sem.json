@@ -1,0 +1,25 @@
+{
+  "ts": "2026-08-11T02:53:02.502934+00:00",
+  "tag": "max3_pro_sem",
+  "extra": [
+    "plus_strong",
+    "noxb10",
+    "semantic_rmse"
+  ],
+  "passed": true,
+  "delta": 0.0024965836145658393,
+  "nested": 0.7055697233215428,
+  "spearman": 0.9892020462094702,
+  "blocks_plus": "4/5",
+  "gate": {
+    "G1_spearman": true,
+    "G2_delta": true,
+    "G3_blocks_plus": true,
+    "G4_keep_noxb": true,
+    "G5_new_win": true,
+    "G6_keep_base": true
+  },
+  "verdict": "SHIP_CANDIDATE",
+  "lb_claim": null,
+  "note": "Cannot claim LB>0.71222 without public leaderboard. Local gate only. Prefer smallest delta-passing recipe if multiple pass."
+}

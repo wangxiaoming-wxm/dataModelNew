@@ -1,0 +1,9 @@
+{
+  "tag": "ship_max3_b7",
+  "nested": 0.7044905465739018,
+  "delta": 0.0014174068669248197,
+  "spearman_vs_max3": 0.9957843511955597,
+  "blocks_plus": "4/5",
+  "passed": true,
+  "n_arms": 4
+}

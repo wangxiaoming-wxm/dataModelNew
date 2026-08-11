@@ -1,0 +1,50 @@
+{
+  "n_pool": 7,
+  "pool": [
+    "cat_w12_d5",
+    "noxb10",
+    "ord_noxb_new_interim",
+    "ordered_bag",
+    "plus_strong",
+    "plus_v10",
+    "semantic_rmse"
+  ],
+  "top": [
+    {
+      "extra": [
+        "plus_strong",
+        "noxb10",
+        "cat_w12_d5",
+        "ord_noxb_new_interim"
+      ],
+      "nested": 0.7061739349196986,
+      "delta": 0.003100795212721663,
+      "sp": 0.9918028205362356,
+      "blocks_plus": 4,
+      "passed": true
+    },
+    {
+      "extra": [
+        "plus_strong",
+        "noxb10",
+        "cat_w12_d5"
+      ],
+      "nested": 0.7058917572063541,
+      "delta": 0.002818617499377174,
+      "sp": 0.9917505642620466,
+      "blocks_plus": 4,
+      "passed": true
+    },
+    {
+      "extra": [
+        "plus_strong",
+        "ord_noxb_new_interim"
+      ],
+      "nested": 0.7050990622405119,
+      "delta": 0.0020259225335349518,
+      "sp": 0.991766846201359,
+      "blocks_plus": 4,
+      "passed": true
+    }
+  ]
+}

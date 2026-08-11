@@ -1,30 +1,21 @@
-# Beat max3 — 当前可交最高版
+# Beat max3 — 接入 714 best_v1
 
-## 提交文件（主推）
+## 参考来源
+GitHub `main/714.zip` → `refs_incoming/714/`
+- `特征设计文档_best_v1.md`（声称线上 **0.71464**）
+- `explore_best.py`（双编码世界 max2）
 
-**`submissions/submission_beat_max3.csv`**
+## 配方
+- 臂1：cond_r 世界 + RMSE + Ordered d5 iter800 + 8seed×3bag
+- 臂2：rate 世界 + RMSE + Plain d6 iter800 + 8seed×3bag
+- 融合：`max(rank(main), rank(alt))`
 
-| 项 | 值 |
-|---|---|
-| 配方 | `max(rank(merger_ord8), rank(v2_cat_alt8), rank(ord_noxb_strong), rank(plus_strong))` |
-| `ord_noxb_strong` | `0.5·ord_noxb_bag + 0.5·new16_bag`（同一 ES 逻辑臂加种子，非孪生堆叠） |
-| nested Δ vs v4_max3 | **+0.0018**（随 new16 种子数浮动，当前≥9 seeds） |
-| Spearman vs v4_max3 | ≈ **0.9915** |
-| blocks+ | **4/5** |
-| 臂数 | **4**（策略合规） |
+## 相对 v4_max3（LB 0.71222）
+若复现成功，best_v1 是当前**期望值最高**的可交候选（文档声称 +0.002+ LB）。
 
-对照冠军：`submissions/submission_v4_max3.csv`（LB **0.71222**）。
+## 当前主推（训练完成前）
+仍为 `submissions/submission_beat_max3.csv` = `ship_max3s_plus`（真·4臂，Δ≈+0.0018 nested）。
 
-## 明确不交
-
-- `submission_max3_best*` / `*_pro*` / kitchen-sink（noxb10+w12）— v4ext 同款风险
-- `plus+b7` 双互补 max 堆叠 — 二者 Spearman≈**0.977**，属高相关孪生
-
-## 备选（同门禁，非主推）
-
-- `submission_ship_max3s_b7.csv`：第四臂换 `b7_closest`（其本身已是多源 fuse，迁移风险更高）
-- `submission_ship_max3_plus.csv`：未加强 ord 的四臂版
-
-## 诚实边界
-
-本地 nested 增益**不能保证**公开榜 > 0.71222。本版是策略约束下期望值最高的可交候选；探针正交臂（exp1/2/3）若过门禁会自动替换进 `submission_beat_max3.csv`。
+训练完成后：
+- `submissions/submission_best_v1.csv`
+- 若过门禁，自动提升为 `submission_beat_max3.csv`

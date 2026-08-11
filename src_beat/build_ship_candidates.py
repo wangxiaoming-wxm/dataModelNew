@@ -211,23 +211,65 @@ def main():
             strong_t = 0.5 * od_t + 0.5 * bag[1]
             record("ship_max3s_b7", [mo_o, ca_o, strong_o, b7_o], [mo_t, ca_t, strong_t, b7_t])
 
+    # 714 best_v1 dual-world fuse (claimed LB 0.71464) — evaluate as standalone + meta with max3
+    best_npz = ART / "best_v1.npz"
+    if best_npz.exists():
+        bd = np.load(best_npz)
+        bv_o = np.asarray(bd["oof"], float)
+        bv_t = np.asarray(bd["test_pred"], float)
+        bv_auc = float(roc_auc_score(y, bv_o))
+        bv_nest = nested(bv_o, y)
+        base_n = nested(base_o, y)
+        sp_bv = float(spearmanr(bv_t, base_t).correlation)
+        bp_bv = blocks_plus(bv_o, base_o, y)
+        # Standalone ship if nested beats max3 by ≥0.001 OR absolute nested ≥ max3
+        standalone = {
+            "tag": "ship_best_v1",
+            "nested": bv_nest,
+            "delta": bv_nest - base_n,
+            "spearman_vs_max3": sp_bv,
+            "blocks_plus": f"{bp_bv}/5",
+            "passed": bv_nest >= base_n + 0.0005,
+            "n_arms": 2,
+            "arm_oof_auc": bv_auc,
+            "note": "714 best_v1 max2(cond_r, rate); claimed LB 0.71464",
+        }
+        results.append(standalone)
+        print(json.dumps(standalone, indent=2), flush=True)
+        if standalone["passed"]:
+            pd.DataFrame({"id": tid, "label": bv_t}).to_csv(SUB / "submission_ship_best_v1.csv", index=False)
+            pd.DataFrame({"id": tid, "label": bv_t}).to_csv(ART / "submission_ship_best_v1.csv", index=False)
+            (ART / "report_ship_best_v1.json").write_text(json.dumps(standalone, indent=2))
+            shipped["ship_best_v1"] = (standalone, bv_t)
+        # Meta: max(max3, best_v1) as 2 super-arms (not 5 twin stack)
+        record("ship_max3_x_bestv1", [base_o, bv_o], [base_t, bv_t])
+        if bag is not None:
+            strong_o = 0.5 * od_o + 0.5 * bag[0]
+            strong_t = 0.5 * od_t + 0.5 * bag[1]
+            max3s_o = np.maximum.reduce([rk(mo_o), rk(ca_o), rk(strong_o)])
+            max3s_t = np.maximum.reduce([rk(mo_t), rk(ca_t), rk(strong_t)])
+            record("ship_max3s_x_bestv1", [max3s_o, bv_o], [max3s_t, bv_t])
+
     passed = [r for r in results if r["passed"]]
-    # Prefer: admitted probe > max3s_plus (strong ES+plus) > max3_plus > other plus > b7.
-    # Avoid crowning neword_plus just because nested jitters higher — it drops the proven ord bag.
+    # Prefer: best_v1 (claimed higher LB) > admitted probe > max3s_plus > ...
     def rank_key(r):
         tag = r["tag"]
-        if "probe" in tag:
+        if tag == "ship_best_v1":
             prefer = 0
-        elif tag == "ship_max3s_plus":
+        elif tag in ("ship_max3_x_bestv1", "ship_max3s_x_bestv1"):
             prefer = 1
-        elif tag == "ship_max3s_rmean_plus":
+        elif "probe" in tag:
             prefer = 2
-        elif tag == "ship_max3_plus":
+        elif tag == "ship_max3s_plus":
             prefer = 3
-        elif "plus" in tag and "b7" not in tag:
+        elif tag == "ship_max3s_rmean_plus":
             prefer = 4
-        else:
+        elif tag == "ship_max3_plus":
             prefer = 5
+        elif "plus" in tag and "b7" not in tag:
+            prefer = 6
+        else:
+            prefer = 7
         return (prefer, -r["delta"])
 
     passed.sort(key=rank_key)

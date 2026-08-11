@@ -28,5 +28,9 @@ V4ext 实测 **0.71123**，证明「丢掉 ord_noxb_bag + 用诚实 nested 外�
 
 ## 训练
 ```bash
-bash run_beat_max3.sh   # P0 fuse + P1–P3 长训新 noxb 族
+bash run_beat_max3.sh            # P0 fuse + P1–P3 长训新 noxb 族
+bash run_beat_max3_followup.sh   # plus_new8 + CoFEH/goldmine 方法论臂
 ```
+
+## 方法论接入
+见 `docs/METHODOLOGY_ADOPT.md`：`features_goldmine` + CoFEH 蒸馏算子 + Made-With-ML 残差互补 + 监督门禁。

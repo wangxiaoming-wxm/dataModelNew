@@ -17,6 +17,21 @@ python3 src_beat/supervise.py --tag max3_best_plusnew --extra plus_strong noxb10
 python3 src_beat/supervise.py --tag max3_plusnew --extra plus_new8 || true
 python3 src_beat/supervise.py --tag max3_dualplus --extra plus_strong plus_new8 cat_w12_d5 || true
 
+# P5: methodology arms (features_goldmine distilled CoFEH ops + full goldmine)
+echo "[P5] cofeh_arm (distilled goldmine ops + LightGBM)"
+python3 src_beat/train_method_arm.py --mode cofeh --tag cofeh_arm \
+  --seeds 2700 2701 2702 2703 2704 2705 2706 2707 \
+  2>&1 | tee logs/beat_max3/cofeh_arm.log
+python3 src_beat/supervise.py --tag max3_best_cofeh --extra plus_strong noxb10 cat_w12_d5 cofeh_arm || true
+python3 src_beat/supervise.py --tag max3_plus_cofeh --extra plus_strong cofeh_arm || true
+
+echo "[P5] goldmine_arm (fold-local GoldenFeatures)"
+python3 src_beat/train_method_arm.py --mode goldmine --tag goldmine_arm \
+  --seeds 2800 2801 2802 2803 \
+  2>&1 | tee logs/beat_max3/goldmine_arm.log
+python3 src_beat/supervise.py --tag max3_best_gold --extra plus_strong noxb10 cat_w12_d5 goldmine_arm || true
+python3 src_beat/supervise.py --tag max3_plus_gold --extra plus_strong goldmine_arm || true
+
 # leaderboard dump
 python3 - <<'PY'
 import json
@@ -29,5 +44,8 @@ rows.sort(reverse=True)
 print('=== LEADERBOARD ===')
 for d,ok,tag,nest,sp in rows:
     print(f"{'PASS' if ok else 'FAIL'} Δ={d:+.5f} nest={nest:.5f} sp={sp:.4f} {tag}")
+best=[r for r in rows if r[1]]
+if best:
+    print('BEST_SHIP', best[0][2], 'delta', best[0][0])
 PY
 echo FOLLOWUP_DONE

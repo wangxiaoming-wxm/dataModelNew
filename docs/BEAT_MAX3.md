@@ -35,3 +35,6 @@ bash run_beat_max3_followup.sh   # plus_new8 + CoFEH/goldmine 方法论臂
 
 ## 方法论接入
 见 `docs/METHODOLOGY_ADOPT.md`：`features_goldmine` + CoFEH 蒸馏算子 + Made-With-ML 残差互补 + 监督门禁。
+
+
+> **策略对齐**：交榜以 `docs/DELIVERY_HQ.md` 为准；`stage_best`/`max3_best`/`pro` 因高相关堆臂风险勿交。

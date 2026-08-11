@@ -25,7 +25,10 @@ V4 在 V3 诚实协议上继续推高：不解冻早停、不碰测试标签、�
 1. [`docs/V4.md`](docs/V4.md) — V4 数字、复现、无效方向、下一步建议  
 2. [`docs/V4_SUPERVISION.md`](docs/V4_SUPERVISION.md) — 独立监督者定稿意见  
 3. [`docs/DATA_STRUCTURE.md`](docs/DATA_STRUCTURE.md) — 数据生成机制（方案地基）  
-4. [`docs/V3.md`](docs/V3.md) — V3 对照（只读）
+4. [`docs/V3.md`](docs/V3.md) — V3 对照（只读）  
+5. [`docs/复盘_全流程_极详细版_20260811.md`](docs/复盘_全流程_极详细版_20260811.md) — 全流程复盘  
+6. [`docs/下一步策略_20260811.md`](docs/下一步策略_20260811.md) — 后续策略  
+7. [`reference/714/`](reference/714/) — 714 参考代码与特征设计（原 `714.zip`）
 
 ---
 
@@ -75,6 +78,8 @@ docs/V4.md                V4 说明、复现、下一步、坑
 docs/V4_SUPERVISION.md    监督者定稿
 docs/DATA_STRUCTURE.md    数据地基
 docs/V3.md / SUPERVISION.md / HANDOFF.md   历史对照
+docs/复盘_* / 下一步策略_*  2026-08-11 复盘与策略
+reference/714/            714 参考（无 zip / 无 macOS 垃圾）
 ```
 
 ---

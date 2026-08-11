@@ -17,9 +17,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
-from scipy.stats import rankdata, pearsonr
+from scipy.stats import pearsonr, rankdata, spearmanr
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
+
+try:
+    from .features_te import FEATURE_NAME, build_source_days_te
+except ImportError:  # 兼容 ``python src_super/train_super714.py``
+    from features_te import FEATURE_NAME, build_source_days_te
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -236,6 +241,94 @@ def run_arm(
     return oof_pool, te_pool, float(roc_auc_score(y, oof_pool))
 
 
+def run_te_arm(
+    train: pd.DataFrame,
+    test: pd.DataFrame,
+    y: np.ndarray,
+    edges: dict,
+    *,
+    seeds=SEEDS,
+    n_splits=N_SPLITS,
+    bag_seeds=BAG_SEEDS,
+) -> tuple[np.ndarray, np.ndarray, float, list[float]]:
+    """训练唯一候选臂：main 特征加双层诚实 source×days-bin TE。"""
+    raw_train = train.drop(columns=["label"]).reset_index(drop=True)
+    raw_test = test.reset_index(drop=True)
+    raw_all = pd.concat([raw_train, raw_test], ignore_index=True)
+    x_all, cat_features = build_main(raw_all, edges)
+    for column in cat_features:
+        x_all[column] = x_all[column].astype(str)
+    x_train = x_all.iloc[: len(train)].reset_index(drop=True)
+    x_test = x_all.iloc[len(train) :].reset_index(drop=True)
+
+    oof_ranks: list[np.ndarray] = []
+    test_ranks: list[np.ndarray] = []
+    seed_aucs: list[float] = []
+    for seed in seeds:
+        started = time.time()
+        splitter = StratifiedKFold(n_splits, shuffle=True, random_state=seed)
+        seed_oof = np.zeros(len(train), dtype=float)
+        seed_test = np.zeros(len(test), dtype=float)
+        for train_idx, valid_idx in splitter.split(x_train, y):
+            te_fold = build_source_days_te(
+                fit_frame=raw_train.iloc[train_idx],
+                y_fit=y[train_idx],
+                valid_frame=raw_train.iloc[valid_idx],
+                other_frames=(raw_test,),
+                n_bins=10,
+                smoothing=20.0,
+                inner_splits=4,
+                inner_seed=seed,
+            )
+            x_fit = x_train.iloc[train_idx].copy()
+            x_valid = x_train.iloc[valid_idx].copy()
+            x_fold_test = x_test.copy()
+            x_fit[FEATURE_NAME] = te_fold.fit.to_numpy()
+            x_valid[FEATURE_NAME] = te_fold.valid.to_numpy()
+            x_fold_test[FEATURE_NAME] = te_fold.others[0].to_numpy()
+
+            fold_test = np.zeros(len(test), dtype=float)
+            for bag_seed in bag_seeds:
+                model = CatBoostRegressor(
+                    loss_function="RMSE",
+                    eval_metric="RMSE",
+                    iterations=800,
+                    learning_rate=LR,
+                    depth=5,
+                    l2_leaf_reg=10,
+                    random_strength=0.7,
+                    boosting_type="Ordered",
+                    verbose=0,
+                    allow_writing_files=False,
+                    thread_count=-1,
+                    random_seed=seed * 100 + bag_seed,
+                )
+                model.fit(
+                    Pool(x_fit, y[train_idx], cat_features=cat_features),
+                    verbose=False,
+                )
+                seed_oof[valid_idx] += model.predict(x_valid)
+                fold_test += model.predict(x_fold_test)
+            seed_oof[valid_idx] /= len(bag_seeds)
+            seed_test += fold_test / len(bag_seeds)
+
+        seed_test /= n_splits
+        seed_auc = float(roc_auc_score(y, seed_oof))
+        seed_aucs.append(seed_auc)
+        oof_ranks.append(rankdata(seed_oof) / len(seed_oof))
+        test_ranks.append(rankdata(seed_test) / len(seed_test))
+        print(
+            f"  [main_te] seed {seed}: OOF={seed_auc:.5f} "
+            f"({time.time() - started:.0f}s)",
+            flush=True,
+        )
+
+    pooled_oof = np.mean(oof_ranks, axis=0)
+    pooled_test = np.mean(test_ranks, axis=0)
+    pooled_auc = float(roc_auc_score(y, pooled_oof))
+    return pooled_oof, pooled_test, pooled_auc, seed_aucs
+
+
 def setup_log(log_path: Path) -> logging.Logger:
     """同时写终端与文件，避免复用进程时重复 handler。"""
     logger = logging.getLogger("super714")
@@ -252,10 +345,64 @@ def setup_log(log_path: Path) -> logging.Logger:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="训练 SUPER714/best_v1 双臂基线")
+    parser = argparse.ArgumentParser(description="训练 SUPER714 的折内 TE 候选臂")
     parser.add_argument("--smoke", action="store_true", help="2 折×1 seed×1 bag 通路检查")
+    parser.add_argument(
+        "--baseline-only",
+        action="store_true",
+        help="重新训练 best_v1 双臂，不训练 TE；默认直接复用冻结基线",
+    )
     parser.add_argument("--data-dir", help="含 train.csv/test.csv 的目录；覆盖 DATA_DIR")
     return parser.parse_args()
+
+
+def load_frozen_baseline(
+    y: np.ndarray,
+    test_rows: int,
+) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], dict[str, float]]:
+    """读取并复核不可变 best_v1 基座。"""
+    artifact_dir = ROOT / "artifacts" / "super714"
+    oof = np.load(artifact_dir / "best_v1_oof.npy", allow_pickle=True).item()
+    test_pred = np.load(artifact_dir / "best_v1_test.npy", allow_pickle=True).item()
+    if set(oof) != {"main", "alt", "fuse"} or set(test_pred) != {"main", "alt", "fuse"}:
+        raise ValueError("冻结 best_v1 产物键必须为 main/alt/fuse")
+    if any(len(np.asarray(value)) != len(y) for value in oof.values()):
+        raise ValueError("冻结 best_v1 OOF 长度错误")
+    if any(len(np.asarray(value)) != test_rows for value in test_pred.values()):
+        raise ValueError("冻结 best_v1 test 长度错误")
+
+    scores = {
+        key: float(roc_auc_score(y, np.asarray(oof[key])))
+        for key in ("main", "alt", "fuse")
+    }
+    expected = {"main": 0.699917, "alt": 0.697704, "fuse": 0.701275}
+    for key, expected_score in expected.items():
+        if abs(scores[key] - expected_score) > 1e-5:
+            raise ValueError(
+                f"冻结基座 {key} AUC={scores[key]:.8f}，偏离 {expected_score:.6f}"
+            )
+    return oof, test_pred, scores
+
+
+def save_submission(
+    sample: pd.DataFrame,
+    test: pd.DataFrame,
+    prediction: np.ndarray,
+    path: Path,
+) -> None:
+    """按官方样例行序写提交并执行硬校验。"""
+    if list(sample.columns) != ["id", "label"]:
+        raise ValueError("submit_sample.csv 列必须严格为 id,label")
+    if not sample["id"].astype(str).reset_index(drop=True).equals(
+        test["id"].astype(str).reset_index(drop=True)
+    ):
+        raise ValueError("submit_sample.csv 与 test.csv 的 id/行序不一致")
+    values = np.asarray(prediction, dtype=float)
+    if len(values) != len(sample) or not np.isfinite(values).all():
+        raise ValueError("提交预测长度错误或包含非有限值")
+    submission = sample[["id"]].copy()
+    submission["label"] = np.clip(values, 0.001, 0.999)
+    submission.to_csv(path, index=False)
 
 
 def main() -> int:
@@ -272,65 +419,160 @@ def main() -> int:
     n_splits = 2 if args.smoke else N_SPLITS
     bag_seeds = (0,) if args.smoke else BAG_SEEDS
 
-    log.info("=== SUPER714 best_v1 基线（线上锚点 0.71453）smoke=%s ===", args.smoke)
+    log.info(
+        "=== SUPER714（冻结 best_v1 + 折内 TE）smoke=%s baseline_only=%s ===",
+        args.smoke,
+        args.baseline_only,
+    )
     t_start = time.time()
     train = pd.read_csv(data_dir / "train.csv", dtype={"id": str})
     test = pd.read_csv(data_dir / "test.csv", dtype={"id": str})
+    sample = pd.read_csv(data_dir / "submit_sample.csv", dtype={"id": str})
     y = train["label"].astype(int).values
     raw_all = pd.concat([train.drop(columns=["label"]), test])
-    edges_main = fit_edges_main(raw_all); edges_alt = fit_edges_alt(raw_all)
+    edges_main = fit_edges_main(raw_all)
 
-    log.info("--- 臂1: cond_r + Ordered+d5+800+l2=10 ---")
-    o1, t1, a1 = run_arm(
-        "main", build_main, edges_main, train, test, y, True, 5, 800, 10,
-        seeds=seeds, n_splits=n_splits, bag_seeds=bag_seeds,
+    frozen_oof, frozen_test, frozen_scores = load_frozen_baseline(y, len(test))
+    main_oof = np.asarray(frozen_oof["main"])
+    alt_oof = np.asarray(frozen_oof["alt"])
+    max2_oof = np.maximum(main_oof, alt_oof)
+    main_test = np.asarray(frozen_test["main"])
+    alt_test = np.asarray(frozen_test["alt"])
+    max2_test = np.maximum(main_test, alt_test)
+    base_spearman = float(spearmanr(main_oof, alt_oof).statistic)
+    log.info(
+        "冻结基座: main=%.6f alt=%.6f max2=%.6f Spearman=%.5f",
+        frozen_scores["main"],
+        frozen_scores["alt"],
+        frozen_scores["fuse"],
+        base_spearman,
     )
-    log.info("  臂1 pooled OOF = %.5f", a1)
 
-    log.info("--- 臂2: rate + Plain+d6+800+l2=6 ---")
-    o2, t2, a2 = run_arm(
-        "alt", build_alt, edges_alt, train, test, y, False, 6, 800, 6,
-        seeds=seeds, n_splits=n_splits, bag_seeds=bag_seeds,
-    )
-    log.info("  臂2 pooled OOF = %.5f", a2)
+    recipe = {
+        "seeds": list(seeds),
+        "n_splits": n_splits,
+        "bag_seeds": list(bag_seeds),
+        "iterations": 800,
+    }
+    if args.baseline_only:
+        edges_alt = fit_edges_alt(raw_all)
+        log.info("--- 重训臂1: cond_r + Ordered+d5+800+l2=10 ---")
+        trained_main_oof, trained_main_test, main_auc = run_arm(
+            "main", build_main, edges_main, train, test, y, True, 5, 800, 10,
+            seeds=seeds, n_splits=n_splits, bag_seeds=bag_seeds,
+        )
+        log.info("--- 重训臂2: rate + Plain+d6+800+l2=6 ---")
+        trained_alt_oof, trained_alt_test, alt_auc = run_arm(
+            "alt", build_alt, edges_alt, train, test, y, False, 6, 800, 6,
+            seeds=seeds, n_splits=n_splits, bag_seeds=bag_seeds,
+        )
+        trained_max2_oof = np.maximum(trained_main_oof, trained_alt_oof)
+        trained_max2_test = np.maximum(trained_main_test, trained_alt_test)
+        max2_auc = float(roc_auc_score(y, trained_max2_oof))
+        correlation = float(pearsonr(trained_main_oof, trained_alt_oof).statistic)
+        np.save(
+            artifact_dir / f"trained_oof{suffix}.npy",
+            {
+                "main": trained_main_oof,
+                "alt": trained_alt_oof,
+                "fuse": trained_max2_oof,
+            },
+        )
+        np.save(
+            artifact_dir / f"trained_test{suffix}.npy",
+            {
+                "main": trained_main_test,
+                "alt": trained_alt_test,
+                "fuse": trained_max2_test,
+            },
+        )
+        submission_path = submission_dir / f"submission_super714_baseline{suffix}.csv"
+        save_submission(sample, test, trained_max2_test, submission_path)
+        metrics = {
+            "mode": "baseline_smoke" if args.smoke else "baseline_full",
+            "data_dir": str(data_dir),
+            "recipe": recipe,
+            "auc": {"main": main_auc, "alt": alt_auc, "max2": max2_auc},
+            "pearson_main_alt": correlation,
+            "selected_fusion": "max2",
+            "submission": str(submission_path.relative_to(ROOT)),
+        }
+    else:
+        log.info("--- 候选臂: main + 双层诚实 TE(source×days_bin10) ---")
+        te_oof, te_test, te_auc, seed_aucs = run_te_arm(
+            train,
+            test,
+            y,
+            edges_main,
+            seeds=seeds,
+            n_splits=n_splits,
+            bag_seeds=bag_seeds,
+        )
+        max3_oof = np.maximum.reduce([main_oof, alt_oof, te_oof])
+        max3_test = np.maximum.reduce([main_test, alt_test, te_test])
+        max3_auc = float(roc_auc_score(y, max3_oof))
+        corr_main = float(spearmanr(te_oof, main_oof).statistic)
+        gain = max3_auc - frozen_scores["fuse"]
+        gates = {
+            "te_auc_gt_0.697": te_auc > 0.697,
+            "spearman_main_lt_0.90": corr_main < 0.90,
+            "max3_gain_gt_0.001": gain > 0.001,
+        }
+        accepted = (not args.smoke) and all(gates.values())
+        selected_fusion = "max3" if accepted else "max2"
+        selected_test = max3_test if accepted else max2_test
+        log.info(
+            "TE=%.6f Spearman(TE,main)=%.5f max3=%.6f gain=%+.6f",
+            te_auc,
+            corr_main,
+            max3_auc,
+            gain,
+        )
+        log.info("门槛=%s；选择=%s", gates, selected_fusion)
 
-    fuse_oof = np.maximum(o1, o2); fuse_te = np.maximum(t1, t2)
-    fuse_auc = float(roc_auc_score(y, fuse_oof))
-    correlation = float(pearsonr(o1, o2)[0])
-    log.info("  max2融合 OOF = %.5f", fuse_auc)
-    log.info("  (臂1=%.5f, 臂2=%.5f)", a1, a2)
-    log.info("  corr=%.4f", correlation)
+        np.savez(
+            artifact_dir / f"main_te{suffix}.npz",
+            oof=te_oof,
+            test_pred=te_test,
+            per_seed=np.asarray(seed_aucs),
+            seeds=np.asarray(seeds),
+            y=y,
+        )
+        submission_path = submission_dir / f"submission_super714{suffix}.csv"
+        save_submission(sample, test, selected_test, submission_path)
+        if accepted:
+            save_submission(
+                sample,
+                test,
+                max3_test,
+                submission_dir / "submission_super714_te_max3.csv",
+            )
+        metrics = {
+            "mode": "te_smoke" if args.smoke else "te_full",
+            "data_dir": str(data_dir),
+            "recipe": recipe,
+            "frozen_auc": frozen_scores,
+            "frozen_main_alt_spearman": base_spearman,
+            "te_seed_auc": seed_aucs,
+            "te_auc": te_auc,
+            "te_main_spearman": corr_main,
+            "max3_auc": max3_auc,
+            "max3_gain": gain,
+            "gates": gates,
+            "accepted": accepted,
+            "selected_fusion": selected_fusion,
+            "submission": str(submission_path.relative_to(ROOT)),
+        }
 
-    sub = pd.DataFrame({"id":test["id"], "label":fuse_te.clip(0.001,0.999)})
-    sub_path = submission_dir / f"submission_super714{suffix}.csv"
-    sub.to_csv(sub_path, index=False)
-    np.save(
-        artifact_dir / f"trained_oof{suffix}.npy",
-        {"main": o1, "alt": o2, "fuse": fuse_oof},
-    )
-    np.save(
-        artifact_dir / f"trained_test{suffix}.npy",
-        {"main": t1, "alt": t2, "fuse": fuse_te},
-    )
     metrics = {
-        "mode": "smoke" if args.smoke else "full",
-        "data_dir": str(data_dir),
-        "recipe": {
-            "seeds": list(seeds),
-            "n_splits": n_splits,
-            "bag_seeds": list(bag_seeds),
-            "iterations": 800,
-        },
-        "auc": {"main": a1, "alt": a2, "max2": fuse_auc},
-        "pearson_main_alt": correlation,
-        "selected_fusion": "max2",
-        "submission": str(sub_path.relative_to(ROOT)),
+        **metrics,
+        "elapsed_minutes": (time.time() - t_start) / 60,
     }
     (artifact_dir / f"metrics{suffix}.json").write_text(
         json.dumps(metrics, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    log.info("已保存 %s", sub_path)
+    log.info("已保存 %s", submission_path)
     log.info("DATA_DIR=%s", data_dir)
     log.info("总耗时: %.1f 分钟", (time.time() - t_start) / 60)
     return 0

@@ -39,11 +39,14 @@ pip install -r requirements.txt
 # 秒级验收（不训练）
 bash run_super714.sh --verify
 
-# 通路检查；输出带 _smoke 后缀，不覆盖主交付
+# TE 通路检查；输出带 _smoke 后缀，不覆盖主交付
 bash run_super714.sh --smoke
 
-# 完整训练
+# 完整训练唯一候选 TE 臂；基座直接读取已校验冻结产物
 bash run_super714.sh
+
+# 可选：单独从头复现 best_v1 双臂
+bash run_super714.sh --baseline-only
 ```
 
 可通过 `DATA_DIR` 或 `--data-dir` 指向含 `train.csv/test.csv` 的目录。
@@ -55,6 +58,7 @@ bash run_super714.sh
 - 预计算测试预测：`artifacts/super714/best_v1_test.npy`
 - 秒级验收：`src_super/verify_super714.py`
 - 完整训练入口：`src_super/train_super714.py`
+- 折内 TE 实现：`src_super/features_te.py`
 
 当前主提交来自已验证 best_v1 fuse 产物；完整训练完成并通过门槛后才允许覆盖。
 

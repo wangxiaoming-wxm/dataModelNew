@@ -11,11 +11,14 @@ pip install -r requirements.txt
 # 秒级核验预计算 best_v1 产物与主提交
 bash run_super714.sh --verify
 
-# 冒烟：2 folds × 1 seed × 1 bag，不覆盖主提交
+# 冒烟：完整 TE 通路，2 folds × 1 seed × 1 bag，不覆盖主提交
 bash run_super714.sh --smoke
 
-# 完整：8 seeds × 5 folds × 3 bags
+# 完整训练唯一候选 TE 臂：8 seeds × 5 folds × 3 bags
 bash run_super714.sh
+
+# 可选：从头重训 best_v1 双臂（默认直接使用已校验冻结产物）
+bash run_super714.sh --baseline-only
 ```
 
 默认数据目录是 `data/`，也可覆盖：
@@ -24,7 +27,9 @@ bash run_super714.sh
 DATA_DIR=/path/to/data bash run_super714.sh --smoke
 ```
 
-主提交：`submissions/submission_super714.csv`。
+主提交：`submissions/submission_super714.csv`。完整训练只会在 TE 臂同时通过
+`AUC>0.697`、与 main 的 Spearman `<0.90`、max3 增益 `>0.001` 时升级它；
+否则自动保持 best_v1 max2。
 方案与诚实门槛见 [`docs/SOLUTION.md`](docs/SOLUTION.md)。
 
 ## 目录

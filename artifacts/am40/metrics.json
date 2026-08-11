@@ -1,0 +1,21 @@
+{
+  "name": "AM40",
+  "formula": "0.4*max(main,alt) + 0.6*(0.62*main+0.38*alt)",
+  "alpha_max": 0.4,
+  "linear_weights": {
+    "main": 0.62,
+    "alt": 0.38
+  },
+  "source_oof": "/workspace/artifacts/super714/best_v1_oof.npy",
+  "source_test": "/workspace/artifacts/super714/best_v1_test.npy",
+  "oof_auc": 0.7018113510376338,
+  "w62_oof_auc": 0.7015936597140784,
+  "max2_oof_auc": 0.7012752084064776,
+  "delta_vs_w62": 0.00021769132355542453,
+  "gate_beat_w62": true,
+  "submission": "submissions/submission_am40.csv",
+  "submission_sha256": "de0d337f02873f8b429c0518d3dadcbb34fdbd371e9707193dc2d1fbec49e2a9",
+  "spearman_vs_submission_w62": 0.998932108802142,
+  "different_from_w62_file": true,
+  "n_test": 6398
+}

@@ -181,15 +181,22 @@ def main():
             record("ship_max3s_b7", [mo_o, ca_o, strong_o, b7_o], [mo_t, ca_t, strong_t, b7_t])
 
     passed = [r for r in results if r["passed"]]
-    # Prefer plus-family / admitted probes over b7 (b7_closest is already a multi-source fuse).
+    # Prefer: admitted probe > max3s_plus (strong ES+plus) > max3_plus > other plus > b7.
+    # Avoid crowning neword_plus just because nested jitters higher — it drops the proven ord bag.
     def rank_key(r):
         tag = r["tag"]
         if "probe" in tag:
-            prefer = 0  # orthogonal probe that passed hard gate
-        elif "plus" in tag and "b7" not in tag:
+            prefer = 0
+        elif tag == "ship_max3s_plus":
             prefer = 1
-        else:
+        elif tag == "ship_max3s_rmean_plus":
             prefer = 2
+        elif tag == "ship_max3_plus":
+            prefer = 3
+        elif "plus" in tag and "b7" not in tag:
+            prefer = 4
+        else:
+            prefer = 5
         return (prefer, -r["delta"])
 
     passed.sort(key=rank_key)

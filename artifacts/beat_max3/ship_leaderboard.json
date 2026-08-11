@@ -2,36 +2,36 @@
   "all": [
     {
       "tag": "ship_max3s_b7",
-      "nested": 0.7047919557607444,
-      "delta": 0.0017188160537674468,
-      "spearman_vs_max3": 0.9956761126301058,
-      "blocks_plus": "4/5",
-      "passed": true,
-      "n_arms": 4
-    },
-    {
-      "tag": "ship_max3s_plus",
-      "nested": 0.7046978384719432,
-      "delta": 0.0016246987649662925,
-      "spearman_vs_max3": 0.9915384451195864,
-      "blocks_plus": "4/5",
-      "passed": true,
-      "n_arms": 4
-    },
-    {
-      "tag": "ship_max3s_rmean_plus",
-      "nested": 0.7046064827530752,
-      "delta": 0.0015333430460983122,
-      "spearman_vs_max3": 0.9915349203196031,
+      "nested": 0.7049479720224603,
+      "delta": 0.0018748323154833546,
+      "spearman_vs_max3": 0.995679759078863,
       "blocks_plus": "4/5",
       "passed": true,
       "n_arms": 4
     },
     {
       "tag": "ship_max3_neword_plus",
-      "nested": 0.7045649348090367,
-      "delta": 0.0014917951020597675,
-      "spearman_vs_max3": 0.9913010060527606,
+      "nested": 0.704922471038844,
+      "delta": 0.0018493313318670435,
+      "spearman_vs_max3": 0.9913019659466481,
+      "blocks_plus": "4/5",
+      "passed": true,
+      "n_arms": 4
+    },
+    {
+      "tag": "ship_max3s_plus",
+      "nested": 0.7048854510743353,
+      "delta": 0.0018123113673583768,
+      "spearman_vs_max3": 0.9915379522208465,
+      "blocks_plus": "4/5",
+      "passed": true,
+      "n_arms": 4
+    },
+    {
+      "tag": "ship_max3s_rmean_plus",
+      "nested": 0.7047834968978861,
+      "delta": 0.001710357190909173,
+      "spearman_vs_max3": 0.9915335982484687,
       "blocks_plus": "4/5",
       "passed": true,
       "n_arms": 4
@@ -56,27 +56,27 @@
     },
     {
       "tag": "ship_max3s",
-      "nested": 0.7030616207260849,
-      "delta": -1.1518980892022412e-05,
-      "spearman_vs_max3": 0.9998753256040102,
-      "blocks_plus": "2/5",
+      "nested": 0.7032531890908137,
+      "delta": 0.00018004938383675562,
+      "spearman_vs_max3": 0.9998791052391103,
+      "blocks_plus": "3/5",
       "passed": false,
       "n_arms": 3
     },
     {
       "tag": "ship_max3s_rmean",
-      "nested": 0.7029704889182926,
-      "delta": -0.00010265078868432198,
-      "spearman_vs_max3": 0.9998712650968165,
-      "blocks_plus": "2/5",
+      "nested": 0.7031677794549547,
+      "delta": 9.463974797774277e-05,
+      "spearman_vs_max3": 0.9998747816488069,
+      "blocks_plus": "3/5",
       "passed": false,
       "n_arms": 3
     },
     {
       "tag": "ship_max3_neword",
-      "nested": 0.7027971071087089,
-      "delta": -0.00027603259826802784,
-      "spearman_vs_max3": 0.9995243183732754,
+      "nested": 0.703085877759281,
+      "delta": 1.2738052304062109e-05,
+      "spearman_vs_max3": 0.9995396719212186,
       "blocks_plus": "3/5",
       "passed": false,
       "n_arms": 3
@@ -85,27 +85,18 @@
   "best_passed": [
     {
       "tag": "ship_max3s_plus",
-      "nested": 0.7046978384719432,
-      "delta": 0.0016246987649662925,
-      "spearman_vs_max3": 0.9915384451195864,
+      "nested": 0.7048854510743353,
+      "delta": 0.0018123113673583768,
+      "spearman_vs_max3": 0.9915379522208465,
       "blocks_plus": "4/5",
       "passed": true,
       "n_arms": 4
     },
     {
       "tag": "ship_max3s_rmean_plus",
-      "nested": 0.7046064827530752,
-      "delta": 0.0015333430460983122,
-      "spearman_vs_max3": 0.9915349203196031,
-      "blocks_plus": "4/5",
-      "passed": true,
-      "n_arms": 4
-    },
-    {
-      "tag": "ship_max3_neword_plus",
-      "nested": 0.7045649348090367,
-      "delta": 0.0014917951020597675,
-      "spearman_vs_max3": 0.9913010060527606,
+      "nested": 0.7047834968978861,
+      "delta": 0.001710357190909173,
+      "spearman_vs_max3": 0.9915335982484687,
       "blocks_plus": "4/5",
       "passed": true,
       "n_arms": 4
@@ -120,10 +111,19 @@
       "n_arms": 4
     },
     {
+      "tag": "ship_max3_neword_plus",
+      "nested": 0.704922471038844,
+      "delta": 0.0018493313318670435,
+      "spearman_vs_max3": 0.9913019659466481,
+      "blocks_plus": "4/5",
+      "passed": true,
+      "n_arms": 4
+    },
+    {
       "tag": "ship_max3s_b7",
-      "nested": 0.7047919557607444,
-      "delta": 0.0017188160537674468,
-      "spearman_vs_max3": 0.9956761126301058,
+      "nested": 0.7049479720224603,
+      "delta": 0.0018748323154833546,
+      "spearman_vs_max3": 0.995679759078863,
       "blocks_plus": "4/5",
       "passed": true,
       "n_arms": 4

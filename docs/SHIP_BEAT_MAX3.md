@@ -8,7 +8,7 @@
 |---|---|
 | 配方 | `max(rank(merger_ord8), rank(v2_cat_alt8), rank(ord_noxb_strong), rank(plus_strong))` |
 | `ord_noxb_strong` | `0.5·ord_noxb_bag + 0.5·new16_bag`（同一 ES 逻辑臂加种子，非孪生堆叠） |
-| nested Δ vs v4_max3 | **+0.0016 ~ +0.0017**（随 new16 种子数浮动） |
+| nested Δ vs v4_max3 | **+0.0018**（随 new16 种子数浮动，当前≥9 seeds） |
 | Spearman vs v4_max3 | ≈ **0.9915** |
 | blocks+ | **4/5** |
 | 臂数 | **4**（策略合规） |

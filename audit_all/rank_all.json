@@ -1,0 +1,1110 @@
+{
+  "data_sha": {
+    "train": "494a61073a0438f692914c4868db31df1171e662348e0024e06b120d08d44f28",
+    "test": "d6ffd26bd4873fa09f6fac361f59170a880e88e331a01d7a6356bd9184ce55ec"
+  },
+  "ruler": "5-block nested AUC, np.array_split contiguous, re-rank inside block; fusion=max(rank)",
+  "per_candidate": {
+    "opus/v4_honest": {
+      "source": "zip:20260810-cursor-opus5",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0,
+      "notes": "",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        }
+      ],
+      "nested_5block": 0.699926,
+      "full_oof": 0.700228,
+      "nested_10block": 0.700261,
+      "perm_auc": 0.49619,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "17887750ed35332dc08ee4b81003862e6cb144679add894f1a28b6bf0e2fe771",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 1.0
+      }
+    },
+    "opus/v4_max3": {
+      "source": "zip:20260810-cursor-opus5",
+      "protocol": "mixed_ES",
+      "es_arms": 1,
+      "notes": "",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "ord_noxb_bag.npz",
+          "oof_auc": 0.70064,
+          "nested_single": 0.70057,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds"
+          ]
+        }
+      ],
+      "nested_5block": 0.703073,
+      "full_oof": 0.703355,
+      "nested_10block": 0.703341,
+      "perm_auc": 0.49587,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "01afc280d1a478a502acc352893a2217d3122738ac9eeeb3d0647d2df430eeb9",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 0.9999999999999999
+      }
+    },
+    "opus/v5_honest": {
+      "source": "zip:20260810-cursor-opus5",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0,
+      "notes": "",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_gap.npz",
+          "oof_auc": 0.696364,
+          "nested_single": 0.69607,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        }
+      ],
+      "nested_5block": 0.70253,
+      "full_oof": 0.702853,
+      "nested_10block": 0.702798,
+      "perm_auc": 0.49476,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "db8f71e2d0a9fece28c18ddb3f812ca8ed7372e922b9e668b7f5dc4becabe560",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 1.0
+      }
+    },
+    "zcode/v4_honest": {
+      "source": "zip:20260808-zcode-cursor",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0,
+      "notes": "",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        }
+      ],
+      "nested_5block": 0.699926,
+      "full_oof": 0.700228,
+      "nested_10block": 0.700261,
+      "perm_auc": 0.49619,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "17887750ed35332dc08ee4b81003862e6cb144679add894f1a28b6bf0e2fe771",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 1.0
+      }
+    },
+    "zcode/v4_max3": {
+      "source": "zip:20260808-zcode-cursor",
+      "protocol": "mixed_ES",
+      "es_arms": 1,
+      "notes": "",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "ord_noxb_bag.npz",
+          "oof_auc": 0.70064,
+          "nested_single": 0.70057,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds"
+          ]
+        }
+      ],
+      "nested_5block": 0.703073,
+      "full_oof": 0.703355,
+      "nested_10block": 0.703341,
+      "perm_auc": 0.49587,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "01afc280d1a478a502acc352893a2217d3122738ac9eeeb3d0647d2df430eeb9",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 0.9999999999999999
+      }
+    },
+    "zcode/v4_max4": {
+      "source": "zip:20260808-zcode-cursor",
+      "protocol": "mixed_ES",
+      "es_arms": 2,
+      "notes": "ordered_bag also uses ES per zcode REPORT",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "ord_noxb_bag.npz",
+          "oof_auc": 0.70064,
+          "nested_single": 0.70057,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds"
+          ]
+        },
+        {
+          "arm": "ordered_bag.npz",
+          "oof_auc": 0.699107,
+          "nested_single": 0.698941,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds"
+          ]
+        }
+      ],
+      "nested_5block": 0.703211,
+      "full_oof": 0.703504,
+      "nested_10block": 0.703452,
+      "perm_auc": 0.49565,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "9a3948d8e0fb419e2e6731507a5926dfb8e5231793718c9d7ba09f7fab79f840",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 1.0
+      }
+    },
+    "zcode/v5_audit_max3_gap": {
+      "source": "zip:20260808-zcode-cursor",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0,
+      "notes": "v5_audit arms; csv may be different recipe",
+      "arms": [
+        {
+          "arm": "arm_cat_d5.npz",
+          "oof_auc": 0.695064,
+          "nested_single": 0.694887,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_d6.npz",
+          "oof_auc": 0.694915,
+          "nested_single": 0.694752,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_alt.npz",
+          "oof_auc": 0.69508,
+          "nested_single": 0.694641,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_gap.npz",
+          "oof_auc": 0.696364,
+          "nested_single": 0.69607,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        }
+      ],
+      "nested_5block": 0.700832,
+      "full_oof": 0.701097,
+      "nested_10block": 0.701095,
+      "perm_auc": 0.49464,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "db8f71e2d0a9fece28c18ddb3f812ca8ed7372e922b9e668b7f5dc4becabe560",
+        "repro_frac_diff": 0.7260081275398562,
+        "repro_max_abs": 0.12769615504845266,
+        "repro_spearman": 0.9981505890294823
+      }
+    },
+    "repo/v4_max3": {
+      "source": "branch:cursor/v4max3pro-f126",
+      "protocol": "mixed_ES",
+      "es_arms": 1,
+      "notes": "",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "ord_noxb_bag.npz",
+          "oof_auc": 0.70064,
+          "nested_single": 0.70057,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds"
+          ]
+        }
+      ],
+      "nested_5block": 0.703073,
+      "full_oof": 0.703355,
+      "nested_10block": 0.703341,
+      "perm_auc": 0.49587,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "01afc280d1a478a502acc352893a2217d3122738ac9eeeb3d0647d2df430eeb9",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 0.9999999999999999
+      }
+    },
+    "repo/v4max3pro": {
+      "source": "branch:cursor/v4max3pro-f126",
+      "protocol": "mixed_ES",
+      "es_arms": 3,
+      "notes": "",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "ord_noxb_bag.npz",
+          "oof_auc": 0.70064,
+          "nested_single": 0.70057,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds"
+          ]
+        },
+        {
+          "arm": "plus_strong.npz",
+          "oof_auc": 0.689105,
+          "nested_single": 0.688711,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "y"
+          ]
+        },
+        {
+          "arm": "noxb10.npz",
+          "oof_auc": 0.70037,
+          "nested_single": 0.70016,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y",
+            "pool"
+          ]
+        }
+      ],
+      "nested_5block": 0.70522,
+      "full_oof": 0.705719,
+      "nested_10block": 0.705519,
+      "perm_auc": 0.49591,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "cdec1846e2d269a4591dc53ab47290b3acc7a5927b6adc58871f7155a09fc11d",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 0.9999999999999999
+      }
+    },
+    "repo/v4max3pronew": {
+      "source": "branch:cursor/v4max3pronew-f126",
+      "protocol": "mixed_ES",
+      "es_arms": 3,
+      "notes": "pro + semantic_rmse; README says logloss diversity rejected",
+      "arms": [
+        {
+          "arm": "merger_ord8.npz",
+          "oof_auc": 0.696596,
+          "nested_single": 0.696403,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "v2_cat_alt8.npz",
+          "oof_auc": 0.697039,
+          "nested_single": 0.696757,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y"
+          ]
+        },
+        {
+          "arm": "ord_noxb_bag.npz",
+          "oof_auc": 0.70064,
+          "nested_single": 0.70057,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds"
+          ]
+        },
+        {
+          "arm": "plus_strong.npz",
+          "oof_auc": 0.689105,
+          "nested_single": 0.688711,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "y"
+          ]
+        },
+        {
+          "arm": "noxb10.npz",
+          "oof_auc": 0.70037,
+          "nested_single": 0.70016,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "y",
+            "pool"
+          ]
+        },
+        {
+          "arm": "semantic_rmse.npz",
+          "oof_auc": 0.695969,
+          "nested_single": 0.695784,
+          "y_match": null,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test_pred",
+            "per_seed",
+            "seeds",
+            "pool"
+          ]
+        }
+      ],
+      "nested_5block": 0.70557,
+      "full_oof": 0.706072,
+      "nested_10block": 0.705891,
+      "perm_auc": 0.49589,
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.999
+        ],
+        "nan": 0,
+        "sha256": "ef81f1af373a1e85eb2f5e0177115662c5b24afbf553a7ac3e00343aa4ac47ca",
+        "repro_frac_diff": 0.0,
+        "repro_max_abs": 1.1102230246251565e-16,
+        "repro_spearman": 0.9999999999999999
+      }
+    },
+    "main/v2": {
+      "source": "branch:main",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0,
+      "rebuild_nested_5block_views_max": 0.698784,
+      "rebuild_full_oof": 0.699096,
+      "report_nested_field": null,
+      "arms": [
+        {
+          "arm": "arm_cat_d5.npz",
+          "oof_auc": 0.695064,
+          "nested_single": 0.694887,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_d6.npz",
+          "oof_auc": 0.694915,
+          "nested_single": 0.694752,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_alt.npz",
+          "oof_auc": 0.69508,
+          "nested_single": 0.694641,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        }
+      ],
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.9989999999990014
+        ],
+        "nan": 0,
+        "sha256": "01fa19b4233a4f4ea7a793d6e072f26ef2ddb5dcae14caa4cc5c4fd7fdb7a6c3",
+        "repro_frac_diff": 0.9996874023132228,
+        "repro_max_abs": 0.0009983240472385413,
+        "repro_spearman": 0.99999999933562,
+        "matched_as": "clipped"
+      },
+      "perm_auc": 0.49491,
+      "notes": "rebuild uses only views_max of listed arms; official nested may use nested rule selection over more rules"
+    },
+    "main/v3": {
+      "source": "branch:main",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0,
+      "rebuild_nested_5block_views_max": 0.701115,
+      "rebuild_full_oof": 0.701514,
+      "report_nested_field": null,
+      "arms": [
+        {
+          "arm": "arm_cat_d5_f10.npz",
+          "oof_auc": 0.697713,
+          "nested_single": 0.697422,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_d6_f10.npz",
+          "oof_auc": 0.697599,
+          "nested_single": 0.697301,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_alt_f10.npz",
+          "oof_auc": 0.698178,
+          "nested_single": 0.697813,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        }
+      ],
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.9989999999990014
+        ],
+        "nan": 0,
+        "sha256": "01ec697c9fbc47221b17b9a4b87e2f0a395638104ad786427f30f0eea94af1e9",
+        "repro_frac_diff": 0.9996874023132228,
+        "repro_max_abs": 0.0009983240472385413,
+        "repro_spearman": 0.9999999993241651,
+        "matched_as": "clipped"
+      },
+      "perm_auc": 0.49499,
+      "notes": "rebuild uses only views_max of listed arms; official nested may use nested rule selection over more rules"
+    },
+    "main/v4": {
+      "error": "\"no oof in /workspace/artifacts/v4/arm_cat_d5.json keys=['arm', 'world', 'preset', 'loss', 'folds', 'n_seeds', 'parts_dir', 'parts', 'per_seed_auc', 'bagged_oof_auc', 'note']\""
+    },
+    "repo/v5": {
+      "source": "branch:cursor/honest-auc-push-f126",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0,
+      "nested_5block": 0.700832,
+      "full_oof": 0.701097,
+      "arms": [
+        {
+          "arm": "arm_cat_d5.npz",
+          "oof_auc": 0.695064,
+          "nested_single": 0.694887,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_d6.npz",
+          "oof_auc": 0.694915,
+          "nested_single": 0.694752,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_cat_alt.npz",
+          "oof_auc": 0.69508,
+          "nested_single": 0.694641,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        },
+        {
+          "arm": "arm_gap.npz",
+          "oof_auc": 0.696364,
+          "nested_single": 0.69607,
+          "y_match": true,
+          "has_test": true,
+          "keys": [
+            "oof",
+            "test",
+            "y"
+          ]
+        }
+      ],
+      "csv": {
+        "rows": 6398,
+        "id_aligned": true,
+        "range": [
+          0.001,
+          0.9989999999990014
+        ],
+        "nan": 0,
+        "sha256": "736e40e3343489bb023f67126808daae10bf17af26159fd008ffcc35e17f3642",
+        "repro_frac_diff": 0.9995311034698343,
+        "repro_max_abs": 0.0009983240472385413,
+        "repro_spearman": 0.9999999993814392
+      },
+      "audit_nested_mean": null,
+      "fusion_report_keys": [
+        "protocol",
+        "gap_bagging",
+        "gap_bag_auc",
+        "arm_oof_auc",
+        "rule_full_oof_auc",
+        "fixed_nested99",
+        "nested_selection_picks",
+        "nested_oof_auc_seed99",
+        "supervisor_nested20_mean",
+        "supervisor_nested20_std",
+        "v2_pipeline_nested",
+        "v2_supervisor_mean",
+        "delta_vs_v2_pipeline",
+        "delta_vs_v2_supervisor",
+        "submitted_rule",
+        "submission",
+        "target",
+        "admit"
+      ],
+      "fusion_nested": null,
+      "perm_auc": 0.49464
+    }
+  },
+  "vs_anchor": {
+    "opus/v4_honest": {
+      "spearman": 0.9952,
+      "identical": false,
+      "same_sha256": false
+    },
+    "opus/v4_max3": {
+      "spearman": 1.0,
+      "identical": true,
+      "same_sha256": true
+    },
+    "opus/v5_honest": {
+      "spearman": 0.997569,
+      "identical": false,
+      "same_sha256": false
+    },
+    "zcode/v4_honest": {
+      "spearman": 0.9952,
+      "identical": false,
+      "same_sha256": false
+    },
+    "zcode/v4_max3": {
+      "spearman": 1.0,
+      "identical": true,
+      "same_sha256": true
+    },
+    "zcode/v4_max4": {
+      "spearman": 0.999784,
+      "identical": false,
+      "same_sha256": false
+    },
+    "zcode/v5_audit_max3_gap": {
+      "spearman": 0.997569,
+      "identical": false,
+      "same_sha256": false
+    },
+    "repo/v4_max3": {
+      "spearman": 1.0,
+      "identical": true,
+      "same_sha256": true
+    },
+    "repo/v4max3pro": {
+      "spearman": 0.991735,
+      "identical": false,
+      "same_sha256": false
+    },
+    "repo/v4max3pronew": {
+      "spearman": 0.989202,
+      "identical": false,
+      "same_sha256": false
+    },
+    "main/v2": {
+      "spearman": 0.993279,
+      "identical": false,
+      "same_sha256": false
+    },
+    "main/v3": {
+      "spearman": 0.993295,
+      "identical": false,
+      "same_sha256": false
+    },
+    "repo/v5": {
+      "spearman": 0.995859,
+      "identical": false,
+      "same_sha256": false
+    }
+  },
+  "ladder": [
+    {
+      "nested": 0.70557,
+      "name": "repo/v4max3pronew",
+      "protocol": "mixed_ES",
+      "es_arms": 3
+    },
+    {
+      "nested": 0.70522,
+      "name": "repo/v4max3pro",
+      "protocol": "mixed_ES",
+      "es_arms": 3
+    },
+    {
+      "nested": 0.703211,
+      "name": "zcode/v4_max4",
+      "protocol": "mixed_ES",
+      "es_arms": 2
+    },
+    {
+      "nested": 0.703073,
+      "name": "zcode/v4_max3",
+      "protocol": "mixed_ES",
+      "es_arms": 1
+    },
+    {
+      "nested": 0.703073,
+      "name": "repo/v4_max3",
+      "protocol": "mixed_ES",
+      "es_arms": 1
+    },
+    {
+      "nested": 0.703073,
+      "name": "opus/v4_max3",
+      "protocol": "mixed_ES",
+      "es_arms": 1
+    },
+    {
+      "nested": 0.70253,
+      "name": "opus/v5_honest",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0
+    },
+    {
+      "nested": 0.701115,
+      "name": "main/v3",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0
+    },
+    {
+      "nested": 0.700832,
+      "name": "zcode/v5_audit_max3_gap",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0
+    },
+    {
+      "nested": 0.700832,
+      "name": "repo/v5",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0
+    },
+    {
+      "nested": 0.699926,
+      "name": "zcode/v4_honest",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0
+    },
+    {
+      "nested": 0.699926,
+      "name": "opus/v4_honest",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0
+    },
+    {
+      "nested": 0.698784,
+      "name": "main/v2",
+      "protocol": "honest_fixed_trees",
+      "es_arms": 0
+    }
+  ],
+  "verified_public_lb_facts": {
+    "zcode/v3_max3_CLAIMED_IN_REPORT": 0.71184,
+    "opus/v4_max3": 0.71222,
+    "repo/v4_max3": 0.71222,
+    "zcode/v4_max3": 0.71222,
+    "main/v2": 0.70878,
+    "b7_closest": 0.70722
+  },
+  "unverified_lb_claims": {
+    "v4_honest_LB_0.71104": "claimed in opus v5_honest README; prior audit5 FINDINGS marks as unverified",
+    "v5_honest_expected_LB_0.7136": "extrapolation from unverified anchor; not a measurement",
+    "v4max3pro_extrapolated_LB": "extrapolation; not measured"
+  }
+}

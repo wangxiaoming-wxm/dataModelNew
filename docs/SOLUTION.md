@@ -71,9 +71,14 @@ bash run_super714.sh --baseline-only
 - OOF 仅用于预先声明的门槛判断；不进行大规模臂搜索或榜单闭环。
 - 冒烟产物不会覆盖主提交。
 
-## 7. 门槛实测
+## 7. 门槛实测（完整 8×5×3）
 
-Smoke（2×1×1）观测见 [`TE_GATE_RESULT.md`](TE_GATE_RESULT.md)；smoke **不能**当作最终拒绝。  
-完整门槛以 `artifacts/super714/metrics.json`（8×5×3）为准。未产出前主提交保持 best_v1 max2。
+| 指标 | 实测 | 门槛 | 结果 |
+|---|---:|---|:---:|
+| TE OOF | 0.69964 | >0.697 | 通过 |
+| Spearman(TE, main) | 0.99767 | <0.90 | **未通过** |
+| max3−max2 | −0.00018 | >0.001 | **未通过** |
+
+主提交保持 best_v1 max2。详见 [`TE_GATE_RESULT.md`](TE_GATE_RESULT.md) / `artifacts/super714/metrics.json`。
 
 测试：`python3 -m unittest discover -s tests -v`

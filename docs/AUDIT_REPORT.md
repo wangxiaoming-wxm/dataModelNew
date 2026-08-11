@@ -241,3 +241,9 @@ git status --short
 PENDING: full TE metrics.json
 
 AUDIT_STATUS: APPROVE
+
+## 复审后补充：完整 TE 门槛已完成
+
+`artifacts/super714/metrics.json`：TE AUC=0.69964（过）、Spearman(main)=0.99767（败）、max3Δ=-0.00018（败）。主提交仍为 max2。PENDING 已关闭。
+
+AUDIT_STATUS: APPROVE

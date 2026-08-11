@@ -29,3 +29,14 @@ bash run_super714_extend.sh
 
 - `submissions/submission_super714_extend{,_w62,_wbest}.csv`
 - `artifacts/super714_extend/metrics.json`
+
+## 全量结果（已跑完）
+
+| 指标 | 值 |
+|---|---|
+| new main / alt pool OOF | 0.69763 / 0.69404 |
+| merged_w62 | **0.70125** |
+| frozen_w62 | **0.70159** |
+| Δ | **−0.00034** |
+
+**拒绝替换 W62**：新 seed 弱于冻结 8 seed，等权合并稀释了最强臂。

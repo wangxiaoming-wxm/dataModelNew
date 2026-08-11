@@ -1,0 +1,10 @@
+{
+  "tag": "ship_max3s_plus",
+  "nested": 0.704792428461904,
+  "delta": 0.0017192887549271063,
+  "spearman_vs_max3": 0.9915373727626388,
+  "blocks_plus": "4/5",
+  "passed": true,
+  "n_arms": 4,
+  "alias": "submission_beat_max3.csv"
+}

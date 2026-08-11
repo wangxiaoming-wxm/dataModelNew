@@ -84,3 +84,13 @@
 1. **若要稳**：交 `submission_v4_max3.csv`（已是冠军）。  
 2. **若要探索一次**：交 `submission_max3_plus.csv`。  
 3. **等探针**：看 `artifacts/beat_max3/probes/summary.json` 的 `admit_to_max`；仅 `true` 时交对应 `submission_max3_ortho_*.csv`。
+
+## 7. 当前可交最高版（自动刷新）
+
+| 文件 | 配方 | nested Δ |
+|---|---|---:|
+| **`submissions/submission_beat_max3.csv`** | max(mo8, ca8, **ord_strong**, plus) | **见 report** |
+| `submissions/submission_ship_max3s_plus.csv` | 同上显式名 | |
+| `submissions/submission_ship_max3_plus.csv` | 原 max3+plus | +0.00146 |
+
+`ord_strong` = 0.5·冠军 `ord_noxb_bag` + 0.5·新种子袋（**同一逻辑臂去噪，不是堆孪生臂**）。

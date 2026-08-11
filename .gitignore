@@ -17,6 +17,7 @@ submissions/*_smoke.csv
 # local
 artifacts/probe/
 logs/
+.worktrees/
 *.zip
 .DS_Store
 __MACOSX/

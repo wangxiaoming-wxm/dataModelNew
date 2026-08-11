@@ -203,4 +203,41 @@ Ran 3 tests ... OK
 `best_v1_test.npy` SHA-256：
 `aaa43ca48b9d297c35367c873f6001c3607f5cff4a9f96a6ac72e284a57942dd`
 
-AUDIT_STATUS: REQUEST_CHANGES
+## 6. 复审（2026-08-11）
+
+复审对象：`cursor/super714-edb2`（PR #12）
+
+已重新执行：
+
+```text
+bash run_super714.sh --verify
+PASS: SUPER714 预计算锚点与主提交验收通过
+OOF AUC: main=0.69992, alt=0.69770, fuse=0.70128
+rows: train=14930, test=6398, submission=6398
+submission_vs_fuse_max_abs: 1.110e-16
+
+python3 -m unittest discover -s tests -v
+Ran 3 tests ... OK
+
+git status --short
+（空）
+```
+
+逐项复核结果：
+
+- README、`docs/PROTOCOL.md`、`docs/ML_DONE.md` 已明确主交付是复现
+  `0.71453`，不是超越；相对旧方案的比较保持清楚。
+- `docs/PROTOCOL.md` 已披露 best_v1 使用 label-free transductive FE，
+  并区分 TE 候选臂的折内目标统计。
+- `src_super/verify_super714.py` 现在强制校验提交 SHA-256，并校验提交
+  label 与冻结 `best_v1_test["fuse"]` 的 clip 结果一致；本次运行通过。
+- `docs/TE_GATE_RESULT.md` 已将 smoke 标记为非最终判定，并明确完整
+  `8×5×3` 门槛须等待 `artifacts/super714/metrics.json`。
+- 当前工作树干净，未发现上次报告中的 HIGH 缺陷仍未修复。
+
+基线交付可 APPROVE。完整 TE 尚未产出 `metrics.json`，不影响 best_v1
+基线验收，但不得据此宣称 TE 已接受或主交付已超越 `0.71453`。
+
+PENDING: full TE metrics.json
+
+AUDIT_STATUS: APPROVE

@@ -1,0 +1,52 @@
+{
+  "mode": "te_full",
+  "data_dir": "/workspace/data",
+  "recipe": {
+    "seeds": [
+      2026,
+      2027,
+      2028,
+      2029,
+      2030,
+      2031,
+      2032,
+      2033
+    ],
+    "n_splits": 5,
+    "bag_seeds": [
+      0,
+      1,
+      2
+    ],
+    "iterations": 800
+  },
+  "frozen_auc": {
+    "main": 0.6999172374906356,
+    "alt": 0.6977044736039691,
+    "fuse": 0.7012752084064776
+  },
+  "frozen_main_alt_spearman": 0.9475455551464508,
+  "te_seed_auc": [
+    0.691042671281026,
+    0.6910632213419697,
+    0.6981138328082866,
+    0.6908291098728663,
+    0.6949509644695915,
+    0.6934575273529769,
+    0.6928082847496057,
+    0.6942789824525368
+  ],
+  "te_auc": 0.699638294048384,
+  "te_main_spearman": 0.9976667957159285,
+  "max3_auc": 0.7010991645429945,
+  "max3_gain": -0.00017604386348313295,
+  "gates": {
+    "te_auc_gt_0.697": true,
+    "spearman_main_lt_0.90": false,
+    "max3_gain_gt_0.001": false
+  },
+  "accepted": false,
+  "selected_fusion": "max2",
+  "submission": "submissions/submission_super714.csv",
+  "elapsed_minutes": 93.08476312557856
+}

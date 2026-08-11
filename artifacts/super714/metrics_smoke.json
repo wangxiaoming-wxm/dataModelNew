@@ -1,0 +1,36 @@
+{
+  "mode": "te_smoke",
+  "data_dir": "/workspace/data",
+  "recipe": {
+    "seeds": [
+      2026
+    ],
+    "n_splits": 2,
+    "bag_seeds": [
+      0
+    ],
+    "iterations": 800
+  },
+  "frozen_auc": {
+    "main": 0.6999172374906356,
+    "alt": 0.6977044736039691,
+    "fuse": 0.7012752084064776
+  },
+  "frozen_main_alt_spearman": 0.9475455551464508,
+  "te_seed_auc": [
+    0.6766101594724536
+  ],
+  "te_auc": 0.6766101594724536,
+  "te_main_spearman": 0.882229872401009,
+  "max3_auc": 0.6975628871671289,
+  "max3_gain": -0.003712321239348726,
+  "gates": {
+    "te_auc_gt_0.697": false,
+    "spearman_main_lt_0.90": true,
+    "max3_gain_gt_0.001": false
+  },
+  "accepted": false,
+  "selected_fusion": "max2",
+  "submission": "submissions/submission_super714_smoke.csv",
+  "elapsed_minutes": 1.7148273626963297
+}

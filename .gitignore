@@ -7,3 +7,8 @@ __pycache__/
 artifacts/super714/*_smoke.*
 artifacts/super714/train*.log
 submissions/*_smoke.csv
+
+# local probes
+artifacts/probe/
+artifacts/super714/smoke_run.log
+**/__pycache__/

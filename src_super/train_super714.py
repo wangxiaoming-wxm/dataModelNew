@@ -24,6 +24,9 @@ from sklearn.model_selection import StratifiedKFold
 try:
     from .features_te import FEATURE_NAME, build_source_days_te
 except ImportError:  # 兼容 ``python src_super/train_super714.py``
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parent))
     from features_te import FEATURE_NAME, build_source_days_te
 
 ROOT = Path(__file__).resolve().parents[1]

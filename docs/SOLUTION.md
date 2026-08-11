@@ -69,3 +69,15 @@ bash run_super714.sh --baseline-only
 - TE 的分桶、统计量和平滑映射必须在对应训练折内拟合。
 - OOF 仅用于预先声明的门槛判断；不进行大规模臂搜索或榜单闭环。
 - 冒烟产物不会覆盖主提交。
+
+## 7. 门槛实测
+
+`bash run_super714.sh --smoke`（2 折 × 1 seed × 1 bag，完整双层诚实 TE）：
+
+| 指标 | 实测 | 门槛 | 结果 |
+|---|---:|---|:---:|
+| TE OOF | 0.67661 | >0.697 | 未通过 |
+| Spearman(TE, main) | 0.88223 | <0.90 | 通过 |
+| max3−max2 | −0.00371 | >0.001 | 未通过 |
+
+因此主提交保持 best_v1 max2，不升级 max3。详见 [`TE_GATE_RESULT.md`](TE_GATE_RESULT.md)。

@@ -1,0 +1,28 @@
+{
+  "baseline": "best_v1",
+  "online_auc": 0.71453,
+  "oof_auc": {
+    "main": 0.69992,
+    "alt": 0.69770,
+    "max2": 0.70128
+  },
+  "recipe": {
+    "main": "RMSE + Ordered + depth=5 + iterations=800 + l2=10",
+    "alt": "RMSE + Plain + depth=6 + iterations=800 + l2=6",
+    "ensemble": "8 seeds x 5 folds x 3 bags; max2(rank)",
+    "seeds": [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033],
+    "bag_seeds": [0, 1, 2]
+  },
+  "files": {
+    "best_v1_oof.npy": {
+      "sha256": "ef23c61013f9ecf469174c55849983677de2b669cce6c052f999808545b7600d"
+    },
+    "best_v1_test.npy": {
+      "sha256": "aaa43ca48b9d297c35367c873f6001c3607f5cff4a9f96a6ac72e284a57942dd"
+    },
+    "submission_super714.csv": {
+      "sha256": "89250a77fa3196eafe8898353b925d78fb23dd10e1a310e1fa04e0067248f88c"
+    }
+  },
+  "provenance": "real714_pkg/v1_best714（只读参考包）"
+}

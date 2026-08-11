@@ -1,21 +1,29 @@
-# SUPER714-Plus 进展（相对 W62）
+# SUPER714-Plus 结果（相对 W62）
 
 | 方案 | 本地 OOF | 线上 AUC | 状态 |
 |---|---|---|---|
 | best_v1 max2 | 0.70128 | 0.71453 | 公开冠军锚点；勿再交同文件 |
 | **W62** `0.62*main+0.38*alt` | **0.70159** | **0.71503** | **当前已提交最强**（`task_w62`） |
-| SUPER714-Plus max2 / w62 / wbest | 训练中 | — | `cursor/super714-plus-edb2` |
+| Plus max2 | 0.69645 | — | **拒绝**：ΔOOF vs best_v1 = **−0.00483** |
+| Plus-w62 | 0.69754 | — | 仍低于 W62 |
+| Plus-wbest (w=0.80) | 0.69803 | — | 仍低于 W62；不建议交 |
 
-## 训练进度（全量）
+## 全量训练结论
 
-- 命令：`python3 -u src_super/train_super714_plus.py`
-- 日志：`logs/super714_plus_full.log`
-- 协议：10 seeds (3100–3109) × 4 bags × 1000 trees；main Ordered d6，alt Plain d6
-- 结束后执行：`python3 -u src_super/fuse_plus_weights.py`
+- 协议：10 seeds (3100–3109) × 4 bags × 1000 trees；main Ordered d6 +rate；alt Plain d6 +ratio/cond_r bins(6,12,24)
+- 耗时：≈668 分钟
+- main / alt pooled OOF：0.69780 / 0.69113（corr≈0.951）
+- test Spearman(Plus-max2, best_v1-max2)≈0.983 → 不同文件，但**更弱**
+- 产物已落盘：`submissions/submission_super714_plus{,_w62,_wbest}.csv`，`artifacts/super714_plus/`
 
-## 下一步（训练完成后）
+## 决策
 
-1. 读 `artifacts/super714_plus/metrics.json` 与 `fuse_weights_metrics.json`
-2. 优先比较 Plus-w62 / Plus-wbest / Plus-max2 相对 W62 的 OOF 与 test Spearman
-3. 若 Plus OOF 不低于 best_v1，优先提交 **Plus-w62**（预注册权重，跟线上证据一致）
-4. 若 Plus 明显弱于 W62，保留 W62 为最强，另开更轻的差异化实验（勿盲目交 wbest）
+1. **线上继续以 W62（0.71503）为最强提交**，不要用 Plus 系列顶替。  
+2. Plus 差异化方向（加深 depth、改分箱、跨世界连续特征）在本数据上伤害信号，记为死路旁证。  
+3. 下一步应回到 **best_v1 同构轴** 上找增益：更多 bag/seed、或同臂上已被 W62 验证的加权族微调——而不是再改世界定义。
+
+## 复现融合后处理
+
+```bash
+python3 -u src_super/fuse_plus_weights.py
+```

@@ -25,3 +25,5 @@ __MACOSX/
 artifacts/super714_plus/*_smoke.*
 artifacts/super714_plus/train*.log
 submissions/*_plus_smoke.csv
+artifacts/super714_extend/*_smoke.*
+submissions/*_extend*_smoke.csv

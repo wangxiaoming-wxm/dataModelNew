@@ -1,14 +1,16 @@
 __pycache__/
+**/__pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
 .venv/
 
+# smoke / training logs (keep metrics_smoke.json for gate evidence)
 artifacts/super714/*_smoke.*
+!artifacts/super714/metrics_smoke.json
 artifacts/super714/train*.log
+artifacts/super714/smoke_run.log
 submissions/*_smoke.csv
 
 # local probes
 artifacts/probe/
-artifacts/super714/smoke_run.log
-**/__pycache__/

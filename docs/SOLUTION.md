@@ -2,11 +2,12 @@
 
 ## 1. 当前结论
 
-SUPER714 以线上 AUC `0.71453` 的 best_v1 为安全基座，并为折内
-`TE(source × days_bin10)` 保留第三臂。只有第三臂同时通过强度、差异性和融合增益三项门槛，
-主提交才会升级为 max3；否则交付已验证的 max2，避免为了本地分数堆叠高相关臂。
+SUPER714 **主交付是 best_v1 冠军的干净复现**（线上 `0.71453` / 本地 max2 `0.70128`），
+不是对 0.71453 的已证实超越。相对台账内旧方案（v4_max3 `0.71222` 等）它更强。
 
-这里的“期望超越”是有门槛的实验假设，不是对未知榜单成绩的保证。
+仓库另保留折内 `TE(source × days_bin10)` 第三臂实验：只有在完整 8×5×3 上同时通过
+强度、差异性和融合增益三项预注册门槛，主提交才会升级为 max3。详见
+[`PROTOCOL.md`](PROTOCOL.md) 与 [`TE_GATE_RESULT.md`](TE_GATE_RESULT.md)。
 
 ## 2. best_v1 基座
 
@@ -72,12 +73,7 @@ bash run_super714.sh --baseline-only
 
 ## 7. 门槛实测
 
-`bash run_super714.sh --smoke`（2 折 × 1 seed × 1 bag，完整双层诚实 TE）：
+Smoke（2×1×1）观测见 [`TE_GATE_RESULT.md`](TE_GATE_RESULT.md)；smoke **不能**当作最终拒绝。  
+完整门槛以 `artifacts/super714/metrics.json`（8×5×3）为准。未产出前主提交保持 best_v1 max2。
 
-| 指标 | 实测 | 门槛 | 结果 |
-|---|---:|---|:---:|
-| TE OOF | 0.67661 | >0.697 | 未通过 |
-| Spearman(TE, main) | 0.88223 | <0.90 | 通过 |
-| max3−max2 | −0.00371 | >0.001 | 未通过 |
-
-因此主提交保持 best_v1 max2，不升级 max3。详见 [`TE_GATE_RESULT.md`](TE_GATE_RESULT.md)。
+测试：`python3 -m unittest discover -s tests -v`

@@ -5,7 +5,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src_rebuild.evaluation import CandidateScore, make_stratified_splits, rank_average, select_candidate
+from src_rebuild.evaluation import (
+    BlendSpec,
+    CandidateScore,
+    make_stratified_splits,
+    rank_average,
+    select_candidate,
+)
 from src_rebuild.features import RebuildFeatureBuilder
 from src_rebuild.io import save_submission
 
@@ -120,6 +126,23 @@ class EvaluationTests(unittest.TestCase):
         second = np.array([10.0, 30.0, 20.0])
         result = rank_average([first, second])
         np.testing.assert_allclose(result, np.array([1 / 3, 1.0, 2 / 3]))
+
+    def test_blend_spec_combines_only_pre_registered_components(self):
+        blend = BlendSpec(
+            name="ratio_rate_mean",
+            components=("ratio", "rate"),
+            weights=(0.5, 0.5),
+            complexity=2,
+        )
+        prediction = blend.combine(
+            {
+                "ratio": np.array([0.2, 0.8]),
+                "rate": np.array([0.4, 0.6]),
+            }
+        )
+        np.testing.assert_allclose(prediction, np.array([0.3, 0.7]))
+        with self.assertRaises(KeyError):
+            blend.combine({"ratio": np.array([0.2, 0.8])})
 
 
 class SubmissionTests(unittest.TestCase):

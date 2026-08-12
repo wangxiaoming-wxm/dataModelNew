@@ -41,12 +41,12 @@
 
 候选超参是有限、预注册集合。每个外折只依据 outer-train 的 inner OOF 选择一个配置。
 
-完整候选最终收敛为两个 RMSE CatBoost：
+V2 完整候选最终收敛为两个 RMSE CatBoost：
 
-- `cb_ratio_rmse_d5`：depth 5，800 trees；
-- `cb_rate_rmse_d6`：depth 6，800 trees。
+- `cb_ratio_rich_rmse_d5`：Ordered、depth 5、800 trees；
+- `cb_rate_rich_rmse_d6`：Plain、depth 6、800 trees。
 
-每个模型使用 seeds `2026/2027`，预测先做 rank 再平均。三个融合权重 `ratio:rate = 0.35:0.65 / 0.50:0.50 / 0.65:0.35` 在完整运行前锁定；权重不连续搜索，也不使用 outer-valid 拟合。
+每个模型使用 seeds `2026..2029`，预测先做 rank 再平均。三个融合权重 `ratio:rate = 0.35:0.65 / 0.50:0.50 / 0.65:0.35` 在完整运行前锁定；权重不连续搜索，也不使用 outer-valid 拟合。8-seed 扩展未达到预注册增益门槛，因此止损在 4 seeds。
 
 ### 3.2 线性模型
 
@@ -54,7 +54,7 @@
 
 ### 3.3 残差与 stacking
 
-第一版不做监督 stacking。后续只有在主模型稳定后，才允许用严格 cross-fit 的一级预测训练二级模型；二级模型和融合权重必须全部在 outer-train 的 inner OOF 上拟合。
+V2 实现并验证了严格 cross-fit Logistic stacking：一级预测、元模型训练和元模型计分均限制在 outer-train 内。其 smoke 仅比最佳固定 blend 高 `0.000017`，未过 `0.001` 门禁，代码保留但默认关闭。
 
 ## 4. 特征策略
 
@@ -68,15 +68,17 @@
 - `x0..x18` 的逐行均值、标准差、最小、最大和分位数；
 - 类别频次与 `days/condition` 的组内均值偏差，统计量只在当前训练分区拟合。
 
-### 4.2 五个预注册特征世界
+### 4.2 七个预注册特征世界
 
 1. `core`：业务/结构字段，不含 `x0..x18` 和 `id`；
 2. `all`：`core` 加原始 `x0..x18` 与行汇总；
 3. `all_id`：`all` 加 8 个 byte、16 个 nibble、popcount；仅作消融，默认复杂度最高。
 4. `ratio`：`condition` 除以当前训练分区内的 source 中位数，再构造 `days / condition_source_ratio`、折内分位箱及少量类别交互；
 5. `rate`：用当前训练分区内每个 source 的 condition 经验分布将 condition 映射为 percentile，再构造 `days * (1-percentile)`、折内分位箱及类别交互。
+6. `ratio_rich`：在 ratio 上增加预注册的低阶分位×region/source/age/binary 交互和固定 days 桶；
+7. `rate_rich`：在 rate 上增加对应的经验分位交互。
 
-`ratio/rate` 的 source 统计、经验 CDF、分位边界、类别频率和缺失回退值均在每个 inner/outer 训练分区重新拟合。验证行从不参与这些统计量。
+所有 ratio/rate/rich 世界的 source 统计、经验 CDF、分位边界、类别频率和缺失回退值均在每个 inner/outer 训练分区重新拟合。验证行从不参与这些统计量。
 
 ### 4.3 目标编码规则
 
@@ -130,7 +132,7 @@ bash run_rebuild.sh --full
 bash run_rebuild.sh --verify
 ```
 
-当前 `--full` 默认只运行已锁定的 `cb_ratio_rmse_d5,cb_rate_rmse_d6` 和三个预注册 blend。若要重跑历史消融，必须用 `--configs` 显式列出，避免无意扩大最终搜索空间。
+当前 `--full` 默认只运行已锁定的 `cb_ratio_rich_rmse_d5,cb_rate_rich_rmse_d6`、4 seeds 和三个预注册 blend，写入 `artifacts/rebuild/v2_full/`。V1 证据保留在 `artifacts/rebuild/full/`。若要重跑历史消融，必须用 `--configs` 显式列出，避免无意扩大最终搜索空间；stacking 还必须显式传入 `--enable-stack`。
 
 产物：
 
@@ -155,25 +157,30 @@ submissions/submission_rebuild_<recipe>.csv
 | 原始/core/all/id 广候选 | 3 outer × 2 inner，1 seed，250/300 trees | 0.668683 ± 0.006066 | 0.668679 | `all_id` 最差；置乱 0.502032 |
 | ratio/rate 机制消融 | 3×2，1 seed，250/300 trees | 0.673806 ± 0.012142 | 0.673804 | 固定 rate 0.678030，进入下一轮 |
 | ratio/rate blend | 3×2，1 seed，300 trees | 0.679815 ± 0.008104 | 0.679858 | 最佳固定 blend 0.680300，较单臂 +0.002270 |
-| **最终选择算法** | **5 outer × 3 inner，2 seeds，800 trees** | **0.688722 ± 0.012695** | **0.688704** | 5/5 外折均选择 ratio/rate blend |
+| V1 完整选择算法 | 5×3，2 seeds，800 trees | 0.688722 ± 0.012695 | 0.688704 | 保留为回归基线 |
+| rich 世界消融 | 3×2，1 seed，300 trees | 0.684521 ± 0.004756 | 0.684642 | 固定 rich w50=0.686649；相对 simple w50 +0.006349 |
+| rich 4-seed | 3×2，4 seeds，300 trees | 0.688949 ± 0.007746 | 0.688981 | 固定 w50=0.688990；相对 1-seed +0.002341 |
+| strict Logistic stack | 3×2，4 seeds，300 trees | 0.688949 ± 0.007746 | 0.688981 | stack 固定 0.689007，仅 +0.000017，淘汰 |
+| rich 8-seed 止损 | 3×2，8 seeds，300 trees | 0.689160 ± 0.007828 | 0.689199 | 相对 4-seed 仅 +0.000211，低于 +0.0003 门禁 |
+| **V2 最终选择算法** | **5×3，4 seeds，800 trees** | **0.695181 ± 0.012759** | **0.695101** | **相对 V1 +0.006459；5/5 外折提升** |
 
-最终五折 AUC 为：
+V2 最终五折 AUC 为：
 
 ```text
-0.69695661, 0.67897333, 0.68956813, 0.67355084, 0.70456317
+0.70179534, 0.68503621, 0.69776503, 0.67988507, 0.71142467
 ```
 
-完整运行中的外折选择依次为 `w50 / w35 / w65 / w50 / w65`。这说明“两个机制需要融合”稳定，但精确权重仍有抽样不确定性。最终全训练集 inner 选择为 `w65`，inner AUC `0.683282`；该数仅用于最终配方选择，不作为无偏性能估计。
+V1 对应折为 `0.69695661 / 0.67897333 / 0.68956813 / 0.67355084 / 0.70456317`，V2 五折增量均为正。V2 外折选择依次为 `w65 / w35 / w50 / w50 / w65`，稳定选择 rich 双臂但精确权重仍有抽样不确定性。最终全训练集 inner 选择为 `w65`，inner AUC `0.684265`；该数仅用于最终配方选择，不作为无偏性能估计。
 
-置乱哨兵在独立 3-fold outer 上得到 `0.492784 ± 0.007624`，pooled `0.492789`，通过 `[0.48, 0.52]` 门禁。
+V2 置乱哨兵在独立 3-fold outer 上得到 `0.495288 ± 0.003677`，pooled `0.495285`，通过 `[0.48, 0.52]` 门禁。
 
 ## 9. 最终产物
 
-- 无偏性能估计：outer nested `0.688722 ± 0.012695`，pooled `0.688704`；
-- 最终配方：`0.65 * cb_ratio_rmse_d5 + 0.35 * cb_rate_rmse_d6` 的 rank blend；
-- 推荐文件：`submissions/submission_rebuild_blend_ratio_rate_w65.csv`；
-- SHA256：`787c4fd456a53b6e63f297e9d2ad84137f386ba79e92c58b0c1ca11d1d8ddaa2`；
-- 完整证据：`artifacts/rebuild/full/metrics.json`；
+- 无偏性能估计：outer nested `0.695181 ± 0.012759`，pooled `0.695101`；
+- 最终配方：`0.65 * cb_ratio_rich_rmse_d5 + 0.35 * cb_rate_rich_rmse_d6` 的 4-seed rank blend；
+- 推荐文件：`submissions/submission_rebuild_blend_rich_ratio_rate_w65.csv`；
+- SHA256：`94ac5e3718f5e219ef13317dfb478a27869381b20f4e86adab03c56d1c475758`；
+- 完整证据：`artifacts/rebuild/v2_full/metrics.json`；
 - 复核命令：`bash run_rebuild.sh --verify`。
 
 ## 10. 已证伪与下一轮
@@ -183,11 +190,13 @@ submissions/submission_rebuild_<recipe>.csv
 - `id` byte/nibble：固定 outer smoke `0.665772`，明显低于不含 ID 的 core；停止。
 - 原始 `x0..x18`：同深度 Logloss 下 `all=0.669431`、`core=0.669624`，没有增益；停止直接喂入和行汇总扩展。
 - ratio-Logloss：`0.676910`，低于 ratio-RMSE `0.677695`；不进入完整运行。
-- 无监督 stacking、全局方向翻转、显式目标编码和大规模 ID 组合搜索：没有泄漏安全且稳定的晋级证据，不做。
+- strict Logistic stacking：系数始终为正且稳定，但相对固定 blend 仅 `+0.000017`；不进入完整运行。
+- 8 seeds：相对 4 seeds 仅 `+0.000211` 且有外折退化；不值得把完整训练成本翻倍。
+- 全局方向翻转、显式目标编码和大规模 ID 组合搜索：没有泄漏安全且稳定的晋级证据，不做。
 
-仍值得继续、但必须使用新的预注册确认实验：
+止损点：在同一个 outer seed 上继续添加交互或微调权重会放大实验者过拟合。下一轮必须先锁定方案并更换 outer seed，当前 V2 保持推荐。仍值得验证：
 
-1. 将 seeds 从 2 增至 4，只测试已经锁定的 ratio/rate/w65，使用新的 outer seed 作稳定性确认；
-2. 对两个一级模型做严格 cross-fit 的低自由度 Logistic stacking，权重/正则只在 inner OOF 拟合；
-3. 为 source 经验 CDF 增加 shrinkage 与 leave-one-out 的 label-free 稳健版本，防止小组分位跳变；
+1. 用新的 outer seed 对锁定的 V2 做稳定性确认，不再改特征；
+2. 为 source 经验 CDF 增加预注册 shrinkage 与 leave-one-out 的 label-free 稳健版本；
+3. 残差臂必须增加一层 sub-inner cross-fit 生成残差训练目标；只有在新 outer seed 下预注册后才值得承担计算成本；
 4. 报告多个 outer seeds 的均值和 seed 间方差，但不得据此反复改特征后仍把同一批 seeds 当最终无偏估计。

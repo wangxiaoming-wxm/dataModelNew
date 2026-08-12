@@ -59,3 +59,21 @@
 - `python3 -m unittest tests.test_rebuild -v`
 - `bash run_rebuild.sh --verify`
 - 新 V2 产物必须通过同等长度、有限值、SHA256 和置乱哨兵校验。
+
+## 冻结结果
+
+阈值定义后得到：
+
+| 验证 | 结果 | 裁决 |
+|---|---:|---|
+| rich ratio 单臂 vs simple | `+0.005885`，3/3 外折提升 | 通过 |
+| rich rate 单臂 vs simple | `+0.006343`，3/3 外折提升 | 通过 |
+| rich w50 vs 最好 rich 单臂 | `+0.002277` | 通过 |
+| 4-seed vs 1-seed rich w50 | `+0.002341`，3/3 提升 | 通过 |
+| strict stack vs 4-seed w50 | `+0.000017` | 淘汰 |
+| 8-seed vs 4-seed 选择算法 | `+0.000211` | 低于 `+0.0003`，淘汰 |
+| V2 full fold-mean vs V1 | `+0.006459`，5/5 提升 | 通过 |
+| V2 full pooled vs V1 | `+0.006396` | 通过 |
+| permutation | `0.495288 ± 0.003677` | 通过 |
+
+最终冻结为 rich ratio/rate、4 seeds、inner 选择 `w35/w50/w65`。完整 outer nested 为 `0.695181 ± 0.012759`，pooled `0.695101`。

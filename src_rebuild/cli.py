@@ -94,19 +94,24 @@ def protocol_defaults(profile: str) -> dict[str, object]:
 def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
     """Create only the pre-registered blends supported by the chosen components."""
     names = {config.name for config in configs}
-    ratio = "cb_ratio_rmse_d5"
-    rate = "cb_rate_rmse_d6"
-    if not {ratio, rate}.issubset(names):
-        return ()
-    return tuple(
-        BlendSpec(
-            name=f"blend_ratio_rate_w{int(round(weight * 100)):02d}",
-            components=(ratio, rate),
-            weights=(weight, 1.0 - weight),
-            complexity=2,
-        )
-        for weight in (0.35, 0.50, 0.65)
+    pairs = (
+        ("ratio_rate", "cb_ratio_rmse_d5", "cb_rate_rmse_d6", 2),
+        ("rich_ratio_rate", "cb_ratio_rich_rmse_d5", "cb_rate_rich_rmse_d6", 3),
     )
+    blends: list[BlendSpec] = []
+    for prefix, ratio, rate, complexity in pairs:
+        if not {ratio, rate}.issubset(names):
+            continue
+        blends.extend(
+            BlendSpec(
+                name=f"blend_{prefix}_w{int(round(weight * 100)):02d}",
+                components=(ratio, rate),
+                weights=(weight, 1.0 - weight),
+                complexity=complexity,
+            )
+            for weight in (0.35, 0.50, 0.65)
+        )
+    return tuple(blends)
 
 
 def build_evaluator(

@@ -8,12 +8,13 @@ import numpy as np
 import pandas as pd
 
 
-FEATURE_MODES = ("core", "all", "all_id", "ratio", "rate")
+FEATURE_MODES = ("core", "all", "all_id", "ratio", "rate", "ratio_rich", "rate_rich")
 RAW_X_COLUMNS = tuple(f"x{index}" for index in range(19))
 BIN_COLUMNS = ("t1", "t2", "r1", "r2", "c1", "c2", "w1", "w2")
 GRADE_MAP = {"s": 1.0, "ss": 2.0, "sss": 3.0}
 RATIO_QUANTILES = (5, 10, 20, 40)
 RATE_QUANTILES = (7, 13, 25)
+DAYS_FIXED_EDGES = np.array([700, 2500, 5000, 7000, 9000, 10000], dtype=float)
 CATEGORICAL_COLUMNS = (
     "month",
     "region",
@@ -142,10 +143,10 @@ class RebuildFeatureBuilder:
         return [column for column in frame.columns if column not in excluded]
 
     def _build(self, frame: pd.DataFrame) -> pd.DataFrame:
-        if self.mode == "ratio":
-            return self._build_ratio_world(frame)
-        if self.mode == "rate":
-            return self._build_rate_world(frame)
+        if self.mode in ("ratio", "ratio_rich"):
+            return self._build_ratio_world(frame, rich=self.mode == "ratio_rich")
+        if self.mode in ("rate", "rate_rich"):
+            return self._build_rate_world(frame, rich=self.mode == "rate_rich")
         out = frame.loc[:, self._base_columns(frame)].copy()
 
         for column in CATEGORICAL_COLUMNS:
@@ -198,7 +199,7 @@ class RebuildFeatureBuilder:
         if len(finite_condition):
             self._global_condition_median = float(finite_condition.median())
 
-        if self.mode == "ratio":
+        if self.mode in ("ratio", "ratio_rich"):
             self._source_condition_medians = pd.DataFrame(
                 {"source": source, "condition": condition}
             ).groupby("source")["condition"].median()
@@ -216,7 +217,7 @@ class RebuildFeatureBuilder:
                 self._set_quantile_edges(f"condition_ratio_{count}", condition_ratio, count)
                 self._set_quantile_edges(f"exposure_ratio_{count}", exposure_ratio, count)
 
-        if self.mode == "rate":
+        if self.mode in ("rate", "rate_rich"):
             grouped = pd.DataFrame({"source": source, "condition": condition}).groupby("source")
             self._source_condition_values = {
                 str(name): np.sort(group["condition"].dropna().to_numpy(float))
@@ -292,7 +293,7 @@ class RebuildFeatureBuilder:
         self._add_cross(out, "x20|region", ("x20_cat", "region_cat"))
         return out
 
-    def _build_ratio_world(self, frame: pd.DataFrame) -> pd.DataFrame:
+    def _build_ratio_world(self, frame: pd.DataFrame, *, rich: bool = False) -> pd.DataFrame:
         if self._source_condition_medians is None:
             raise RuntimeError("ratio statistics are not fitted")
         out = self._common_world_features(frame)
@@ -338,9 +339,11 @@ class RebuildFeatureBuilder:
             ("region|binary", ("region_cat", "binary_pattern")),
         ):
             self._add_cross(out, name, columns)
+        if rich:
+            self._add_ratio_rich_features(out, frame)
         return out
 
-    def _build_rate_world(self, frame: pd.DataFrame) -> pd.DataFrame:
+    def _build_rate_world(self, frame: pd.DataFrame, *, rich: bool = False) -> pd.DataFrame:
         out = self._common_world_features(frame)
         days = pd.to_numeric(frame["days"], errors="coerce")
         percentile = self._condition_source_percentile(frame)
@@ -371,7 +374,91 @@ class RebuildFeatureBuilder:
             ("rate_q7|binary", ("rate_q7", "binary_pattern")),
         ):
             self._add_cross(out, name, columns)
+        if rich:
+            self._add_rate_rich_features(out)
         return out
+
+    def _add_ratio_rich_features(self, out: pd.DataFrame, frame: pd.DataFrame) -> None:
+        days = pd.to_numeric(frame["days"], errors="coerce")
+        age = pd.to_numeric(frame["age_range"], errors="coerce").clip(lower=1.0)
+        out["days_over_age"] = days / age
+        out["days_fixed"] = pd.Series(
+            np.digitize(days.fillna(-1.0).to_numpy(float), DAYS_FIXED_EDGES),
+            index=out.index,
+        ).astype(str)
+        interactions = (
+            ("days_q5|region", ("days_q5", "region_cat")),
+            ("days_q5|source", ("days_q5", "source_cat")),
+            ("days_q20|region", ("days_q20", "region_cat")),
+            ("days_q20|source", ("days_q20", "source_cat")),
+            ("days_q10|age", ("days_q10", "age_range_cat")),
+            ("condition_q5|region", ("condition_q5", "region_cat")),
+            ("condition_q5|source", ("condition_q5", "source_cat")),
+            ("condition_q20|region", ("condition_q20", "region_cat")),
+            ("condition_q20|source", ("condition_q20", "source_cat")),
+            ("condition_ratio_q5|region", ("condition_ratio_q5", "region_cat")),
+            ("condition_ratio_q5|source", ("condition_ratio_q5", "source_cat")),
+            ("condition_ratio_q10|region", ("condition_ratio_q10", "region_cat")),
+            ("condition_ratio_q10|age", ("condition_ratio_q10", "age_range_cat")),
+            ("condition_ratio_q20|region", ("condition_ratio_q20", "region_cat")),
+            ("condition_ratio_q20|source", ("condition_ratio_q20", "source_cat")),
+            ("ratio_q5|region", ("ratio_q5", "region_cat")),
+            ("ratio_q5|source", ("ratio_q5", "source_cat")),
+            ("ratio_q20|source", ("ratio_q20", "source_cat")),
+            ("ratio_q10|binary", ("ratio_q10", "binary_pattern")),
+            ("days_q5|condition_q5", ("days_q5", "condition_q5")),
+            ("days_q20|condition_q20", ("days_q20", "condition_q20")),
+            ("days_q5|condition_ratio_q5", ("days_q5", "condition_ratio_q5")),
+            ("days_q10|condition_ratio_q10", ("days_q10", "condition_ratio_q10")),
+            ("days_q10|condition_q10|region", ("days_q10", "condition_q10", "region_cat")),
+            ("days_q10|condition_q10|source", ("days_q10", "condition_q10", "source_cat")),
+            ("days_q10|condition_q10|age", ("days_q10", "condition_q10", "age_range_cat")),
+            ("source|condition_q10|age", ("source_cat", "condition_q10", "age_range_cat")),
+            ("region|condition_q10|age", ("region_cat", "condition_q10", "age_range_cat")),
+            ("region|source|age", ("region_cat", "source_cat", "age_range_cat")),
+            ("ratio_q5|region|source", ("ratio_q5", "region_cat", "source_cat")),
+            ("ratio_q20|region|source", ("ratio_q20", "region_cat", "source_cat")),
+            ("days_fixed|source", ("days_fixed", "source_cat")),
+            ("days_fixed|condition_q10", ("days_fixed", "condition_q10")),
+            ("days_fixed|condition_ratio_q10", ("days_fixed", "condition_ratio_q10")),
+            ("days_fixed|region", ("days_fixed", "region_cat")),
+            ("x20|age", ("x20_cat", "age_range_cat")),
+            ("x19|livability", ("x19_cat", "livability_cat")),
+            ("livability|age", ("livability_cat", "age_range_cat")),
+            ("region|livability", ("region_cat", "livability_cat")),
+            ("t3|days_q5", ("t3_cat", "days_q5")),
+            ("source|x20|age", ("source_cat", "x20_cat", "age_range_cat")),
+            ("region|x20|age", ("region_cat", "x20_cat", "age_range_cat")),
+            ("region|source|x19", ("region_cat", "source_cat", "x19_cat")),
+        )
+        for name, columns in interactions:
+            self._add_cross(out, name, columns)
+
+    def _add_rate_rich_features(self, out: pd.DataFrame) -> None:
+        interactions = (
+            ("condition_pct_q7|source", ("condition_pct_q7", "source_cat")),
+            ("condition_pct_q25|source", ("condition_pct_q25", "source_cat")),
+            ("condition_pct_q7|region", ("condition_pct_q7", "region_cat")),
+            ("condition_pct_q7|age", ("condition_pct_q7", "age_range_cat")),
+            ("days_q7|region", ("days_q7", "region_cat")),
+            ("days_q7|source", ("days_q7", "source_cat")),
+            ("days_q7|age", ("days_q7", "age_range_cat")),
+            ("days_q25|region", ("days_q25", "region_cat")),
+            ("rate_q7|region", ("rate_q7", "region_cat")),
+            ("rate_q7|source", ("rate_q7", "source_cat")),
+            ("rate_q13|age", ("rate_q13", "age_range_cat")),
+            ("days_q7|condition_pct_q7", ("days_q7", "condition_pct_q7")),
+            ("days_q13|condition_pct_q13", ("days_q13", "condition_pct_q13")),
+            ("days_q7|region|source", ("days_q7", "region_cat", "source_cat")),
+            ("condition_pct_q7|region|age", ("condition_pct_q7", "region_cat", "age_range_cat")),
+            ("rate_q7|region|source", ("rate_q7", "region_cat", "source_cat")),
+            ("days_q7|binary", ("days_q7", "binary_pattern")),
+            ("region|binary", ("region_cat", "binary_pattern")),
+            ("x20|age", ("x20_cat", "age_range_cat")),
+            ("region|livability", ("region_cat", "livability_cat")),
+        )
+        for name, columns in interactions:
+            self._add_cross(out, name, columns)
 
     @staticmethod
     def _add_identifier_features(out: pd.DataFrame, identifiers: pd.Series) -> None:

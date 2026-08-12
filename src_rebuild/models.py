@@ -25,6 +25,7 @@ class ModelConfig:
     l2_leaf_reg: float
     random_strength: float
     complexity: int
+    boosting_type: str = "Plain"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -118,6 +119,30 @@ def candidate_configs(profile: str) -> tuple[ModelConfig, ...]:
             complexity=1,
         ),
         ModelConfig(
+            name="cb_ratio_rich_rmse_d5",
+            feature_mode="ratio_rich",
+            objective="rmse",
+            depth=5,
+            iterations=rmse_iterations,
+            learning_rate=0.03,
+            l2_leaf_reg=10.0,
+            random_strength=0.7,
+            complexity=2,
+            boosting_type="Ordered",
+        ),
+        ModelConfig(
+            name="cb_rate_rich_rmse_d6",
+            feature_mode="rate_rich",
+            objective="rmse",
+            depth=6,
+            iterations=rmse_iterations,
+            learning_rate=0.03,
+            l2_leaf_reg=6.0,
+            random_strength=0.7,
+            complexity=2,
+            boosting_type="Plain",
+        ),
+        ModelConfig(
             name="cb_all_id_logloss_d5",
             feature_mode="all_id",
             objective="logloss",
@@ -166,6 +191,7 @@ def fit_predict_config(
             "verbose": False,
             "allow_writing_files": False,
             "thread_count": thread_count,
+            "boosting_type": config.boosting_type,
         }
         if config.objective == "logloss":
             model = CatBoostClassifier(

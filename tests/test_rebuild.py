@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src_rebuild.cli import configs_for_run
+from src_rebuild.cli import available_blends, configs_for_run
 from src_rebuild.evaluation import (
     BlendSpec,
     CandidateScore,
@@ -15,6 +15,7 @@ from src_rebuild.evaluation import (
 )
 from src_rebuild.features import RebuildFeatureBuilder
 from src_rebuild.io import save_submission
+from src_rebuild.models import candidate_configs
 
 
 def tiny_frame() -> pd.DataFrame:
@@ -99,11 +100,35 @@ class FeatureBuilderTests(unittest.TestCase):
         self.assertIn("exposure_rate", transformed.frame.columns)
         self.assertAlmostEqual(float(transformed.frame["condition_source_pct"].iloc[0]), 0.5)
 
+    def test_rich_worlds_add_only_label_free_pre_registered_interactions(self):
+        frame = tiny_frame()
+        ratio = RebuildFeatureBuilder("ratio_rich").fit_transform(frame.iloc[:3])
+        rate = RebuildFeatureBuilder("rate_rich").fit_transform(frame.iloc[:3])
+
+        self.assertIn("days_fixed", ratio.frame.columns)
+        self.assertIn("ratio_q20|region|source", ratio.frame.columns)
+        self.assertIn("condition_ratio_q20|source", ratio.frame.columns)
+        self.assertIn("rate_q7|region|source", rate.frame.columns)
+        self.assertIn("condition_pct_q25|source", rate.frame.columns)
+        self.assertNotIn("label", ratio.frame.columns)
+        self.assertNotIn("label", rate.frame.columns)
+
 
 class EvaluationTests(unittest.TestCase):
     def test_full_entry_defaults_to_locked_finalists(self):
         names = [config.name for config in configs_for_run("full", None)]
         self.assertEqual(names, ["cb_ratio_rmse_d5", "cb_rate_rmse_d6"])
+
+    def test_rich_configs_lock_boosting_types_and_blend_grid(self):
+        configs = candidate_configs("smoke")
+        by_name = {config.name: config for config in configs}
+
+        self.assertEqual(by_name["cb_ratio_rich_rmse_d5"].boosting_type, "Ordered")
+        self.assertEqual(by_name["cb_rate_rich_rmse_d6"].boosting_type, "Plain")
+        blend_names = {blend.name for blend in available_blends(configs)}
+        self.assertIn("blend_rich_ratio_rate_w35", blend_names)
+        self.assertIn("blend_rich_ratio_rate_w50", blend_names)
+        self.assertIn("blend_rich_ratio_rate_w65", blend_names)
 
     def test_selector_requires_margin_for_more_complex_candidate(self):
         candidates = [

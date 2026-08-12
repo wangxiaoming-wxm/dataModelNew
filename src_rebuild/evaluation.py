@@ -52,6 +52,52 @@ class BlendSpec:
 
 
 @dataclass(frozen=True)
+class ResidualSpec:
+    """A fixed sequential arm trained only on cross-fitted base residuals."""
+
+    name: str
+    base_components: tuple[str, ...]
+    base_weights: tuple[float, ...]
+    residual_component: str
+    alpha: float
+    complexity: int
+    subinner_splits: int = 2
+    subinner_seed: int = 424243
+
+    def __post_init__(self) -> None:
+        if not self.base_components or len(self.base_components) != len(self.base_weights):
+            raise ValueError("residual base components and weights must share a non-zero length")
+        if any(weight < 0 for weight in self.base_weights):
+            raise ValueError("residual base weights must be non-negative")
+        if not np.isclose(sum(self.base_weights), 1.0):
+            raise ValueError("residual base weights must sum to one")
+        if self.alpha <= 0:
+            raise ValueError("residual alpha must be positive")
+        if self.subinner_splits < 2:
+            raise ValueError("residual sub-inner splits must be at least two")
+
+    @property
+    def components(self) -> tuple[str, ...]:
+        return tuple(dict.fromkeys((*self.base_components, self.residual_component)))
+
+    def base_prediction(self, predictions: dict[str, np.ndarray]) -> np.ndarray:
+        arrays = [np.asarray(predictions[name], dtype=float) for name in self.base_components]
+        if any(len(array) != len(arrays[0]) for array in arrays):
+            raise ValueError("residual base component lengths differ")
+        return sum(weight * array for weight, array in zip(self.base_weights, arrays))
+
+    def combine(self, base_prediction: np.ndarray, residual_prediction: np.ndarray) -> np.ndarray:
+        base = np.asarray(base_prediction, dtype=float)
+        residual = np.asarray(residual_prediction, dtype=float)
+        if len(base) != len(residual):
+            raise ValueError("base and residual prediction lengths differ")
+        return base + self.alpha * residual
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class StackSpec:
     """A fixed, cross-fitted logistic meta-model over OOF component ranks."""
 
@@ -243,6 +289,63 @@ def cross_fitted_prediction(
     return prediction
 
 
+def cross_fitted_residual_prediction(
+    frame: pd.DataFrame,
+    y: np.ndarray,
+    spec: ResidualSpec,
+    config_by_name: dict[str, ModelConfig],
+    base_oof_predictions: dict[str, np.ndarray],
+    splits: list[tuple[np.ndarray, np.ndarray]],
+    *,
+    model_seeds: tuple[int, ...],
+    thread_count: int,
+) -> np.ndarray:
+    """Cross-fit residuals with an additional base-OOF layer in every train fold."""
+    prediction = np.empty(len(frame), dtype=float)
+    seen = np.zeros(len(frame), dtype=int)
+    for fold_index, (train_indices, valid_indices) in enumerate(splits):
+        train_frame = frame.iloc[train_indices].reset_index(drop=True)
+        valid_frame = frame.iloc[valid_indices].reset_index(drop=True)
+        train_y = y[train_indices]
+        subinner = make_stratified_splits(
+            train_y,
+            n_splits=spec.subinner_splits,
+            seed=spec.subinner_seed + fold_index,
+        )
+        subinner_base_predictions: dict[str, np.ndarray] = {}
+        for component_name in spec.base_components:
+            subinner_base_predictions[component_name] = cross_fitted_prediction(
+                train_frame,
+                train_y,
+                config_by_name[component_name],
+                subinner,
+                model_seeds=model_seeds,
+                thread_count=thread_count,
+            )
+        train_base = spec.base_prediction(subinner_base_predictions)
+        residual_target = train_y.astype(float) - train_base
+        residual_valid = fit_predict_config(
+            train_frame,
+            residual_target,
+            valid_frame,
+            config_by_name[spec.residual_component],
+            seeds=model_seeds,
+            thread_count=thread_count,
+            rank_output=False,
+        )
+        valid_base = spec.base_prediction(
+            {
+                component_name: base_oof_predictions[component_name][valid_indices]
+                for component_name in spec.base_components
+            }
+        )
+        prediction[valid_indices] = spec.combine(valid_base, residual_valid)
+        seen[valid_indices] += 1
+    if not np.array_equal(seen, np.ones(len(frame), dtype=int)):
+        raise RuntimeError("residual cross-fit did not score every row exactly once")
+    return prediction
+
+
 class HonestNestedEvaluator:
     """Evaluate the complete inner-selection algorithm on untouched outer folds."""
 
@@ -252,6 +355,7 @@ class HonestNestedEvaluator:
         *,
         blends: tuple[BlendSpec, ...] = (),
         stacks: tuple[StackSpec, ...] = (),
+        residuals: tuple[ResidualSpec, ...] = (),
         outer_splits: int,
         inner_splits: int,
         outer_seed: int,
@@ -264,7 +368,7 @@ class HonestNestedEvaluator:
         if not configs:
             raise ValueError("at least one model config is required")
         config_names = {config.name for config in configs}
-        for recipe in (*blends, *stacks):
+        for recipe in (*blends, *stacks, *residuals):
             missing = set(recipe.components) - config_names
             if missing:
                 raise ValueError(f"recipe {recipe.name!r} has unknown components {sorted(missing)}")
@@ -272,12 +376,14 @@ class HonestNestedEvaluator:
             [config.name for config in configs]
             + [blend.name for blend in blends]
             + [stack.name for stack in stacks]
+            + [residual.name for residual in residuals]
         )
         if len(recipe_names) != len(set(recipe_names)):
             raise ValueError("config and blend names must be unique")
         self.configs = configs
         self.blends = blends
         self.stacks = stacks
+        self.residuals = residuals
         self.outer_splits = outer_splits
         self.inner_splits = inner_splits
         self.outer_seed = outer_seed
@@ -339,6 +445,22 @@ class HonestNestedEvaluator:
                 inner_auc = float(roc_auc_score(outer_y, prediction))
                 scores.append(CandidateScore(stack.name, inner_auc, stack.complexity))
                 print(f"  {stack.name}: inner={inner_auc:.6f}", flush=True)
+            config_by_name = {config.name: config for config in self.configs}
+            for residual in self.residuals:
+                prediction = cross_fitted_residual_prediction(
+                    outer_train_frame,
+                    outer_y,
+                    residual,
+                    config_by_name,
+                    inner_predictions,
+                    inner,
+                    model_seeds=self.model_seeds,
+                    thread_count=self.thread_count,
+                )
+                inner_predictions[residual.name] = prediction
+                inner_auc = float(roc_auc_score(outer_y, prediction))
+                scores.append(CandidateScore(residual.name, inner_auc, residual.complexity))
+                print(f"  {residual.name}: inner={inner_auc:.6f}", flush=True)
 
             selected_score = select_candidate(scores, minimum_complex_gain=self.minimum_complex_gain)
             required_names = (
@@ -374,6 +496,24 @@ class HonestNestedEvaluator:
                     )
                     outer_predictions[stack.name] = prediction
                     outer_stack_coefficients[stack.name] = coefficients
+            for residual in self.residuals:
+                if not all(component in outer_predictions for component in residual.base_components):
+                    continue
+                train_base = residual.base_prediction(inner_predictions)
+                valid_base = residual.base_prediction(outer_predictions)
+                residual_prediction = fit_predict_config(
+                    outer_train_frame,
+                    outer_y.astype(float) - train_base,
+                    outer_valid_frame,
+                    self._config_by_name(residual.residual_component),
+                    seeds=self.model_seeds,
+                    thread_count=self.thread_count,
+                    rank_output=False,
+                )
+                outer_predictions[residual.name] = residual.combine(
+                    valid_base,
+                    residual_prediction,
+                )
             recipes_to_score = (
                 self._recipe_names() if self.diagnose_all_outer else (selected_score.name,)
             )
@@ -450,6 +590,22 @@ class HonestNestedEvaluator:
             inner_auc = float(roc_auc_score(labels, prediction))
             scores.append(CandidateScore(stack.name, inner_auc, stack.complexity))
             print(f"  {stack.name}: inner={inner_auc:.6f}", flush=True)
+        config_by_name = {config.name: config for config in self.configs}
+        for residual in self.residuals:
+            prediction = cross_fitted_residual_prediction(
+                train_frame.reset_index(drop=True),
+                labels,
+                residual,
+                config_by_name,
+                inner_predictions,
+                inner,
+                model_seeds=self.model_seeds,
+                thread_count=self.thread_count,
+            )
+            inner_predictions[residual.name] = prediction
+            inner_auc = float(roc_auc_score(labels, prediction))
+            scores.append(CandidateScore(residual.name, inner_auc, residual.complexity))
+            print(f"  {residual.name}: inner={inner_auc:.6f}", flush=True)
         selected_score = select_candidate(scores, minimum_complex_gain=self.minimum_complex_gain)
         print(f"  selected={selected_score.name}", flush=True)
         component_predictions: dict[str, np.ndarray] = {}
@@ -474,6 +630,24 @@ class HonestNestedEvaluator:
             recipe_metadata = {
                 "inner_cross_fit_coefficients": final_stack_cross_fit_coefficients[stack.name],
                 "full_fit_coefficients": coefficients,
+            }
+        elif any(residual.name == selected_score.name for residual in self.residuals):
+            residual = self._residual_by_name(selected_score.name)
+            train_base = residual.base_prediction(inner_predictions)
+            test_base = residual.base_prediction(component_predictions)
+            residual_prediction = fit_predict_config(
+                train_frame.reset_index(drop=True),
+                labels.astype(float) - train_base,
+                test_frame.reset_index(drop=True),
+                self._config_by_name(residual.residual_component),
+                seeds=self.model_seeds,
+                thread_count=self.thread_count,
+                rank_output=False,
+            )
+            test_prediction = residual.combine(test_base, residual_prediction)
+            recipe_metadata = {
+                "residual_target_mean": float(np.mean(labels - train_base)),
+                "residual_target_std": float(np.std(labels - train_base)),
             }
         else:
             test_prediction = self._prediction_for_recipe(
@@ -500,6 +674,7 @@ class HonestNestedEvaluator:
             "configs": [asdict(config) for config in self.configs],
             "blends": [blend.to_dict() for blend in self.blends],
             "stacks": [stack.to_dict() for stack in self.stacks],
+            "residuals": [residual.to_dict() for residual in self.residuals],
         }
 
     def _config_by_name(self, name: str) -> ModelConfig:
@@ -520,10 +695,18 @@ class HonestNestedEvaluator:
                 return stack
         raise KeyError(name)
 
+    def _residual_by_name(self, name: str) -> ResidualSpec:
+        for residual in self.residuals:
+            if residual.name == name:
+                return residual
+        raise KeyError(name)
+
     def _recipe_names(self) -> tuple[str, ...]:
         return tuple(config.name for config in self.configs) + tuple(
             blend.name for blend in self.blends
-        ) + tuple(stack.name for stack in self.stacks)
+        ) + tuple(stack.name for stack in self.stacks) + tuple(
+            residual.name for residual in self.residuals
+        )
 
     def _components_for_recipe(self, name: str) -> tuple[str, ...]:
         if any(config.name == name for config in self.configs):
@@ -531,7 +714,10 @@ class HonestNestedEvaluator:
         for blend in self.blends:
             if blend.name == name:
                 return blend.components
-        return self._stack_by_name(name).components
+        for stack in self.stacks:
+            if stack.name == name:
+                return stack.components
+        return self._residual_by_name(name).components
 
     def _prediction_for_recipe(
         self,
@@ -548,4 +734,7 @@ class HonestNestedEvaluator:
         for blend in self.blends:
             if blend.name == name:
                 return {"type": "blend", **blend.to_dict()}
-        return {"type": "stack", **self._stack_by_name(name).to_dict()}
+        for stack in self.stacks:
+            if stack.name == name:
+                return {"type": "stack", **stack.to_dict()}
+        return {"type": "residual", **self._residual_by_name(name).to_dict()}

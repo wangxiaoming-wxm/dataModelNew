@@ -16,7 +16,7 @@ import pandas as pd
 import scipy
 import sklearn
 
-from .evaluation import BlendSpec, HonestNestedEvaluator, StackSpec
+from .evaluation import BlendSpec, HonestNestedEvaluator, ResidualSpec, StackSpec
 from .io import append_experiment, save_submission, sha256_file, write_json
 from .models import ModelConfig, candidate_configs
 
@@ -42,6 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-final", action="store_true")
     parser.add_argument("--permutation-check", action="store_true")
     parser.add_argument("--enable-stack", action="store_true")
+    parser.add_argument("--enable-residual", action="store_true")
     return parser.parse_args()
 
 
@@ -157,6 +158,25 @@ def available_stacks(configs: tuple[ModelConfig, ...]) -> tuple[StackSpec, ...]:
     )
 
 
+def available_residuals(configs: tuple[ModelConfig, ...]) -> tuple[ResidualSpec, ...]:
+    """Expose the single pre-registered nested-nested residual arm."""
+    names = {config.name for config in configs}
+    base_components = ("cb_ratio_rich_rmse_d5", "cb_rate_rich_rmse_d6")
+    residual_component = "cb_core_rmse_d5"
+    if not {*base_components, residual_component}.issubset(names):
+        return ()
+    return (
+        ResidualSpec(
+            name="residual_rich_w50_core_d5_a20",
+            base_components=base_components,
+            base_weights=(0.5, 0.5),
+            residual_component=residual_component,
+            alpha=0.20,
+            complexity=4,
+        ),
+    )
+
+
 def build_evaluator(
     profile: str,
     configs: tuple[ModelConfig, ...],
@@ -171,7 +191,12 @@ def build_evaluator(
     return HonestNestedEvaluator(
         configs,
         blends=available_blends(configs),
-        stacks=available_stacks(configs) if args.enable_stack else (),
+        stacks=available_stacks(configs) if getattr(args, "enable_stack", False) else (),
+        residuals=(
+            available_residuals(configs)
+            if getattr(args, "enable_residual", False)
+            else ()
+        ),
         outer_splits=args.outer_splits or int(defaults["outer_splits"]),
         inner_splits=args.inner_splits or int(defaults["inner_splits"]),
         outer_seed=args.outer_seed,

@@ -212,8 +212,9 @@ def fit_predict_config(
     *,
     seeds: tuple[int, ...],
     thread_count: int = -1,
+    rank_output: bool = True,
 ) -> np.ndarray:
-    """Fit one configuration on one partition and rank-average predictions."""
+    """Fit one configuration and average either ranks or raw predictions."""
     builder = RebuildFeatureBuilder(config.feature_mode)
     train_matrix = builder.fit_transform(train_frame)
     prediction_matrix = builder.transform(prediction_frame)
@@ -259,5 +260,10 @@ def fit_predict_config(
             raw_prediction = model.predict(prediction_pool)
         else:
             raise ValueError(f"unsupported objective {config.objective!r}")
-        predictions.append(rankdata(np.asarray(raw_prediction, dtype=float)) / len(raw_prediction))
+        raw_prediction = np.asarray(raw_prediction, dtype=float)
+        predictions.append(
+            rankdata(raw_prediction) / len(raw_prediction)
+            if rank_output
+            else raw_prediction
+        )
     return np.mean(predictions, axis=0)

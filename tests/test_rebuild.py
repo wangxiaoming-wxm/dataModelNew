@@ -181,6 +181,17 @@ class EvaluationTests(unittest.TestCase):
         self.assertIn("blend_freq_ratio_rate_w50", blend_names)
         self.assertIn("blend_freq_ratio_rate_w65", blend_names)
 
+    def test_cross_depth_configs_and_four_model_blend_are_pre_registered(self):
+        configs = candidate_configs("smoke")
+        by_name = {config.name: config for config in configs}
+
+        self.assertEqual(by_name["cb_ratio_rich_rmse_d6"].depth, 6)
+        self.assertEqual(by_name["cb_rate_rich_rmse_d5"].depth, 5)
+        blends = {blend.name: blend for blend in available_blends(configs)}
+        cross_depth = blends["blend_rich_cross_depth_equal"]
+        self.assertEqual(len(cross_depth.components), 4)
+        self.assertEqual(cross_depth.weights, (0.25, 0.25, 0.25, 0.25))
+
     def test_selector_requires_margin_for_more_complex_candidate(self):
         candidates = [
             CandidateScore("simple", inner_auc=0.7000, complexity=0),

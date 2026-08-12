@@ -1,0 +1,157 @@
+{
+  "profile": "full",
+  "outer_splits": 5,
+  "outer_seed": 90210,
+  "arm_mean_auc": {
+    "A1": 0.6973031412256386,
+    "A2": 0.6923807044800049,
+    "REF1": 0.6948447324489709,
+    "REF2": 0.6941816596992596,
+    "R1": 0.6961321368246042,
+    "R2": 0.6962606914706141,
+    "R3": 0.6963169325920563,
+    "R4": 0.6941272892601488,
+    "BYTE07": 0.5269022560655852
+  },
+  "recipes": {
+    "vz19": {
+      "fold_auc": [
+        0.7173377826846217,
+        0.673158761434032,
+        0.704641946296612,
+        0.6960498523175502,
+        0.7066604616530157
+      ],
+      "fold_mean": 0.6995697608771663,
+      "fold_std": 0.016595468878773646,
+      "pooled_auc": 0.6994813075053401
+    },
+    "vz20": {
+      "fold_auc": [
+        0.7173153782674664,
+        0.6724368413256943,
+        0.7036822904284596,
+        0.696773639460651,
+        0.7086702655745842
+      ],
+      "fold_mean": 0.699775683011371,
+      "fold_std": 0.017017936275858188,
+      "pooled_auc": 0.6997445025352704
+    },
+    "vz20_4arm": {
+      "fold_auc": [
+        0.7176365082466926,
+        0.6727809980669966,
+        0.7044589768898437,
+        0.6963610247780407,
+        0.7083041697691734
+      ],
+      "fold_mean": 0.6999083355501494,
+      "fold_std": 0.016985010513928967,
+      "pooled_auc": 0.6998215279452964
+    },
+    "vz20_max3": {
+      "fold_auc": [
+        0.7170241208444473,
+        0.6719837742232202,
+        0.7037370567815058,
+        0.6970599181243021,
+        0.7100750806651775
+      ],
+      "fold_mean": 0.6999759901277306,
+      "fold_std": 0.017312160755996456,
+      "pooled_auc": 0.6999376382775288
+    }
+  },
+  "lift_vs_vz19": {
+    "vz20": {
+      "per_fold_diff": [
+        -2.2404417155286183e-05,
+        -0.0007219201083377147,
+        -0.000959655868152387,
+        0.0007237871431007292,
+        0.002009803921568576
+      ],
+      "fold_mean_lift": 0.00020592213420478345,
+      "folds_not_degraded": 2,
+      "n_folds": 5
+    },
+    "vz20_4arm": {
+      "per_fold_diff": [
+        0.0002987255620708895,
+        -0.000377763367035322,
+        -0.00018296940676831852,
+        0.0003111724604905053,
+        0.0016437081161577716
+      ],
+      "fold_mean_lift": 0.0003385746729831052,
+      "folds_not_degraded": 3,
+      "n_folds": 5
+    },
+    "vz20_max3": {
+      "per_fold_diff": [
+        -0.0003136618401743396,
+        -0.0011749872108117732,
+        -0.0009048895151062553,
+        0.001010065806751892,
+        0.0034146190121618902
+      ],
+      "fold_mean_lift": 0.00040622925056428284,
+      "folds_not_degraded": 2,
+      "n_folds": 5
+    }
+  },
+  "component_diagnostics": {
+    "my_cb_foldmean": 0.6988870525942167,
+    "ref_foldmean": 0.6981287512534052,
+    "max2_foldmean": 0.6988203986564422,
+    "max2_lift_vs_mycb": -6.66539377744968e-05,
+    "byte07_lift_in_vz19": 0.0007493622207240813,
+    "note": "On fresh outer seed 90210, max2 contributes ~0 (vz19 claimed +0.0018 was OOF-specific); byte07 is the real orthogonal add (+0.00075)."
+  },
+  "orthogonality": {
+    "spearman_R1_vs_A1_mean": 0.9858624024964395,
+    "note": "ratio_rich(R1) ~0.985 correlated with vz19 arm1(A1): rich features are near-duplicates of vz19's manual crosses -> no orthogonal gain."
+  },
+  "oracle_ceiling": {
+    "best_foldmean": 0.6997734516715852,
+    "at_w": 0.9500000000000001,
+    "lift_vs_vz19": 0.00020369079441895366,
+    "note": "Upper bound tuned ON eval (NOT gate-valid). Even cheating, max fusion lift over vz19 is ~+0.0002."
+  },
+  "permutation": {
+    "arm": "R1",
+    "perm_seed": 1234,
+    "folds": 3,
+    "fold_auc": [
+      0.5004107476478473,
+      0.5309187180192503,
+      0.5072092435646424
+    ],
+    "fold_mean": 0.51284623641058,
+    "pooled_auc": 0.5129022474534684,
+    "gate_range": [
+      0.48,
+      0.52
+    ],
+    "gate_pass": true
+  },
+  "gate_verdict": {
+    "gate_lift_threshold": 0.0015,
+    "vz20_foldmean_lift": 0.00020592213420478345,
+    "vz20_folds_not_degraded": 2,
+    "gate1_lift_pass": false,
+    "gate2_folds_pass": false,
+    "permutation_pass": true,
+    "overall_pass": false,
+    "conclusion": "GATE NOT MET. Honest fusion ceiling over vz19 is ~+0.0002 (oracle), far below +0.0015. Signal is homogeneous (Spearman~0.98). vz20 is statistically indistinguishable from vz19; do NOT replace vz19 on strength grounds."
+  },
+  "final_submission": {
+    "file": "submission_vz20.csv",
+    "sha256": "a770d35c784c1ede83eadd5e3f984368c7adea91e41c625f325a5360b719eed2",
+    "rows": 6398,
+    "spearman_vs_vz19": 0.99186,
+    "pearson_vs_vz19": 0.99186,
+    "recommendation": "vz20 ~ vz19 (Spearman 0.992). Gate NOT met. Recommend submitting vz19."
+  }
+}

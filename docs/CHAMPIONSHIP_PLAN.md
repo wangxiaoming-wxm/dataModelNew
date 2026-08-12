@@ -1,31 +1,32 @@
 # 冲榜计划（相对线上 0.71503 / 榜首 0.72487）
 
+## 当前冠军（立刻可交）
+
+**`submissions/submission_champion.csv`** = AM40 + id-bytes TE **v3 dual**
+
+| 指标 | 值 |
+|---|---:|
+| 本地 OOF | **0.70717** |
+| nested (选 w) | **0.70737** |
+| vs 冻结 AM40 | **+0.00535** |
+| vs W62 本地 OOF | **+0.0056** 量级 |
+| vs 榜首缺口（线上） | 仍约 **0.01**（本地增益不能直接平移） |
+
+配方见 `docs/ID_BYTES.md`；复现：`bash run_am40_idbytes.sh`。
+
 ## 关于「每个 seed 都要 >0.6999？」
 
-**不需要。**
+**不需要。** Seed 级 OOF 常见 0.691–0.697；融合吃的是跨 seed 排序稳定性。
 
-| 事实 | 数字 |
-|---|---|
-| best_v1 单 seed OOF | 常见 **0.691–0.697** |
-| best_v1 main pooled | **0.69992**（rank 平均后才到） |
-| 冻结 AM40 OOF | 0.70181 |
-| 你的线上 W62 | **0.71503** |
-| 榜首 | **0.72487**（差 ≈**0.01**） |
+## 策略分层
 
-Seed 级 OOF 低于 0.6999 完全正常；融合吃的是 **跨 seed 的排序稳定性**，不是每个 seed 都过线。  
-**0.715→0.725 也不是靠把 seed 从 0.695 刷到 0.700**——本地同构调参（Plus/Extend/Bags/region）增量都在 **≤0.0003** 或为负。要夺冠需要 **新信号或可控多样性（~+0.01 量级）**。
+1. **主交（夺冠导向）**：v3 dual idbytes — 当前最强合法正交信号  
+2. **备份**：`submission_am40_idbytes_tempered.csv`（纯稠密 V7）/ `*_safe.csv`（v1 w=0.85）  
+3. **在跑**：SUPER714-Jitter — 仅当融合 OOF **> 0.70717** 才晋升替换 champion  
+4. **已证伪勿再烧提交**：TE 第三臂、region、扩 seed/bags、Plus 改世界、id 当 CatBoost 类别
 
-## 当前策略（放手干）
+## 提交纪律
 
-1. **地板**：冻结 AM40（OOF 0.70181）/ 线上仍以 W62 为实证锚点  
-2. **主攻：SUPER714-Jitter** — 把 opus 验证过的「可控 jitter 重编码」注入 best_v1 双臂，并加 Logloss 分类臂做分歧  
-   - 历史同类机制约 **+0.01 AUC**（正好是榜差额量级）  
-   - 脚本：`src_super/train_super714_jitter.py`  
-   - 门禁：融合 OOF **> AM40** 才晋升 `submission_champion.csv`  
-3. 已证伪勿再烧提交：TE 第三臂、region 第三世界、扩 seed/bags、Plus 改世界
-
-## 提交纪律（次数少）
-
-- 未过门禁：**不要交**，守 W62  
-- 过门禁且 ΔOOF ≥ +0.0003：优先交 champion  
-- 若只想搏小增益：AM40（与 W62 Spearman≈0.999，线上风险：持平/微涨/微跌）  
+- 有提交次数：交 **champion**  
+- 只剩 1 次且极度厌恶风险：tempered → safe  
+- 未过门禁的实验：**不要交**，守 W62 / 或交已验证的 champion

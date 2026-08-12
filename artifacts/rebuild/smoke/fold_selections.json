@@ -1,0 +1,43 @@
+{
+  "folds": [
+    {
+      "fold": 0,
+      "inner_auc_by_config": {
+        "cb_all_id_logloss_d5": 0.6469405984814649,
+        "cb_all_logloss_d5": 0.6516711814765422,
+        "cb_core_logloss_d5": 0.6509329238273105,
+        "cb_core_logloss_d6": 0.6482961613738044,
+        "cb_core_rmse_d5": 0.651425244917423
+      },
+      "outer_auc": 0.6701008090320882,
+      "selected": "cb_all_logloss_d5",
+      "selected_inner_auc": 0.6516711814765422
+    },
+    {
+      "fold": 1,
+      "inner_auc_by_config": {
+        "cb_all_id_logloss_d5": 0.6527088523274155,
+        "cb_all_logloss_d5": 0.6612972011165251,
+        "cb_core_logloss_d5": 0.6689548323398063,
+        "cb_core_logloss_d6": 0.668353654084182,
+        "cb_core_rmse_d5": 0.6664473097721032
+      },
+      "outer_auc": 0.6620333118223941,
+      "selected": "cb_core_logloss_d5",
+      "selected_inner_auc": 0.6689548323398063
+    },
+    {
+      "fold": 2,
+      "inner_auc_by_config": {
+        "cb_all_id_logloss_d5": 0.6503739949752118,
+        "cb_all_logloss_d5": 0.6541855484081159,
+        "cb_core_logloss_d5": 0.6606075035287189,
+        "cb_core_logloss_d6": 0.6608912331138381,
+        "cb_core_rmse_d5": 0.6578257005301359
+      },
+      "outer_auc": 0.673913608879466,
+      "selected": "cb_core_logloss_d5",
+      "selected_inner_auc": 0.6606075035287189
+    }
+  ]
+}

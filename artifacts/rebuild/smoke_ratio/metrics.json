@@ -1,0 +1,155 @@
+{
+  "data": {
+    "positive_rate": 0.10020093770931011,
+    "test_rows": 6398,
+    "train_rows": 14930
+  },
+  "elapsed_seconds": 239.54322600364685,
+  "final": null,
+  "name": "first_principles_rebuild_smoke",
+  "nested": {
+    "candidate_outer_auc": {
+      "cb_core_logloss_d6": {
+        "folds": [
+          0.6760439145374267,
+          0.6601581904317791,
+          0.677850302505242
+        ],
+        "mean": 0.6713508024914826,
+        "std": 0.009735074879621214
+      },
+      "cb_rate_rmse_d6": {
+        "folds": [
+          0.6834101431984112,
+          0.6714474057538927,
+          0.6792309927517125
+        ],
+        "mean": 0.6780295139013388,
+        "std": 0.00607119719351485
+      },
+      "cb_ratio_logloss_d5": {
+        "folds": [
+          0.686988089622747,
+          0.6684404986838349,
+          0.6753023707155554
+        ],
+        "mean": 0.6769103196740458,
+        "std": 0.009377761315961098
+      },
+      "cb_ratio_rmse_d5": {
+        "folds": [
+          0.6883593001098223,
+          0.6675911000204965,
+          0.6771359668239729
+        ],
+        "mean": 0.6776954556514306,
+        "std": 0.010395398239057767
+      }
+    },
+    "fold_auc": [
+      0.6834101431984112,
+      0.6601581904317791,
+      0.677850302505242
+    ],
+    "fold_mean": 0.6738062120451441,
+    "fold_selections": [
+      {
+        "fold": 0,
+        "inner_auc_by_config": {
+          "cb_core_logloss_d6": 0.6482961613738044,
+          "cb_rate_rmse_d6": 0.6543744677534167,
+          "cb_ratio_logloss_d5": 0.6481037574536921,
+          "cb_ratio_rmse_d5": 0.6510516363740619
+        },
+        "outer_auc": 0.6834101431984112,
+        "selected": "cb_rate_rmse_d6",
+        "selected_inner_auc": 0.6543744677534167
+      },
+      {
+        "fold": 1,
+        "inner_auc_by_config": {
+          "cb_core_logloss_d6": 0.668353654084182,
+          "cb_rate_rmse_d6": 0.6666999659093403,
+          "cb_ratio_logloss_d5": 0.6604012573674575,
+          "cb_ratio_rmse_d5": 0.6602863525816396
+        },
+        "outer_auc": 0.6601581904317791,
+        "selected": "cb_core_logloss_d6",
+        "selected_inner_auc": 0.668353654084182
+      },
+      {
+        "fold": 2,
+        "inner_auc_by_config": {
+          "cb_core_logloss_d6": 0.6608912331138381,
+          "cb_rate_rmse_d6": 0.655853466647453,
+          "cb_ratio_logloss_d5": 0.6591324677045023,
+          "cb_ratio_rmse_d5": 0.6578380074127711
+        },
+        "outer_auc": 0.677850302505242,
+        "selected": "cb_core_logloss_d6",
+        "selected_inner_auc": 0.6608912331138381
+      }
+    ],
+    "fold_std": 0.012142047916332449,
+    "pooled_auc": 0.67380350877612
+  },
+  "permutation": null,
+  "profile": "smoke",
+  "protocol": {
+    "configs": [
+      {
+        "complexity": 1,
+        "depth": 6,
+        "feature_mode": "core",
+        "iterations": 250,
+        "l2_leaf_reg": 12.0,
+        "learning_rate": 0.03,
+        "name": "cb_core_logloss_d6",
+        "objective": "logloss",
+        "random_strength": 0.7
+      },
+      {
+        "complexity": 1,
+        "depth": 5,
+        "feature_mode": "ratio",
+        "iterations": 250,
+        "l2_leaf_reg": 10.0,
+        "learning_rate": 0.03,
+        "name": "cb_ratio_logloss_d5",
+        "objective": "logloss",
+        "random_strength": 0.7
+      },
+      {
+        "complexity": 1,
+        "depth": 5,
+        "feature_mode": "ratio",
+        "iterations": 300,
+        "l2_leaf_reg": 10.0,
+        "learning_rate": 0.03,
+        "name": "cb_ratio_rmse_d5",
+        "objective": "rmse",
+        "random_strength": 0.7
+      },
+      {
+        "complexity": 1,
+        "depth": 6,
+        "feature_mode": "rate",
+        "iterations": 300,
+        "l2_leaf_reg": 6.0,
+        "learning_rate": 0.03,
+        "name": "cb_rate_rmse_d6",
+        "objective": "rmse",
+        "random_strength": 0.7
+      }
+    ],
+    "diagnose_all_outer": true,
+    "inner_seed": 2718,
+    "inner_splits": 2,
+    "minimum_complex_gain": 0.0005,
+    "model_seeds": [
+      2026
+    ],
+    "outer_seed": 2026,
+    "outer_splits": 3
+  }
+}

@@ -39,6 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--thread-count", type=int, default=-1)
     parser.add_argument("--skip-final", action="store_true")
     parser.add_argument("--permutation-check", action="store_true")
+    parser.add_argument("--enable-stack", action="store_true")
     return parser.parse_args()
 
 
@@ -144,7 +145,7 @@ def build_evaluator(
     return HonestNestedEvaluator(
         configs,
         blends=available_blends(configs),
-        stacks=available_stacks(configs),
+        stacks=available_stacks(configs) if args.enable_stack else (),
         outer_splits=args.outer_splits or int(defaults["outer_splits"]),
         inner_splits=args.inner_splits or int(defaults["inner_splits"]),
         outer_seed=2026,

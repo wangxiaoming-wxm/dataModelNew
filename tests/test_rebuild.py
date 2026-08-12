@@ -5,10 +5,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src_rebuild.cli import available_blends, configs_for_run
+from src_rebuild.cli import available_blends, available_stacks, configs_for_run
 from src_rebuild.evaluation import (
     BlendSpec,
     CandidateScore,
+    StackSpec,
     make_stratified_splits,
     rank_average,
     select_candidate,
@@ -173,6 +174,38 @@ class EvaluationTests(unittest.TestCase):
         np.testing.assert_allclose(prediction, np.array([0.3, 0.7]))
         with self.assertRaises(KeyError):
             blend.combine({"ratio": np.array([0.2, 0.8])})
+
+    def test_stack_spec_cross_fits_meta_model_and_records_coefficients(self):
+        y = np.array([0, 1] * 10)
+        predictions = {
+            "ratio": np.linspace(0.05, 0.95, len(y)),
+            "rate": np.roll(np.linspace(0.05, 0.95, len(y)), 2),
+        }
+        splits = make_stratified_splits(y, n_splits=2, seed=2026)
+        stack = StackSpec(
+            name="stack",
+            components=("ratio", "rate"),
+            regularization_c=0.1,
+            complexity=3,
+        )
+
+        oof, coefficients = stack.cross_fit(predictions, y, splits)
+        final_prediction, final_coefficients = stack.fit_predict(
+            predictions,
+            y,
+            {"ratio": predictions["ratio"][:3], "rate": predictions["rate"][:3]},
+        )
+
+        self.assertEqual(len(oof), len(y))
+        self.assertTrue(np.isfinite(oof).all())
+        self.assertEqual(len(coefficients), 2)
+        self.assertEqual(len(final_coefficients), 2)
+        self.assertEqual(len(final_prediction), 3)
+
+    def test_rich_stack_is_available_only_with_both_components(self):
+        configs = candidate_configs("smoke")
+        stacks = available_stacks(configs)
+        self.assertEqual([stack.name for stack in stacks], ["stack_rich_ratio_rate_logit"])
 
 
 class SubmissionTests(unittest.TestCase):

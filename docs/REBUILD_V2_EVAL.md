@@ -30,6 +30,8 @@
 
 仅允许两个一级模型的 cross-fitted 预测。元模型只能在 outer-train 的 inner OOF 上拟合，outer-valid 不得参与权重、符号或正则选择。
 
+唯一预注册元模型为 `LogisticRegression(C=0.1, L2, lbfgs)`，输入是 rich ratio/rate 的 rank 预测；C 不搜索。用于 inner 计分的元模型本身再次按 inner folds cross-fit，outer-valid 预测则由完整 outer-train inner OOF 拟合元模型后生成。
+
 晋级条件：
 
 1. 相对同轮最佳固定 blend 提高 `>= 0.001`；

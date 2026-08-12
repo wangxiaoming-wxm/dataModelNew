@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src_rebuild.cli import configs_for_run
 from src_rebuild.evaluation import (
     BlendSpec,
     CandidateScore,
@@ -100,6 +101,10 @@ class FeatureBuilderTests(unittest.TestCase):
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_full_entry_defaults_to_locked_finalists(self):
+        names = [config.name for config in configs_for_run("full", None)]
+        self.assertEqual(names, ["cb_ratio_rmse_d5", "cb_rate_rmse_d6"])
+
     def test_selector_requires_margin_for_more_complex_candidate(self):
         candidates = [
             CandidateScore("simple", inner_auc=0.7000, complexity=0),

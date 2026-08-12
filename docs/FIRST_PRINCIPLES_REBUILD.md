@@ -56,6 +56,8 @@ V2 完整候选最终收敛为两个 RMSE CatBoost：
 
 V2 实现并验证了严格 cross-fit Logistic stacking：一级预测、元模型训练和元模型计分均限制在 outer-train 内。其 smoke 仅比最佳固定 blend 高 `0.000017`，未过 `0.001` 门禁，代码保留但默认关闭。
 
+V3 又实现了 nested-nested residual：每个 inner-train 内再用 2-fold sub-inner 生成 base OOF，然后才构造 residual target；inner-valid/outer-valid 从不参与 residual learner 的训练。固定 residual arm 相对同轮 V2 fixed blend 为 `+0.000666`，仍未过门禁，使用 `--enable-residual` 才会启用。
+
 ## 4. 特征策略
 
 ### 4.1 label-free 基础特征
@@ -68,7 +70,7 @@ V2 实现并验证了严格 cross-fit Logistic stacking：一级预测、元模�
 - `x0..x18` 的逐行均值、标准差、最小、最大和分位数；
 - 类别频次与 `days/condition` 的组内均值偏差，统计量只在当前训练分区拟合。
 
-### 4.2 七个预注册特征世界
+### 4.2 九个预注册特征世界
 
 1. `core`：业务/结构字段，不含 `x0..x18` 和 `id`；
 2. `all`：`core` 加原始 `x0..x18` 与行汇总；
@@ -77,6 +79,8 @@ V2 实现并验证了严格 cross-fit Logistic stacking：一级预测、元模�
 5. `rate`：用当前训练分区内每个 source 的 condition 经验分布将 condition 映射为 percentile，再构造 `days * (1-percentile)`、折内分位箱及类别交互。
 6. `ratio_rich`：在 ratio 上增加预注册的低阶分位×region/source/age/binary 交互和固定 days 桶；
 7. `rate_rich`：在 rate 上增加对应的经验分位交互。
+8. `ratio_freq`：为预注册 ratio-rich 高阶类别交互增加当前训练分区频率与 rare 指示；
+9. `rate_freq`：rate-rich 的对应可靠性版本。
 
 所有 ratio/rate/rich 世界的 source 统计、经验 CDF、分位边界、类别频率和缺失回退值均在每个 inner/outer 训练分区重新拟合。验证行从不参与这些统计量。
 
@@ -132,7 +136,7 @@ bash run_rebuild.sh --full
 bash run_rebuild.sh --verify
 ```
 
-当前 `--full` 默认只运行已锁定的 `cb_ratio_rich_rmse_d5,cb_rate_rich_rmse_d6`、4 seeds 和三个预注册 blend，写入 `artifacts/rebuild/v2_full/`。V1 证据保留在 `artifacts/rebuild/full/`。若要重跑历史消融，必须用 `--configs` 显式列出，避免无意扩大最终搜索空间；stacking 还必须显式传入 `--enable-stack`。
+当前 `--full` 默认只运行已锁定的 `cb_ratio_rich_rmse_d5,cb_rate_rich_rmse_d6`、4 seeds 和三个预注册 blend，写入 `artifacts/rebuild/v2_full/`。V1 证据保留在 `artifacts/rebuild/full/`。若要重跑历史消融，必须用 `--configs` 显式列出，避免无意扩大最终搜索空间；stacking/residual 还必须分别显式传入 `--enable-stack` / `--enable-residual`。
 
 产物：
 
@@ -163,6 +167,11 @@ submissions/submission_rebuild_<recipe>.csv
 | strict Logistic stack | 3×2，4 seeds，300 trees | 0.688949 ± 0.007746 | 0.688981 | stack 固定 0.689007，仅 +0.000017，淘汰 |
 | rich 8-seed 止损 | 3×2，8 seeds，300 trees | 0.689160 ± 0.007828 | 0.689199 | 相对 4-seed 仅 +0.000211，低于 +0.0003 门禁 |
 | **V2 最终选择算法** | **5×3，4 seeds，800 trees** | **0.695181 ± 0.012759** | **0.695101** | **相对 V1 +0.006459；5/5 外折提升** |
+| V2 新 outer seed 稳定性 | 5×3，4 seeds，800 trees，outer=314159 | 0.693638 ± 0.011103 | 0.693433 | rich 双臂 5/5；置乱 0.495288，通过 |
+| 类别可靠性频率 | 3×2，4 seeds，outer=314159 | fixed freq=0.684654 | — | V2 fixed=0.684675，`-0.000020`，淘汰 |
+| 交叉深度 | 3×2，4 seeds，outer=314159 | fixed 4-model=0.685051 | — | 相对 V2 `+0.000376`，淘汰 |
+| nested-nested residual | 3×2，4 seeds，outer=314159 | fixed residual=0.685341 | — | 相对 V2 `+0.000666`，2/3 folds，但未过门禁 |
+| rich Logloss objective diversity | 3×2，4 seeds，outer=271828 | fixed 4-model=0.679930 | — | 同轮 V2 fixed=0.681633，`-0.001703`，淘汰 |
 
 V2 最终五折 AUC 为：
 
@@ -192,11 +201,15 @@ V2 置乱哨兵在独立 3-fold outer 上得到 `0.495288 ± 0.003677`，pooled 
 - ratio-Logloss：`0.676910`，低于 ratio-RMSE `0.677695`；不进入完整运行。
 - strict Logistic stacking：系数始终为正且稳定，但相对固定 blend 仅 `+0.000017`；不进入完整运行。
 - 8 seeds：相对 4 seeds 仅 `+0.000211` 且有外折退化；不值得把完整训练成本翻倍。
+- fold-fitted 类别可靠性：ratio 单臂只有 `+0.000549`，双臂融合无增益；不调 rare 阈值或挑列重跑。
+- 交叉深度：Ordered ratio d6 相对 d5 三个 smoke 外折均提升，但四模型融合仅 `+0.000376`；不足以抵御选择噪声。
+- nested-nested residual：严格实现后固定 arm 为 `+0.000666`，方向合理但幅度低于门禁；不搜索 alpha。
+- rich Logloss：在第三组 outer seed 上显著落后 RMSE，四模型 objective blend `-0.001703`；停止该目标族。
 - 全局方向翻转、显式目标编码和大规模 ID 组合搜索：没有泄漏安全且稳定的晋级证据，不做。
 
-止损点：在同一个 outer seed 上继续添加交互或微调权重会放大实验者过拟合。下一轮必须先锁定方案并更换 outer seed，当前 V2 保持推荐。仍值得验证：
+V3 止损点：四条彼此不同的方向均未达到预注册 `+0.001`，而且开发已经使用两组新 outer seeds。继续围绕现有 CatBoost rich 世界调权重、alpha 或交互列，会把 outer folds 变成训练集。当前 V2 保持推荐；V3 没有生成新 submission。若开启下一轮，应先冻结新的模型族并使用未查看切分。仍值得验证：
 
-1. 用新的 outer seed 对锁定的 V2 做稳定性确认，不再改特征；
-2. 为 source 经验 CDF 增加预注册 shrinkage 与 leave-one-out 的 label-free 稳健版本；
-3. 残差臂必须增加一层 sub-inner cross-fit 生成残差训练目标；只有在新 outer seed 下预注册后才值得承担计算成本；
-4. 报告多个 outer seeds 的均值和 seed 间方差，但不得据此反复改特征后仍把同一批 seeds 当最终无偏估计。
+1. source 经验 CDF 的预注册 shrinkage/leave-one-out 稳健版本；
+2. 与 CatBoost 结构真正不同的、原生类别或规则化 GAM/EBM 模型，而不是更多相邻 depth；
+3. 把多个 outer seeds 作为冻结候选的最终确认集，不再用于逐列/逐权重开发；
+4. 若再做 residual，必须换 residual learner；现有 core CatBoost residual 不再搜索 alpha。

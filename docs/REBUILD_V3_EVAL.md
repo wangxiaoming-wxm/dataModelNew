@@ -98,3 +98,14 @@ Phase A/B/C 均未达到 `+0.001`。`314159` 已成为开发切分，后续不�
 - Phase A：frequency 最佳 blend `0.684654`，V2 fixed 最佳 `0.684675`，失败。
 - Phase B：cross-depth 四模型 `0.685051`，相对 V2 `+0.000376`，失败。
 - Phase C：严格 residual `0.685341`，相对 V2 `+0.000666`，2/3 外折提升但低于门禁，失败。
+- Phase D：objective 四模型等权 `0.679930`，同轮 V2 fixed 最佳 `0.681633`，差 `-0.001703`；失败。
+
+## V3 结论
+
+没有候选进入原 seed 的完整确认，因此不生成 V3 submission，也不改 `--full` / `--verify` 默认值。推荐继续使用 V2。完整证据位于：
+
+- `artifacts/rebuild/v3_v2_stability_full/`
+- `artifacts/rebuild/v3_freq_smoke/`
+- `artifacts/rebuild/v3_cross_depth_smoke/`
+- `artifacts/rebuild/v3_residual_smoke/`
+- `artifacts/rebuild/v3_objective_smoke/`

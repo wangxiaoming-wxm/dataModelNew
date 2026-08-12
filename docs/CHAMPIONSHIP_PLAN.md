@@ -36,4 +36,4 @@ score = 0.50 * v3_dual + 0.35 * bits64 + 0.15 * x0_18_q20
 
 - **主交 fp_v4 champion**  
 - Jitter 仅当融合 OOF **> 0.71640** 才替换  
-- 已证伪勿再烧：region / Plus / 扩 bags / id 当 CatBoost 类别  
+- 已证伪勿再烧：region / Plus / 扩 bags / id 当 CatBoost 类别 / **fold-local 分组统计（见 docs/GROUP_STATS.md）**  

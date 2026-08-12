@@ -73,6 +73,25 @@ class FeatureBuilderTests(unittest.TestCase):
         self.assertEqual(list(train_matrix.frame.columns), list(valid_matrix.frame.columns))
         self.assertEqual(train_matrix.cat_columns, valid_matrix.cat_columns)
 
+    def test_ratio_world_fits_bins_and_source_scale_on_training_partition(self):
+        frame = tiny_frame()
+        builder = RebuildFeatureBuilder("ratio").fit(frame.iloc[:3])
+        transformed = builder.transform(frame.iloc[3:])
+
+        self.assertIn("condition_source_ratio", transformed.frame.columns)
+        self.assertIn("ratio_q10", transformed.frame.columns)
+        self.assertIn("ratio_q10|region", transformed.frame.columns)
+        self.assertIn("ratio_q10", transformed.cat_columns)
+
+    def test_rate_world_uses_training_source_distribution_with_unseen_fallback(self):
+        frame = tiny_frame()
+        builder = RebuildFeatureBuilder("rate").fit(frame.iloc[:3])
+        transformed = builder.transform(frame.iloc[3:])
+
+        self.assertIn("condition_source_pct", transformed.frame.columns)
+        self.assertIn("exposure_rate", transformed.frame.columns)
+        self.assertAlmostEqual(float(transformed.frame["condition_source_pct"].iloc[0]), 0.5)
+
 
 class EvaluationTests(unittest.TestCase):
     def test_selector_requires_margin_for_more_complex_candidate(self):

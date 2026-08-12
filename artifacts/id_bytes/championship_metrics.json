@@ -1,39 +1,13 @@
 {
-  "protocol": "6-seed TE; win-prob = 0.55*full+0.45*nested - mild low-w penalty",
-  "te_seeds": [
-    2026,
-    7,
-    42,
-    99,
-    314,
-    2718
-  ],
-  "am40_oof": 0.7018113510376338,
+  "protocol": "fp_v4 selection-free: 0.5*v3_dual + 0.35*bits64 + 0.15*x0_18",
   "champion": {
-    "name": "v3_dual_v7_0.7_w55",
-    "formula": "0.55*AM40 + 0.44999999999999996*(0.7*pool(V7)+0.30000000000000004*pool(V2)); V7=['b3', 'b2hi', 'b1hi', 'b0', 'b4hi', 'b5', 'b7', 'b7hi', 'b5hi', 'b6hi']; V2=['b0', 'b4', 'b5', 'b7', 'b2hi', 'p47']; te_seeds=[2026, 7, 42, 99, 314, 2718]",
-    "w_am40": 0.55,
-    "w_v7_in_pool": 0.7,
-    "specs_v7": [
-      "b3",
-      "b2hi",
-      "b1hi",
-      "b0",
-      "b4hi",
-      "b5",
-      "b7",
-      "b7hi",
-      "b5hi",
-      "b6hi"
-    ],
-    "specs_v2": [
-      "b0",
-      "b4",
-      "b5",
-      "b7",
-      "b2hi",
-      "p47"
-    ],
+    "name": "fp_v4_v3_bits_x",
+    "formula": "0.5*v3_dual + 0.35*bits64 + 0.15*x0_18_q20",
+    "weights": {
+      "v3": 0.5,
+      "bits": 0.35,
+      "xs": 0.15
+    },
     "te_seeds": [
       2026,
       7,
@@ -42,152 +16,48 @@
       314,
       2718
     ],
-    "oof_auc": 0.707165960500892,
-    "nested": 0.707366613031656,
-    "d_am40": 0.005354609463258164,
-    "spearman_vs_w62": 0.9787048615936997,
-    "sha256": "e8e7fff108c09f392c5ae0b2ff4442724a000b28d72eeb9c49f3f14d5e84155f"
-  },
-  "tempered": {
-    "name": "v7",
-    "w": 0.55,
-    "specs": [
-      "b3",
-      "b2hi",
-      "b1hi",
-      "b0",
-      "b4hi",
-      "b5",
-      "b7",
-      "b7hi",
-      "b5hi",
-      "b6hi"
+    "oof_auc": 0.7164047305145615,
+    "v3_oof": 0.707165960500892,
+    "delta_vs_v3": 0.009238770013669573,
+    "bits_oof": 0.5912706824172683,
+    "xs_oof": 0.5485205846925233,
+    "spearman_bits_vs_v3": 0.025610385100616806,
+    "spearman_xs_vs_v3": 0.07552121453928216,
+    "submission": "submissions/submission_champion.csv",
+    "submission_sha256": "2e313d5d173515003fdf7c118193297b04759e16e7ae51ca91f30ade12e7a52f",
+    "gate_beat_v3": true,
+    "data": {
+      "train_rows": 14930,
+      "test_rows": 6398
+    },
+    "ignored_raw_recovered": [
+      "x0",
+      "x1",
+      "x2",
+      "x3",
+      "x4",
+      "x5",
+      "x6",
+      "x7",
+      "x8",
+      "x9",
+      "x10",
+      "x11",
+      "x12",
+      "x13",
+      "x14",
+      "x15",
+      "x16",
+      "x17",
+      "x18"
     ],
-    "oof": 0.706673853714615,
-    "nested": 0.7068587078512312,
-    "sha256": "e2d0490bec33703332f86ee442cd0db75dda818a57f1d81350bd6f54d6b5d316"
+    "richer_id": "all 64 bit planes of 8 hex bytes",
+    "spearman_vs_w62": 0.9669116014245579
   },
-  "safe": {
-    "name": "v1_w85",
-    "oof": 0.703935570533382,
-    "sha256": "7ae47ac7ff581e57be65f193e00fc9ab244939d54bbd52e4c2a23f4bb7d9310e"
-  },
-  "top15": [
-    {
-      "score": 0.7072562541397358,
-      "full": 0.707165960500892,
-      "nested": 0.707366613031656,
-      "name": "dual_v70.7",
-      "w": 0.55
-    },
-    {
-      "score": 0.7072393948100282,
-      "full": 0.7073171253559688,
-      "nested": 0.707366613031656,
-      "name": "dual_v70.7",
-      "w": 0.5
-    },
-    {
-      "score": 0.7071749542062437,
-      "full": 0.7071452611658979,
-      "nested": 0.7072112456999994,
-      "name": "dual_v70.5",
-      "w": 0.55
-    },
-    {
-      "score": 0.7070618396164456,
-      "full": 0.7068124795494551,
-      "nested": 0.707366613031656,
-      "name": "dual_v70.7",
-      "w": 0.6
-    },
-    {
-      "score": 0.7070587269426719,
-      "full": 0.7069339388684948,
-      "nested": 0.7072112456999994,
-      "name": "dual_v70.5",
-      "w": 0.6
-    },
-    {
-      "score": 0.7070245169925016,
-      "full": 0.7070535571409123,
-      "nested": 0.7072112456999994,
-      "name": "dual_v70.5",
-      "w": 0.5
-    },
-    {
-      "score": 0.7068139573063672,
-      "full": 0.7064889031661226,
-      "nested": 0.7072112456999994,
-      "name": "dual_v70.5",
-      "w": 0.65
-    },
-    {
-      "score": 0.7068001122776354,
-      "full": 0.7069339886265115,
-      "nested": 0.7068587078512312,
-      "name": "v7",
-      "w": 0.5
-    },
-    {
-      "score": 0.7068001122776354,
-      "full": 0.7069339886265115,
-      "nested": 0.7068587078512312,
-      "name": "dual_v71.0",
-      "w": 0.5
-    },
-    {
-      "score": 0.7067747333715358,
-      "full": 0.7062904681950738,
-      "nested": 0.707366613031656,
-      "name": "dual_v70.7",
-      "w": 0.65
-    },
-    {
-      "score": 0.7067570380760924,
-      "full": 0.706673853714615,
-      "nested": 0.7068587078512312,
-      "name": "v7",
-      "w": 0.55
-    },
-    {
-      "score": 0.7067570380760924,
-      "full": 0.706673853714615,
-      "nested": 0.7068587078512312,
-      "name": "dual_v71.0",
-      "w": 0.55
-    },
-    {
-      "score": 0.7066955420037911,
-      "full": 0.7069256790377038,
-      "nested": 0.7068587078512312,
-      "name": "v7",
-      "w": 0.45
-    },
-    {
-      "score": 0.7065364718437933,
-      "full": 0.7066364605649804,
-      "nested": 0.7068587078512312,
-      "name": "v7_soft0.45",
-      "w": 0.45
-    },
-    {
-      "score": 0.7065270670823087,
-      "full": 0.7067742156345262,
-      "nested": 0.7062249966295984,
-      "name": "v2_soft0.55",
-      "w": 0.55
-    }
-  ],
   "files": {
     "submit_this": "submissions/submission_champion.csv",
-    "same_as": [
-      "submissions/submission_am40_idbytes.csv",
-      "submissions/submission_am40_idbytes_v3.csv",
-      "submissions/submission_am40_idbytes_aggressive.csv"
-    ],
-    "tempered": "submissions/submission_am40_idbytes_tempered.csv",
-    "safe_backup": "submissions/submission_am40_idbytes_safe.csv"
+    "fp_v4": "submissions/submission_fp_v4.csv",
+    "v3_backup": "submissions/submission_am40_idbytes_v3.csv"
   },
-  "advice": "Submit champion (v3 dual). Tempered=dense-only; safe=v1 w85."
+  "advice": "Submit fp_v4 champion. Evidence in docs/FIRST_PRINCIPLES.md"
 }

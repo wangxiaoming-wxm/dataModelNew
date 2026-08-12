@@ -39,8 +39,9 @@
     "sha256": "5fad4d4acd745fa47ce4fbf89e353a264d8afdc7ceb65d3521db7732c9177508"
   },
   "fp_v6_oof": 0.7434166163115536,
-  "submission": "submissions/submission_champion.csv",
+  "submission": "submissions/submission_fp_v7.csv",
   "submission_sha256": "02e83afbc86b07c2beaa80922370387fa3d0ed652116ed12d77ead1fe7a3f1d7",
   "EXPECTED_OOF": 0.7583798471274498,
-  "gate_beat_v6": true
+  "gate_beat_v6": true,
+  "note": "global champion may be newer; v7 retained as tempered backup"
 }

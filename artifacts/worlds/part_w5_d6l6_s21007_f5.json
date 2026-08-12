@@ -1,9 +1,0 @@
-{
-  "world": "w5",
-  "preset": "d6l6",
-  "seed": 21007,
-  "folds": 5,
-  "stream_offset": 56,
-  "oof_auc": 0.6835436405671936,
-  "elapsed_sec": 441.9
-}

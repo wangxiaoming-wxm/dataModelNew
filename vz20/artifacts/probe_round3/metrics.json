@@ -1,0 +1,99 @@
+{
+  "w62": 0.7015936597140784,
+  "plain_rmse": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6868016462340346,
+    "delta": 0.0,
+    "spearman": 0.9386653416799138
+  },
+  "score_L2": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6844685923417237,
+    "delta": 0.0,
+    "spearman": 0.932997291183952
+  },
+  "score_NewtonL2": {
+    "error": "catboost/private/libs/options/oblivious_tree_options.cpp:146: Only Cosine and L2 score functions are supported for CPU."
+  },
+  "score_SolarL2": {
+    "error": "catboost/private/libs/options/oblivious_tree_options.cpp:146: Only Cosine and L2 score functions are supported for CPU."
+  },
+  "score_LOOL2": {
+    "error": "catboost/private/libs/options/oblivious_tree_options.cpp:146: Only Cosine and L2 score functions are supported for CPU."
+  },
+  "score_NewtonCosine": {
+    "error": "catboost/private/libs/options/oblivious_tree_options.cpp:146: Only Cosine and L2 score functions are supported for CPU."
+  },
+  "langevin": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.685011054241015,
+    "delta": 0.0,
+    "spearman": 0.9370526669583946
+  },
+  "bernoulli": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6849478118016462,
+    "delta": 0.0,
+    "spearman": 0.9397737204479294
+  },
+  "rsm80": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6853600072129221,
+    "delta": 0.0,
+    "spearman": 0.9398849702603377
+  },
+  "mvs": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6868016462340346,
+    "delta": 0.0,
+    "spearman": 0.9386653416799138
+  },
+  "leaf_newton": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6868016462340346,
+    "delta": 0.0,
+    "spearman": 0.9386653416799138
+  },
+  "q90": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6632055985332133,
+    "delta": 0.0,
+    "spearman": 0.8985688683836824
+  },
+  "huber": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6841111805069585,
+    "delta": 0.0,
+    "spearman": 0.9386607729291887
+  },
+  "ordered_default": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.686016514486748,
+    "delta": 0.0,
+    "spearman": 0.9443243707541926
+  },
+  "ordered_flm15": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6871104444863739,
+    "delta": 0.0,
+    "spearman": 0.9412089027416942
+  },
+  "ordered_flm30": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6875146786149597,
+    "delta": 0.0,
+    "spearman": 0.9436574118214855
+  }
+}

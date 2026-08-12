@@ -1,0 +1,52 @@
+{
+  "w62": 0.7015936597140784,
+  "ratio_blend": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6204143011705474
+  },
+  "rmse": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6868016462340346
+  },
+  "logloss": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6868587684373356
+  },
+  "logloss_bal": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6810454398170815
+  },
+  "wrmse": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6818684871731794
+  },
+  "lgb": {
+    "best_auc": 0.7015936597140784,
+    "best_w_arm": 0.0,
+    "arm_auc": 0.6382805142033264
+  },
+  "yeti_src": {
+    "error": "catboost/private/libs/data_types/query.h:68: Error: queryIds should be grouped"
+  },
+  "pair_src": {
+    "error": "catboost/private/libs/data_types/query.h:68: Error: queryIds should be grouped"
+  },
+  "f09d_splice": {
+    "global": 0.6957042013281012,
+    "slice_w62": 0.659037922362341,
+    "slice_spec": 0.6329772032633808,
+    "slice_spliced": 0.6329772032633808,
+    "delta_global": -0.005889458385977209
+  },
+  "car2_splice": {
+    "global": 0.6901120968505962,
+    "slice_w62": 0.666611309008055,
+    "slice_spec": 0.6146802092359038,
+    "delta_global": -0.011481562863482231
+  }
+}

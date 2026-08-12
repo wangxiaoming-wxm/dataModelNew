@@ -1,0 +1,46 @@
+{
+  "name": "fp_v7_cross30",
+  "formula": "0.15*v3 + 0.10*bits + 0.05*xs + 0.22*and_all + 0.06*tri + 0.06*or + 0.06*xor + 0.30*cmean",
+  "weights": {
+    "v3": 0.15,
+    "bits": 0.1,
+    "xs": 0.05,
+    "and_all": 0.22,
+    "tri": 0.06,
+    "or": 0.06,
+    "xor": 0.06,
+    "cmean": 0.3
+  },
+  "oof_auc": 0.7583798471274498,
+  "nested_fold_mean": 0.7585100856647914,
+  "delta_nest_vs_v6": 0.01501026964548935,
+  "delta_full_vs_v6": 0.014963230815896122,
+  "arm_aucs": {
+    "v3": 0.707165960500892,
+    "bits": 0.5912706824172683,
+    "xs": 0.5485205846925233,
+    "and_all": 0.6807484093357186,
+    "or": 0.6502153477209635,
+    "tri": 0.6404031912005536,
+    "xor": 0.651296713821344,
+    "cross_or": 0.6571592779992341,
+    "cross_xor": 0.6750596250315467,
+    "cmean": 0.722060599890612
+  },
+  "spearman_cmean_vs_heavy": 0.0986716167999698,
+  "tempered": {
+    "name": "fp_v6_heavy_xor",
+    "oof": 0.7434166163115536,
+    "sha256": "879376c94da76e51f14c6c6566ce77485ca609934bf957efe4d29646193483c7"
+  },
+  "aggressive": {
+    "name": "heavy_cmean50",
+    "oof": 0.7806519832749375,
+    "sha256": "5fad4d4acd745fa47ce4fbf89e353a264d8afdc7ceb65d3521db7732c9177508"
+  },
+  "fp_v6_oof": 0.7434166163115536,
+  "submission": "submissions/submission_champion.csv",
+  "submission_sha256": "02e83afbc86b07c2beaa80922370387fa3d0ed652116ed12d77ead1fe7a3f1d7",
+  "EXPECTED_OOF": 0.7583798471274498,
+  "gate_beat_v6": true
+}

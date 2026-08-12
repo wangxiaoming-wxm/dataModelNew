@@ -33,34 +33,35 @@
 
 id = 16 位 hex（8 bytes），各 hex 位熵≈4 bit（均匀）。
 
-| 表示 | 池 AUC | vs v3 champion Spearman |
+| 表示 | 池 AUC | vs 表格臂 Spearman |
 |---|---:|---:|
 | 既有 byte/nibble 池（v3） | ~0.55 | （已融入） |
 | **全部 64 个 bit 平面 TE 池** | **0.591** | **≈0.03** |
-| 16 nibble 全池 | 0.542 | — |
-| 8 byte 全池 | 0.545 | — |
+| within-byte AND 二阶 | 0.681（and_all） | ≈0.14 |
+| within-byte OR / XOR / TRI | 0.650 / 0.651 / 0.640 | ≈0.05–0.24 vs and |
+| **cross-byte OR / XOR** | **0.657 / 0.675** | ≈0.05–0.10 vs heavy_xor |
 
-嵌套（折内选 bit）仍相对 v3 **+≈0.002**；无挑选全 64-bit 池混入后提升更大。  
-结论：bit 平面是比「整字节 TE」更细、且与现有融合近乎正交的合法信号。
+嵌套（折内选 bit）仍相对 v3 **+≈0.002**；无挑选全量池混入后提升更大。  
+结论：bit 平面及其布尔组合是与表格臂近乎正交的合法信号。
 
 ## 晋级配方
 
-### fp_v4（已吸收进 v5）
+### fp_v4 → fp_v5 → fp_v6（已吸收）
 
 ```text
 v3_dual = 0.55*AM40 + 0.45*(0.7*V7 + 0.3*V2)
 bits    = mean_rank(TE_6seed(all 64 id bits))
 xs      = mean_rank(TE_6seed(qbin20(x0..x18)))
-score   = 0.50*v3_dual + 0.35*bits + 0.15*xs
+and_all = 0.5*within-byte AND + 0.5*cross-byte same-bit AND
+or/xor/tri = within-byte 对应运算池
 ```
 
-### fp_v5（当前主交）
-
-自然扩展：选择无关的 **bit-AND 二阶池**（within-byte AND + cross-byte same-bit AND）。
+### fp_v7（当前主交）
 
 ```text
-and_all = 0.5 * pool(within-byte ANDs) + 0.5 * pool(cross-byte same-bit ANDs)
-score   = 0.30*v3_dual + 0.25*bits + 0.10*xs + 0.35*and_all   # and_heavy
+cmean = 0.5*pool(cross-byte OR) + 0.5*pool(cross-byte XOR)
+score = 0.15*v3 + 0.10*bits + 0.05*xs + 0.22*and_all
+      + 0.06*tri + 0.06*or + 0.06*xor + 0.30*cmean   # cross30
 ```
 
 | 方案 | OOF | nested fold-mean |
@@ -68,18 +69,23 @@ score   = 0.30*v3_dual + 0.25*bits + 0.10*xs + 0.35*and_all   # and_heavy
 | AM40 | 0.70181 | — |
 | v3 dual | 0.70717 | — |
 | fp_v4 | 0.71640 | 0.71660 |
-| **fp_v5 and_heavy（主交）** | **0.72880** | **0.72900** |
+| fp_v5 and_heavy | 0.72880 | 0.72900 |
+| fp_v6 heavy_xor | 0.74342 | 0.74350 |
+| **fp_v7 cross30（主交）** | **0.75838** | **0.75851** |
 
 ```bash
-bash run_fp_v5.sh
-bash run_fp_v5.sh --verify
+bash run_fp_v7.sh
+bash run_fp_v7.sh --verify
+# 上一档备份
+bash run_fp_v6.sh --verify
 ```
 
 主文件：`submissions/submission_champion.csv`  
-备份：`submission_fp_v5_tempered.csv`（and 权重更低）、`submission_fp_v5_aggressive.csv`（and_max）
+备份：`submission_fp_v7_tempered.csv`（= fp_v6 heavy_xor）、`submission_fp_v7_aggressive.csv`（0.5*heavy+0.5*cmean）
 
 ## 未晋级 / 弱信号
 
 - source 解析 CAR/ENG、t3 后缀：被既有类别特征吸收，混入 champion 无增益  
-- id 的 xor/popcount/sorted-bytes：弱或无效  
-- 在折外挑选「最强 bit/x」再交：有挑选偏置；v4 刻意用**全量池**避免该偏置  
+- id 的 popcount/sorted-bytes：弱或无效  
+- 在折外挑选「最强 bit/x」再交：有挑选偏置；刻意用**全量池**避免该偏置  
+- Jitter / Lossguide / 特征剪枝 / group-stats：见对应 docs，勿再烧提交  

@@ -74,3 +74,27 @@ Phase S 只确认稳定性，不用其结果修改 V2。
 - 最终才生成新 submission。
 
 若完整确认失败，推荐保持 V2；不得依据 final-inner 或 test 预测分布替换。
+
+## Phase D：objective diversity（C 未过后追加预注册）
+
+Phase A/B/C 均未达到 `+0.001`。`314159` 已成为开发切分，后续不再用它做晋级判断。新增第三组未查看切分：
+
+- outer seed `271828`；
+- inner seed `141421`；
+- smoke 仍为 `3 × 2 × 4 seeds × 300/250 trees`。
+
+候选：
+
+- Ordered rich-ratio Logloss depth 6；
+- Plain rich-rate Logloss depth 6；
+- 两个 Logloss 臂的 `w35/w50/w65`；
+- V2 两个 RMSE 臂与两个 Logloss 臂的固定四模型等权 rank blend。
+
+这是 rich 特征与分类目标的新组合，不是重跑已证伪的 simple-ratio Logloss。晋级条件仍为：最佳 objective-diversity 固定 blend 相对同次运行 V2 最佳 fixed blend `+0.001`、至少 2/3 外折提升、单折最大退化不超过 `0.004`。不根据结果增加权重或更换 loss。
+
+## 已冻结的开发结果
+
+- Phase S：`0.693638 ± 0.011103`，pooled `0.693433`；置乱 `0.495288`，通过。
+- Phase A：frequency 最佳 blend `0.684654`，V2 fixed 最佳 `0.684675`，失败。
+- Phase B：cross-depth 四模型 `0.685051`，相对 V2 `+0.000376`，失败。
+- Phase C：严格 residual `0.685341`，相对 V2 `+0.000666`，2/3 外折提升但低于门禁，失败。

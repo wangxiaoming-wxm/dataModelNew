@@ -213,6 +213,19 @@ class EvaluationTests(unittest.TestCase):
         np.testing.assert_allclose(combined, [0.4, 0.6])
         self.assertEqual(spec.alpha, 0.20)
 
+    def test_rich_logloss_configs_and_objective_blends_are_pre_registered(self):
+        configs = candidate_configs("smoke")
+        by_name = {config.name: config for config in configs}
+
+        self.assertEqual(by_name["cb_ratio_rich_logloss_d6"].objective, "logloss")
+        self.assertEqual(by_name["cb_ratio_rich_logloss_d6"].boosting_type, "Ordered")
+        self.assertEqual(by_name["cb_rate_rich_logloss_d6"].objective, "logloss")
+        blends = {blend.name: blend for blend in available_blends(configs)}
+        self.assertIn("blend_rich_logloss_w50", blends)
+        objective_blend = blends["blend_rich_objective_equal"]
+        self.assertEqual(len(objective_blend.components), 4)
+        self.assertEqual(objective_blend.weights, (0.25, 0.25, 0.25, 0.25))
+
     def test_selector_requires_margin_for_more_complex_candidate(self):
         candidates = [
             CandidateScore("simple", inner_auc=0.7000, complexity=0),

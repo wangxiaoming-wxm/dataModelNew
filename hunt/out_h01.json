@@ -1,8 +1,0 @@
-{
-  "n_train": 14930,
-  "n_test": 6398,
-  "pos_rate": 0.10020093770931011,
-  "dup_rows": 0,
-  "train_test_overlap": 0,
-  "max_bit_auc_dev": 0.019606847976918695
-}

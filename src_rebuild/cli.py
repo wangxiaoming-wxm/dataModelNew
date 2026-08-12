@@ -35,6 +35,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--configs", help="逗号分隔的预注册配置名子集")
     parser.add_argument("--outer-splits", type=int)
     parser.add_argument("--inner-splits", type=int)
+    parser.add_argument("--outer-seed", type=int, default=2026)
+    parser.add_argument("--inner-seed", type=int, default=2718)
     parser.add_argument("--model-seeds", help="逗号分隔的模型随机种子")
     parser.add_argument("--thread-count", type=int, default=-1)
     parser.add_argument("--skip-final", action="store_true")
@@ -156,8 +158,8 @@ def build_evaluator(
         stacks=available_stacks(configs) if args.enable_stack else (),
         outer_splits=args.outer_splits or int(defaults["outer_splits"]),
         inner_splits=args.inner_splits or int(defaults["inner_splits"]),
-        outer_seed=2026,
-        inner_seed=2718,
+        outer_seed=args.outer_seed,
+        inner_seed=args.inner_seed,
         model_seeds=tuple(model_seeds),
         minimum_complex_gain=0.0005,
         diagnose_all_outer=bool(defaults["diagnose_all_outer"]),

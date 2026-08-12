@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -8,6 +9,7 @@ import pandas as pd
 from src_rebuild.cli import (
     available_blends,
     available_stacks,
+    build_evaluator,
     configs_for_run,
     default_artifact_dir,
     protocol_defaults,
@@ -122,6 +124,22 @@ class FeatureBuilderTests(unittest.TestCase):
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_evaluator_accepts_preregistered_outer_and_inner_seeds(self):
+        config = candidate_configs("smoke")[0]
+        args = SimpleNamespace(
+            model_seeds="2026",
+            outer_splits=3,
+            inner_splits=2,
+            outer_seed=314159,
+            inner_seed=161803,
+            enable_stack=False,
+            thread_count=-1,
+        )
+        evaluator = build_evaluator("smoke", (config,), args)
+
+        self.assertEqual(evaluator.outer_seed, 314159)
+        self.assertEqual(evaluator.inner_seed, 161803)
+
     def test_full_entry_defaults_to_promoted_rich_finalists(self):
         names = [config.name for config in configs_for_run("full", None)]
         self.assertEqual(names, ["cb_ratio_rich_rmse_d5", "cb_rate_rich_rmse_d6"])

@@ -31,7 +31,7 @@
 
 ## 已证伪（勿再烧提交）
 
-region / Plus / 扩 bags / id 当 CatBoost 类别 / group-stats / Jitter main（池 OOF 0.698 < 冻结 main）
+region / Plus / 扩 bags / id 当 CatBoost 类别 / group-stats / Jitter main（池 OOF 0.698 < 冻结 main） / **Lossguide**（3fold +0.0039 为噪声，见 `docs/LOSSGUIDE.md`） / **特征剪枝**（solo +0.0017 但融不进 fp_v5，见 `docs/FEATURE_PRUNE.md`）
 
 ## 提交纪律
 

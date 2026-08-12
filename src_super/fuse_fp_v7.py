@@ -367,13 +367,11 @@ def main() -> int:
         sub = sample[["id"]].copy()
         sub["label"] = expected
         sub.to_csv(out_path, index=False)
-        champ.write_bytes(out_path.read_bytes())
-        (ROOT / "submissions" / "submission_am40_idbytes.csv").write_bytes(out_path.read_bytes())
+        # 不覆盖全局 champion（由更高版本持有）
 
         tsub = sample[["id"]].copy()
         tsub["label"] = np.clip(heavy_t, 0.001, 0.999)
         tsub.to_csv(tempered_path, index=False)
-        # keep v6 alias in sync with tempered=heavy_xor
         (ROOT / "submissions" / "submission_fp_v6.csv").write_bytes(tempered_path.read_bytes())
 
         asub = sample[["id"]].copy()
@@ -382,10 +380,10 @@ def main() -> int:
 
         np.save(art / "v7_fuse_oof.npy", fuse_o)
         np.save(art / "v7_fuse_test.npy", fuse_t)
-        np.save(ROOT / "artifacts" / "id_bytes" / "fuse_oof.npy", fuse_o)
-        np.save(ROOT / "artifacts" / "id_bytes" / "fuse_test.npy", fuse_t)
 
-    saved = pd.read_csv(champ if args.verify_only else out_path, dtype={"id": str})
+    # 全局 champion 由更高版本持有；校验以 submission_fp_v7.csv 为准
+    check_path = out_path if out_path.is_file() else champ
+    saved = pd.read_csv(check_path, dtype={"id": str})
     if float(np.max(np.abs(saved["label"].to_numpy(float) - expected))) > 1e-12:
         raise ValueError("提交与重算不一致")
 
@@ -423,10 +421,11 @@ def main() -> int:
             "sha256": sha256(aggressive_path) if aggressive_path.is_file() else None,
         },
         "fp_v6_oof": V6_OOF,
-        "submission": "submissions/submission_champion.csv",
-        "submission_sha256": sha256(champ if args.verify_only else out_path),
+        "submission": "submissions/submission_fp_v7.csv",
+        "submission_sha256": sha256(check_path),
         "EXPECTED_OOF": EXPECTED_OOF,
         "gate_beat_v6": True,
+        "note": "global champion may be newer; v7 retained as tempered backup",
     }
     (art / "v7_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n")
     print("PASS: fp_v7 cross30 超过 fp_v6")

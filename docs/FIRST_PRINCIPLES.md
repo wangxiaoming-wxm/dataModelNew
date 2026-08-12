@@ -56,12 +56,21 @@ and_all = 0.5*within-byte AND + 0.5*cross-byte same-bit AND
 or/xor/tri = within-byte 对应运算池
 ```
 
-### fp_v7（当前主交）
+### fp_v7（已吸收进 v8）
 
 ```text
 cmean = 0.5*pool(cross-byte OR) + 0.5*pool(cross-byte XOR)
 score = 0.15*v3 + 0.10*bits + 0.05*xs + 0.22*and_all
       + 0.06*tri + 0.06*or + 0.06*xor + 0.30*cmean   # cross30
+```
+
+### fp_v8（当前主交）
+
+整字节对 XOR/AND（C(8,2)=28）相对 bit 组合是更粗、近正交的键空间。
+
+```text
+bytepair_mean = 0.5*pool(byte_i XOR byte_j) + 0.5*pool(byte_i AND byte_j)
+score = 0.80*v7_cross30 + 0.20*bytepair_mean   # byte20
 ```
 
 | 方案 | OOF | nested fold-mean |
@@ -71,17 +80,18 @@ score = 0.15*v3 + 0.10*bits + 0.05*xs + 0.22*and_all
 | fp_v4 | 0.71640 | 0.71660 |
 | fp_v5 and_heavy | 0.72880 | 0.72900 |
 | fp_v6 heavy_xor | 0.74342 | 0.74350 |
-| **fp_v7 cross30（主交）** | **0.75838** | **0.75851** |
+| fp_v7 cross30 | 0.75838 | 0.75851 |
+| **fp_v8 byte20（主交）** | **0.77016** | **0.77033** |
 
 ```bash
-bash run_fp_v7.sh
-bash run_fp_v7.sh --verify
+bash run_fp_v8.sh
+bash run_fp_v8.sh --verify
 # 上一档备份
-bash run_fp_v6.sh --verify
+bash run_fp_v7.sh --verify
 ```
 
 主文件：`submissions/submission_champion.csv`  
-备份：`submission_fp_v7_tempered.csv`（= fp_v6 heavy_xor）、`submission_fp_v7_aggressive.csv`（0.5*heavy+0.5*cmean）
+备份：`submission_fp_v8_tempered.csv`（= fp_v7）、`submission_fp_v8_aggressive.csv`（0.70*v7+0.30*bytepair）
 
 ## 未晋级 / 弱信号
 

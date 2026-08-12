@@ -1,14 +1,13 @@
-# id 信号演进（v3 → fp_v7）
+# id 信号演进（v3 → fp_v8）
 
-## fp_v7（当前冠军）
+## fp_v8（当前冠军）
 
 ```text
-cmean = 0.5*cross-byte OR + 0.5*cross-byte XOR   # same-bit, 选择无关全量池
-score = 0.15*v3 + 0.10*bits + 0.05*xs + 0.22*and_all
-      + 0.06*tri + 0.06*or + 0.06*xor + 0.30*cmean
+bytepair_mean = 0.5*pool(byteXOR) + 0.5*pool(byteAND)
+score = 0.80*v7_cross30 + 0.20*bytepair_mean
 ```
 
-OOF **0.75838** / nest **0.75851**。复现：`bash run_fp_v7.sh`
+OOF **0.77016** / nest **0.77033**。复现：`bash run_fp_v8.sh`
 
 详见 `docs/FIRST_PRINCIPLES.md`。
 
@@ -19,4 +18,5 @@ OOF **0.75838** / nest **0.75851**。复现：`bash run_fp_v7.sh`
 | v3 dual | 0.70717 | `bash run_am40_idbytes.sh` |
 | fp_v4 | 0.71640 | `bash run_fp_v4.sh` |
 | fp_v5 and_heavy | 0.72880 | `bash run_fp_v5.sh` |
-| fp_v6 heavy_xor | 0.74342 | `bash run_fp_v6.sh`（现为 v7 tempered） |
+| fp_v6 heavy_xor | 0.74342 | `bash run_fp_v6.sh` |
+| fp_v7 cross30 | 0.75838 | `bash run_fp_v7.sh`（现为 v8 tempered） |

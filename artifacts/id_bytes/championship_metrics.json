@@ -1,30 +1,24 @@
 {
-  "protocol": "fp_v7 cross30",
+  "protocol": "fp_v8 byte20",
   "champion": {
-    "name": "fp_v7_cross30",
-    "champion_recipe": "cross30",
+    "name": "fp_v8_byte20",
+    "champion_recipe": "byte20",
     "weights": {
-      "v3": 0.15,
-      "bits": 0.1,
-      "xs": 0.05,
-      "and_all": 0.22,
-      "tri": 0.06,
-      "or": 0.06,
-      "xor": 0.06,
-      "cmean": 0.3
+      "v7": 0.8,
+      "bytepair_mean": 0.2
     },
-    "oof_auc": 0.7583798471274498,
-    "nested_fold_mean": 0.7585100856647914,
-    "delta_nest_vs_v6": 0.01501026964548935,
-    "sha256": "02e83afbc86b07c2beaa80922370387fa3d0ed652116ed12d77ead1fe7a3f1d7"
+    "oof_auc": 0.7701614508323125,
+    "nested_fold_mean": 0.7703295069355633,
+    "delta_nest_vs_v7": 0.011819421270771957,
+    "sha256": "fa2a06f4ed9af099e37225a2a9ff2e10e0a0a7979ac9c7e5dfacdcdde5866d67"
   },
   "files": {
     "submit_this": "submissions/submission_champion.csv",
-    "fp_v7": "submissions/submission_fp_v7.csv",
-    "tempered": "submissions/submission_fp_v7_tempered.csv",
-    "aggressive": "submissions/submission_fp_v7_aggressive.csv",
-    "fp_v6_backup": "submissions/submission_fp_v6.csv",
-    "fp_v5_backup": "submissions/submission_fp_v5.csv"
+    "fp_v8": "submissions/submission_fp_v8.csv",
+    "tempered": "submissions/submission_fp_v8_tempered.csv",
+    "aggressive": "submissions/submission_fp_v8_aggressive.csv",
+    "fp_v7_backup": "submissions/submission_fp_v7.csv",
+    "fp_v6_backup": "submissions/submission_fp_v6.csv"
   },
-  "advice": "Submit fp_v7 cross30. Tempered (=v6 heavy_xor) if risk-averse; aggressive for max local OOF. Local nested ≠ LB rank."
+  "advice": "Submit fp_v8 byte20. Tempered (=v7) if risk-averse. Local nested ≠ LB rank; id-TE-heavy."
 }

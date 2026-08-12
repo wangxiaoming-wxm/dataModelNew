@@ -123,6 +123,21 @@ def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
             )
             for weight in (0.35, 0.50, 0.65)
         )
+    cross_depth_components = (
+        "cb_ratio_rich_rmse_d5",
+        "cb_rate_rich_rmse_d6",
+        "cb_ratio_rich_rmse_d6",
+        "cb_rate_rich_rmse_d5",
+    )
+    if set(cross_depth_components).issubset(names):
+        blends.append(
+            BlendSpec(
+                name="blend_rich_cross_depth_equal",
+                components=cross_depth_components,
+                weights=(0.25, 0.25, 0.25, 0.25),
+                complexity=4,
+            )
+        )
     return tuple(blends)
 
 

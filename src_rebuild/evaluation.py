@@ -22,6 +22,34 @@ class CandidateScore:
     complexity: int
 
 
+@dataclass(frozen=True)
+class BlendSpec:
+    """A fixed rank blend whose components are fitted independently."""
+
+    name: str
+    components: tuple[str, ...]
+    weights: tuple[float, ...]
+    complexity: int
+
+    def __post_init__(self) -> None:
+        if not self.components or len(self.components) != len(self.weights):
+            raise ValueError("blend components and weights must have one shared non-zero length")
+        if any(weight < 0 for weight in self.weights):
+            raise ValueError("blend weights must be non-negative")
+        if not np.isclose(sum(self.weights), 1.0):
+            raise ValueError("blend weights must sum to one")
+
+    def combine(self, predictions: dict[str, np.ndarray]) -> np.ndarray:
+        """Combine pre-registered component predictions without fitting weights."""
+        arrays = [np.asarray(predictions[name], dtype=float) for name in self.components]
+        if any(len(array) != len(arrays[0]) for array in arrays):
+            raise ValueError("blend component lengths differ")
+        return sum(weight * array for weight, array in zip(self.weights, arrays))
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
 @dataclass
 class NestedResult:
     """Complete evidence from one outer nested run."""
@@ -56,14 +84,14 @@ class NestedResult:
 class FinalFitResult:
     """Full-train inner selection followed by one test fit."""
 
-    selected_config: ModelConfig
+    selected_recipe: dict[str, object]
     selected_inner_oof: np.ndarray
     test_prediction: np.ndarray
     inner_auc_by_config: dict[str, float]
 
     def metrics(self) -> dict[str, object]:
         return {
-            "selected_config": self.selected_config.to_dict(),
+            "selected_recipe": self.selected_recipe,
             "inner_auc_by_config": self.inner_auc_by_config,
         }
 
@@ -151,6 +179,7 @@ class HonestNestedEvaluator:
         self,
         configs: tuple[ModelConfig, ...],
         *,
+        blends: tuple[BlendSpec, ...] = (),
         outer_splits: int,
         inner_splits: int,
         outer_seed: int,
@@ -162,7 +191,16 @@ class HonestNestedEvaluator:
     ) -> None:
         if not configs:
             raise ValueError("at least one model config is required")
+        config_names = {config.name for config in configs}
+        for blend in blends:
+            missing = set(blend.components) - config_names
+            if missing:
+                raise ValueError(f"blend {blend.name!r} has unknown components {sorted(missing)}")
+        recipe_names = [config.name for config in configs] + [blend.name for blend in blends]
+        if len(recipe_names) != len(set(recipe_names)):
+            raise ValueError("config and blend names must be unique")
         self.configs = configs
+        self.blends = blends
         self.outer_splits = outer_splits
         self.inner_splits = inner_splits
         self.outer_seed = outer_seed
@@ -179,7 +217,7 @@ class HonestNestedEvaluator:
         nested_oof = np.empty(len(frame), dtype=float)
         fold_auc: list[float] = []
         selections: list[dict[str, object]] = []
-        candidate_outer_auc = {config.name: [] for config in self.configs}
+        candidate_outer_auc = {name: [] for name in self._recipe_names()}
 
         for fold_index, (outer_train_indices, outer_valid_indices) in enumerate(outer):
             outer_train_frame = frame.iloc[outer_train_indices].reset_index(drop=True)
@@ -206,12 +244,24 @@ class HonestNestedEvaluator:
                 inner_auc = float(roc_auc_score(outer_y, prediction))
                 scores.append(CandidateScore(config.name, inner_auc, config.complexity))
                 print(f"  {config.name}: inner={inner_auc:.6f}", flush=True)
+            for blend in self.blends:
+                prediction = blend.combine(inner_predictions)
+                inner_predictions[blend.name] = prediction
+                inner_auc = float(roc_auc_score(outer_y, prediction))
+                scores.append(CandidateScore(blend.name, inner_auc, blend.complexity))
+                print(f"  {blend.name}: inner={inner_auc:.6f}", flush=True)
 
             selected_score = select_candidate(scores, minimum_complex_gain=self.minimum_complex_gain)
-            selected_config = self._config_by_name(selected_score.name)
-            configs_to_fit = self.configs if self.diagnose_all_outer else (selected_config,)
+            required_names = (
+                {config.name for config in self.configs}
+                if self.diagnose_all_outer
+                else set(self._components_for_recipe(selected_score.name))
+            )
+            configs_to_fit = tuple(
+                config for config in self.configs if config.name in required_names
+            )
             outer_predictions: dict[str, np.ndarray] = {}
-            print(f"  selected={selected_config.name}", flush=True)
+            print(f"  selected={selected_score.name}", flush=True)
             for config in configs_to_fit:
                 prediction = fit_predict_config(
                     outer_train_frame,
@@ -222,17 +272,25 @@ class HonestNestedEvaluator:
                     thread_count=self.thread_count,
                 )
                 outer_predictions[config.name] = prediction
+            for blend in self.blends:
+                if all(component in outer_predictions for component in blend.components):
+                    outer_predictions[blend.name] = blend.combine(outer_predictions)
+            recipes_to_score = (
+                self._recipe_names() if self.diagnose_all_outer else (selected_score.name,)
+            )
+            for recipe_name in recipes_to_score:
+                prediction = outer_predictions[recipe_name]
                 score = float(roc_auc_score(labels[outer_valid_indices], prediction))
-                candidate_outer_auc[config.name].append(score)
-                print(f"  {config.name}: outer={score:.6f}", flush=True)
-            selected_prediction = outer_predictions[selected_config.name]
+                candidate_outer_auc[recipe_name].append(score)
+                print(f"  {recipe_name}: outer={score:.6f}", flush=True)
+            selected_prediction = outer_predictions[selected_score.name]
             nested_oof[outer_valid_indices] = selected_prediction
             selected_outer_auc = float(roc_auc_score(labels[outer_valid_indices], selected_prediction))
             fold_auc.append(selected_outer_auc)
             selections.append(
                 {
                     "fold": fold_index,
-                    "selected": selected_config.name,
+                    "selected": selected_score.name,
                     "selected_inner_auc": selected_score.inner_auc,
                     "outer_auc": selected_outer_auc,
                     "inner_auc_by_config": {score.name: score.inner_auc for score in scores},
@@ -272,20 +330,32 @@ class HonestNestedEvaluator:
             inner_auc = float(roc_auc_score(labels, prediction))
             scores.append(CandidateScore(config.name, inner_auc, config.complexity))
             print(f"  {config.name}: inner={inner_auc:.6f}", flush=True)
+        for blend in self.blends:
+            prediction = blend.combine(inner_predictions)
+            inner_predictions[blend.name] = prediction
+            inner_auc = float(roc_auc_score(labels, prediction))
+            scores.append(CandidateScore(blend.name, inner_auc, blend.complexity))
+            print(f"  {blend.name}: inner={inner_auc:.6f}", flush=True)
         selected_score = select_candidate(scores, minimum_complex_gain=self.minimum_complex_gain)
-        selected_config = self._config_by_name(selected_score.name)
-        print(f"  selected={selected_config.name}", flush=True)
-        test_prediction = fit_predict_config(
-            train_frame.reset_index(drop=True),
-            labels,
-            test_frame.reset_index(drop=True),
-            selected_config,
-            seeds=self.model_seeds,
-            thread_count=self.thread_count,
+        print(f"  selected={selected_score.name}", flush=True)
+        component_predictions: dict[str, np.ndarray] = {}
+        for component_name in self._components_for_recipe(selected_score.name):
+            config = self._config_by_name(component_name)
+            component_predictions[component_name] = fit_predict_config(
+                train_frame.reset_index(drop=True),
+                labels,
+                test_frame.reset_index(drop=True),
+                config,
+                seeds=self.model_seeds,
+                thread_count=self.thread_count,
+            )
+        test_prediction = self._prediction_for_recipe(
+            selected_score.name,
+            component_predictions,
         )
         return FinalFitResult(
-            selected_config=selected_config,
-            selected_inner_oof=inner_predictions[selected_config.name],
+            selected_recipe=self._recipe_descriptor(selected_score.name),
+            selected_inner_oof=inner_predictions[selected_score.name],
             test_prediction=test_prediction,
             inner_auc_by_config={score.name: score.inner_auc for score in scores},
         )
@@ -300,6 +370,7 @@ class HonestNestedEvaluator:
             "minimum_complex_gain": self.minimum_complex_gain,
             "diagnose_all_outer": self.diagnose_all_outer,
             "configs": [asdict(config) for config in self.configs],
+            "blends": [blend.to_dict() for blend in self.blends],
         }
 
     def _config_by_name(self, name: str) -> ModelConfig:
@@ -307,3 +378,33 @@ class HonestNestedEvaluator:
             if config.name == name:
                 return config
         raise KeyError(name)
+
+    def _blend_by_name(self, name: str) -> BlendSpec:
+        for blend in self.blends:
+            if blend.name == name:
+                return blend
+        raise KeyError(name)
+
+    def _recipe_names(self) -> tuple[str, ...]:
+        return tuple(config.name for config in self.configs) + tuple(
+            blend.name for blend in self.blends
+        )
+
+    def _components_for_recipe(self, name: str) -> tuple[str, ...]:
+        if any(config.name == name for config in self.configs):
+            return (name,)
+        return self._blend_by_name(name).components
+
+    def _prediction_for_recipe(
+        self,
+        name: str,
+        predictions: dict[str, np.ndarray],
+    ) -> np.ndarray:
+        if name in predictions:
+            return predictions[name]
+        return self._blend_by_name(name).combine(predictions)
+
+    def _recipe_descriptor(self, name: str) -> dict[str, object]:
+        if any(config.name == name for config in self.configs):
+            return {"type": "model", **self._config_by_name(name).to_dict()}
+        return {"type": "blend", **self._blend_by_name(name).to_dict()}

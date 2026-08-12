@@ -16,7 +16,7 @@ import pandas as pd
 import scipy
 import sklearn
 
-from .evaluation import HonestNestedEvaluator
+from .evaluation import BlendSpec, HonestNestedEvaluator
 from .io import append_experiment, save_submission, sha256_file, write_json
 from .models import ModelConfig, candidate_configs
 
@@ -82,6 +82,24 @@ def protocol_defaults(profile: str) -> dict[str, object]:
     }
 
 
+def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
+    """Create only the pre-registered blends supported by the chosen components."""
+    names = {config.name for config in configs}
+    ratio = "cb_ratio_rmse_d5"
+    rate = "cb_rate_rmse_d6"
+    if not {ratio, rate}.issubset(names):
+        return ()
+    return tuple(
+        BlendSpec(
+            name=f"blend_ratio_rate_w{int(round(weight * 100)):02d}",
+            components=(ratio, rate),
+            weights=(weight, 1.0 - weight),
+            complexity=2,
+        )
+        for weight in (0.35, 0.50, 0.65)
+    )
+
+
 def build_evaluator(
     profile: str,
     configs: tuple[ModelConfig, ...],
@@ -95,6 +113,7 @@ def build_evaluator(
     )
     return HonestNestedEvaluator(
         configs,
+        blends=available_blends(configs),
         outer_splits=args.outer_splits or int(defaults["outer_splits"]),
         inner_splits=args.inner_splits or int(defaults["inner_splits"]),
         outer_seed=2026,
@@ -200,7 +219,8 @@ def train(args: argparse.Namespace) -> int:
         final = evaluator.fit_final(features, y, test_frame)
         np.save(artifact_dir / "final_inner_oof.npy", final.selected_inner_oof)
         np.save(artifact_dir / "test_prediction.npy", final.test_prediction)
-        suffix = f"smoke_{final.selected_config.name}" if profile == "smoke" else final.selected_config.name
+        recipe_name = str(final.selected_recipe["name"])
+        suffix = f"smoke_{recipe_name}" if profile == "smoke" else recipe_name
         submission_path = ROOT / "submissions" / f"submission_rebuild_{suffix}.csv"
         submission_sha256 = save_submission(sample, final.test_prediction, submission_path)
         final_metrics = final.metrics()

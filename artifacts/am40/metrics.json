@@ -1,0 +1,23 @@
+{
+  "name": "AM40",
+  "formula": "0.4*max(main,alt) + 0.6*(0.62*main+0.38*alt)",
+  "alpha_max": 0.4,
+  "linear_weights": {
+    "main": 0.62,
+    "alt": 0.38
+  },
+  "source_arms": "artifacts/super714/best_v1_{oof,test}.npy",
+  "oof_auc": 0.7018113510376338,
+  "w62_oof_auc": 0.7015936597140784,
+  "max2_oof_auc": 0.7012752084064776,
+  "delta_vs_w62": 0.00021769132355542453,
+  "delta_vs_max2": 0.0005361426311562001,
+  "gate_beat_w62": true,
+  "submission": "submissions/submission_am40.csv",
+  "submission_sha256": "de0d337f02873f8b429c0518d3dadcbb34fdbd371e9707193dc2d1fbec49e2a9",
+  "n_test": 6398,
+  "spearman_vs_submission_w62": 0.998932108802142,
+  "different_from_submission_w62": true,
+  "spearman_vs_submission_super714": 0.9975180486959037,
+  "different_from_submission_super714": true
+}

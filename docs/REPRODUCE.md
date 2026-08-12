@@ -1,70 +1,42 @@
-# 复现指南
+# 复现说明（task-am40）
+
+## 目标
+
+验收 **AM40** 提交：在冻结 best_v1 双臂上复算融合，核对 OOF 锚点与提交文件哈希。
+
+**不需要重训 CatBoost。**
 
 ## 环境
 
-- Python ≥ 3.10（开发机为 3.12）
-- 依赖见仓库根目录 `requirements.txt`
-
 ```bash
+git clone https://github.com/wangxiaoming-wxm/dataModelNew.git
+cd dataModelNew
+git checkout task-am40
 python3 -m pip install -r requirements.txt
 ```
 
-如遇 pandas/numpy 新版本安装失败，可放宽为：
+数据已在 `data/`；冻结臂在 `artifacts/super714/best_v1_{oof,test}.npy`。
+
+## 验收（秒级）
 
 ```bash
-python3 -m pip install "catboost>=1.2.5" "numpy>=1.24" "pandas>=2.0" "scikit-learn>=1.3" "scipy>=1.10"
+# 重新生成并校验
+bash run_am40.sh
+
+# 或只校验仓库内提交
+bash run_am40.sh --verify
 ```
 
-## 数据
+通过标准：
 
-仓库已包含：
+1. 打印 `PASS: AM40 融合验收通过（已超过 W62）`
+2. OOF = **0.70181135**（相对 W62 +0.00021769）
+3. `submissions/submission_am40.csv` 的 SHA-256 =
+   `de0d337f02873f8b429c0518d3dadcbb34fdbd371e9707193dc2d1fbec49e2a9`
+4. 与 `submission_w62.csv` 哈希不同
 
-- `data/train.csv`（14930 行，含 `label`）
-- `data/test.csv`（6398 行）
-- `data/submit_sample.csv`
+可选：`bash run_w62.sh --verify` 复核同臂 W62 基线。
 
-无需额外下载。
+## 若需从零重训双臂（非本分支必需）
 
-## 验收主交付（必须）
-
-```bash
-bash run_super714.sh --verify
-```
-
-检查项：
-
-1. `artifacts/super714/best_v1_{oof,test}.npy` SHA-256 与 `manifest.json` 一致  
-2. OOF：main≈0.69992 / alt≈0.69770 / fuse≈0.70128  
-3. `submissions/submission_super714.csv` 与冻结 `test fuse`（clip 到 \[0.001, 0.999\]）一致  
-4. 行数 6398，列 `id,label`
-
-## 单元测试
-
-```bash
-python3 -m unittest discover -s tests -v
-```
-
-## 从头重训（可选）
-
-仅当你需要重新生成预测，而非验收交付时：
-
-```bash
-# 重训冠军双臂（耗时长）
-bash run_super714.sh --baseline-only
-
-# 重跑 TE 候选（默认不覆盖主提交，除非过门槛）
-bash run_super714.sh
-```
-
-门槛定义见 [`TE_GATE_RESULT.md`](TE_GATE_RESULT.md)。当前完整结果：**未通过**，主提交保持 max2。
-
-## 常见问题
-
-**Q: verify 失败说 SHA 不匹配？**  
-不要改动 `artifacts/super714/best_v1_*.npy` 与 `submissions/submission_super714.csv`。用 `git checkout --` 还原。
-
-**Q: 自定义数据路径？**  
-`DATA_DIR=/path bash run_super714.sh --verify`，目录内需有 `train.csv` 与 `test.csv`。
-
-**Q: real714_pkg 是什么？**  
-线上冠军源材料的只读归档；日常复现只跑根目录 `run_super714.sh` 即可。
+见 `docs/SOLUTION.md` / `bash run_super714.sh`（耗时长，且本分支交付不依赖重训）。

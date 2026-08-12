@@ -1,0 +1,20 @@
+{
+  "name": "vz20_am40_from_frozen_best_v1",
+  "formula": "0.40*max(main,alt) + 0.60*(0.62*main+0.38*alt)",
+  "oof_auc": 0.7018113510376338,
+  "w62_oof_auc": 0.7015936597140784,
+  "delta_oof_vs_w62": 0.00021769132355542453,
+  "online_w62": 0.71503,
+  "online_vz19": 0.71298,
+  "online_vz17": 0.71487,
+  "expected_online_if_w62_gap": 0.71525,
+  "championship_floor": 0.72,
+  "championship_target": 0.749,
+  "path_to_0.72": false,
+  "path_to_0.749": false,
+  "submission": "vz20/submission_vz20.csv",
+  "submission_sha256": "de0d337f02873f8b429c0518d3dadcbb34fdbd371e9707193dc2d1fbec49e2a9",
+  "w62_anchor_sha256": "e84bd2f0a9f47f58f11d32d914ed1f4f19e12cc8c6c3373e94afc17cba227fe5",
+  "tempered": "vz20/submission_vz20_w62_anchor.csv",
+  "note": "AM40 仅比 W62 高 0.00022 OOF；期望线上仍在 0.715 附近，不是 0.72/0.749。"
+}

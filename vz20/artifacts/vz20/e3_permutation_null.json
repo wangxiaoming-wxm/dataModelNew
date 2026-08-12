@@ -1,0 +1,140 @@
+{
+  "n_perm": 20,
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "families": {
+    "byte": {
+      "honest_oof_sign_mean": 0.5116363932257976,
+      "honest_oof_sign_std": 0.010594159206893569,
+      "noflip_mean": 0.5122190264306624,
+      "eval_leak_mean": 0.5324680845445762,
+      "leak_inflation": 0.0208316913187786,
+      "null_honest_mean": 0.5024546736809548,
+      "null_honest_std": 0.0059816412521352695,
+      "z_vs_null": 1.5349833194301332,
+      "p_one_sided": 0.14285714285714285,
+      "null_leak_mean": 0.5257462831756602,
+      "leak_is_explained_by_null": true
+    },
+    "byte_hi": {
+      "honest_oof_sign_mean": 0.49130256403724076,
+      "honest_oof_sign_std": 0.009968600977664024,
+      "noflip_mean": 0.4976492322537038,
+      "eval_leak_mean": 0.5258185061077633,
+      "leak_inflation": 0.0345159420705225,
+      "null_honest_mean": 0.5006620279257913,
+      "null_honest_std": 0.007584133850495298,
+      "z_vs_null": -1.2340847449493897,
+      "p_one_sided": 0.9047619047619048,
+      "null_leak_mean": 0.5240890874499136,
+      "leak_is_explained_by_null": true
+    },
+    "bit64": {
+      "honest_oof_sign_mean": 0.4978011268930272,
+      "honest_oof_sign_std": 0.010857224244307007,
+      "noflip_mean": 0.49626003818231174,
+      "eval_leak_mean": 0.5747775086864229,
+      "leak_inflation": 0.07697638179339567,
+      "null_honest_mean": 0.4999506276078177,
+      "null_honest_std": 0.005406315246652068,
+      "z_vs_null": -0.39759070951728864,
+      "p_one_sided": 0.7142857142857143,
+      "null_leak_mean": 0.5683759391328093,
+      "leak_is_explained_by_null": true
+    },
+    "bytepair_xor": {
+      "honest_oof_sign_mean": 0.507066915509826,
+      "honest_oof_sign_std": 0.009802146498807904,
+      "noflip_mean": 0.4856090858934828,
+      "eval_leak_mean": 0.5497911888238451,
+      "leak_inflation": 0.04272427331401918,
+      "null_honest_mean": 0.5000112801424115,
+      "null_honest_std": 0.006881059029877014,
+      "z_vs_null": 1.0253705624060891,
+      "p_one_sided": 0.19047619047619047,
+      "null_leak_mean": 0.5451923741958109,
+      "leak_is_explained_by_null": true
+    },
+    "bytepair_and": {
+      "honest_oof_sign_mean": 0.49184784555748484,
+      "honest_oof_sign_std": 0.012831482859761243,
+      "noflip_mean": 0.5000724974304959,
+      "eval_leak_mean": 0.5467895198736173,
+      "leak_inflation": 0.054941674316132505,
+      "null_honest_mean": 0.5026929225291563,
+      "null_honest_std": 0.008011121114218565,
+      "z_vs_null": -1.3537527166357595,
+      "p_one_sided": 0.9523809523809523,
+      "null_leak_mean": 0.546798519440258,
+      "leak_is_explained_by_null": true
+    },
+    "withinbyte_bit_and": {
+      "honest_oof_sign_mean": 0.5038941784977962,
+      "honest_oof_sign_std": 0.007484098361611985,
+      "noflip_mean": 0.49830122813400535,
+      "eval_leak_mean": 0.5963985445979114,
+      "leak_inflation": 0.09250436610011525,
+      "null_honest_mean": 0.49806792979382675,
+      "null_honest_std": 0.005873800723532229,
+      "z_vs_null": 0.9919043866482727,
+      "p_one_sided": 0.19047619047619047,
+      "null_leak_mean": 0.594505412527795,
+      "leak_is_explained_by_null": true
+    },
+    "crossbyte_bit_xor": {
+      "honest_oof_sign_mean": 0.5033804435602113,
+      "honest_oof_sign_std": 0.013352037477281893,
+      "noflip_mean": 0.4903466793622588,
+      "eval_leak_mean": 0.6249178992722592,
+      "leak_inflation": 0.12153745571204788,
+      "null_honest_mean": 0.5005348563864215,
+      "null_honest_std": 0.004616854068259383,
+      "z_vs_null": 0.6163476539908536,
+      "p_one_sided": 0.2857142857142857,
+      "null_leak_mean": 0.6278105119184382,
+      "leak_is_explained_by_null": true
+    },
+    "withinbyte_tri_and": {
+      "honest_oof_sign_mean": 0.5032793850280649,
+      "honest_oof_sign_std": 0.01344102482109239,
+      "noflip_mean": 0.5026717235407433,
+      "eval_leak_mean": 0.6011500703113949,
+      "leak_inflation": 0.09787068528332998,
+      "null_honest_mean": 0.5026934325488284,
+      "null_honest_std": 0.006038302672676072,
+      "z_vs_null": 0.09703926931123114,
+      "p_one_sided": 0.42857142857142855,
+      "null_leak_mean": 0.6050245595619386,
+      "leak_is_explained_by_null": true
+    },
+    "bytepair_concat": {
+      "honest_oof_sign_mean": 0.4983153428247746,
+      "honest_oof_sign_std": 0.008598662029268239,
+      "noflip_mean": 0.4877286447216564,
+      "eval_leak_mean": 0.5443467329682288,
+      "leak_inflation": 0.0460313901434542,
+      "null_honest_mean": 0.49849634134278176,
+      "null_honest_std": 0.006401500580803997,
+      "z_vs_null": -0.028274389062766896,
+      "p_one_sided": 0.47619047619047616,
+      "null_leak_mean": 0.5436273116579451,
+      "leak_is_explained_by_null": true
+    },
+    "CONTROL_xfeatures": {
+      "honest_oof_sign_mean": 0.5087795698625114,
+      "honest_oof_sign_std": 0.017397637310130297,
+      "noflip_mean": 0.5121840299588376,
+      "eval_leak_mean": 0.5449057477011132,
+      "leak_inflation": 0.036126177838601836,
+      "null_honest_mean": 0.508865236581457,
+      "null_honest_std": 1.1390647892519134e-16,
+      "z_vs_null": -752079422996.4,
+      "p_one_sided": 1.0,
+      "null_leak_mean": 0.5456831089047741,
+      "leak_is_explained_by_null": false
+    }
+  }
+}

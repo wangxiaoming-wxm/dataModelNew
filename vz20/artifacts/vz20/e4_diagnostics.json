@@ -1,0 +1,116 @@
+{
+  "adversarial": {
+    "auc": 0.4964762828805971,
+    "verdict": "same distribution (iid split)",
+    "top_features": [
+      [
+        "t3",
+        1252
+      ],
+      [
+        "condition",
+        580
+      ],
+      [
+        "x16",
+        482
+      ],
+      [
+        "x4",
+        477
+      ],
+      [
+        "x8",
+        475
+      ],
+      [
+        "x12",
+        471
+      ],
+      [
+        "x6",
+        460
+      ],
+      [
+        "x18",
+        458
+      ],
+      [
+        "x7",
+        439
+      ],
+      [
+        "x0",
+        438
+      ],
+      [
+        "x2",
+        410
+      ],
+      [
+        "days",
+        403
+      ]
+    ]
+  },
+  "duplicates": {
+    "train_exact_dup_rows": 0,
+    "test_exact_dup_rows": 0,
+    "train_test_exact_matches": 0,
+    "entity_block_train_groups": 8985,
+    "entity_block_shared_with_test": 1595
+  },
+  "days_as_time": {
+    "train_min": 24.3708,
+    "train_max": 11781.1355,
+    "test_min": 24.7967,
+    "test_max": 11580.8097,
+    "train_unique": 14928,
+    "overlap_ratio": 1.0,
+    "corr_days_vs_month": -0.02322141991243993
+  },
+  "id_cardinality": {
+    "byte": {
+      "levels_in_train": 256,
+      "levels_in_test": 256,
+      "rows_per_level_train": 58.32,
+      "test_rows_with_unseen_key": 0.0,
+      "positives_per_level": 5.84
+    },
+    "byte_hi": {
+      "levels_in_train": 16,
+      "levels_in_test": 16,
+      "rows_per_level_train": 933.12,
+      "test_rows_with_unseen_key": 0.0
+    },
+    "bit": {
+      "levels_in_train": 2,
+      "levels_in_test": 2,
+      "rows_per_level_train": 7465.0,
+      "test_rows_with_unseen_key": 0.0
+    },
+    "bytepair_xor": {
+      "levels_in_train": 256,
+      "levels_in_test": 256,
+      "rows_per_level_train": 58.32,
+      "test_rows_with_unseen_key": 0.0
+    },
+    "bytepair_and": {
+      "levels_in_train": 249,
+      "levels_in_test": 238,
+      "rows_per_level_train": 59.96,
+      "test_rows_with_unseen_key": 0.0005
+    },
+    "bytepair_concat": {
+      "levels_in_train": 13371,
+      "levels_in_test": 6078,
+      "rows_per_level_train": 1.12,
+      "test_rows_with_unseen_key": 0.8026,
+      "positives_per_level": 0.0228
+    }
+  },
+  "positives": {
+    "n_pos": 1496,
+    "n_neg": 13434
+  }
+}

@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""AM40 + id 字节 fold-local TE 混合（可复现）。
+"""AM40 + id 字节/半字节/交叉 TE 混合（v2，可复现）。
 
-发现：id 的 hex byte0/4/5/7 有 fold-local TE 真信号，且与 AM40 近乎正交。
-公式（预注册）：
-    id_pool = mean_rank( flip_if_needed( TE_foldlocal(id_byte_b) ) for b in [0,4,5,7] )
-    score   = 0.75 * AM40(main,alt) + 0.25 * id_pool
+预注册公式：
+    specs = [b0, b4, b5, b7, b2hi, p47]
+    id_pool = mean_rank( flip_if_needed( TE_5fold(spec) ) )
+    score   = 0.65 * AM40(main,alt) + 0.35 * id_pool
 
-AM40 定义同 fuse_am40.py；臂来自冻结 best_v1。
-门禁：OOF > 冻结 AM40。
+其中：
+- bX = id hex 第 X 字节（2 个 hex 字符）
+- b2hi = byte2 高半字节
+- p47 = byte4|byte7
+TE 为 fold-local（训练折拟合，验证折只读）；test 用全训练集拟合。
+
+门禁：OOF > 冻结 AM40；锚点 OOF ≈ 0.706482。
 """
 from __future__ import annotations
 
@@ -26,12 +31,12 @@ from sklearn.model_selection import StratifiedKFold
 ROOT = Path(__file__).resolve().parents[1]
 W_MAIN, W_ALT = 0.62, 0.38
 ALPHA_MAX = 0.40
-W_AM40 = 0.75
-STRONG_BYTES = (0, 4, 5, 7)
+W_AM40 = 0.65
+SPECS = ("b0", "b4", "b5", "b7", "b2hi", "p47")
 TE_SEED = 2026
 TE_SPLITS = 5
 TE_SMOOTH = 20.0
-EXPECTED_OOF = 0.7044127250356068
+EXPECTED_OOF = 0.7064823351079033
 OOF_ATOL = 1e-10
 AM40_OOF = 0.7018113510376338
 
@@ -59,9 +64,21 @@ def am40(main: np.ndarray, alt: np.ndarray) -> np.ndarray:
     return ALPHA_MAX * np.maximum(main, alt) + (1.0 - ALPHA_MAX) * linear
 
 
-def id_byte_series(ids: pd.Series, byte: int) -> pd.Series:
+def keys_from_ids(ids: pd.Series, spec: str) -> pd.Series:
     s = ids.astype(str).str.lower()
-    return s.str.slice(2 * byte, 2 * byte + 2)
+    if spec.startswith("b") and spec.endswith("hi"):
+        b = int(spec[1])
+        return s.str.slice(2 * b, 2 * b + 1)
+    if spec.startswith("b") and spec.endswith("lo"):
+        b = int(spec[1])
+        return s.str.slice(2 * b + 1, 2 * b + 2)
+    if spec.startswith("b") and len(spec) == 2:
+        b = int(spec[1])
+        return s.str.slice(2 * b, 2 * b + 2)
+    if spec.startswith("p") and len(spec) == 3:
+        i, j = int(spec[1]), int(spec[2])
+        return s.str.slice(2 * i, 2 * i + 2) + "|" + s.str.slice(2 * j, 2 * j + 2)
+    raise ValueError(spec)
 
 
 def te_oof_test(tr_keys: pd.Series, te_keys: pd.Series, y: np.ndarray):
@@ -80,8 +97,8 @@ def te_oof_test(tr_keys: pd.Series, te_keys: pd.Series, y: np.ndarray):
 
 def id_pool(train_ids: pd.Series, test_ids: pd.Series, y: np.ndarray):
     parts_o, parts_t = [], []
-    for b in STRONG_BYTES:
-        oof, tp = te_oof_test(id_byte_series(train_ids, b), id_byte_series(test_ids, b), y)
+    for spec in SPECS:
+        oof, tp = te_oof_test(keys_from_ids(train_ids, spec), keys_from_ids(test_ids, spec), y)
         if roc_auc_score(y, oof) < 0.5:
             oof = 1.0 - oof
             tp = 1.0 - tp
@@ -118,13 +135,15 @@ def main() -> int:
         raise SystemExit(f"GATE FAIL: {oof_auc} <= AM40 {am40_auc}")
 
     out_path = ROOT / "submissions" / "submission_am40_idbytes.csv"
+    out_v2 = ROOT / "submissions" / "submission_am40_idbytes_v2.csv"
+    champ = ROOT / "submissions" / "submission_champion.csv"
     expected = np.clip(fuse_t, 0.001, 0.999)
     if not args.verify_only:
         sub = sample[["id"]].copy()
         sub["label"] = expected
         sub.to_csv(out_path, index=False)
-        # 同步 champion
-        (ROOT / "submissions" / "submission_champion.csv").write_bytes(out_path.read_bytes())
+        sub.to_csv(out_v2, index=False)
+        champ.write_bytes(out_path.read_bytes())
     saved = pd.read_csv(out_path, dtype={"id": str})
     if float(np.max(np.abs(saved["label"].to_numpy(float) - expected))) > 1e-12:
         raise ValueError("提交与重算不一致")
@@ -132,10 +151,10 @@ def main() -> int:
     art = ROOT / "artifacts" / "id_bytes"
     art.mkdir(parents=True, exist_ok=True)
     metrics = {
-        "name": "AM40+id_bytes_TE",
-        "formula": f"{W_AM40}*AM40 + {1-W_AM40}*rankmean(TE(id_bytes {list(STRONG_BYTES)}))",
+        "name": "AM40+id_bytes_TE_v2",
+        "formula": f"{W_AM40}*AM40 + {1-W_AM40}*rankmean(TE({list(SPECS)}))",
         "w_am40": W_AM40,
-        "strong_bytes": list(STRONG_BYTES),
+        "specs": list(SPECS),
         "oof_auc": oof_auc,
         "am40_oof": am40_auc,
         "delta_vs_am40": oof_auc - am40_auc,
@@ -151,7 +170,7 @@ def main() -> int:
             spearmanr(saved["label"], pd.read_csv(w62)["label"]).statistic
         )
     (art / "blend_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n")
-    print("PASS: AM40+id_bytes 超过 AM40")
+    print("PASS: AM40+id_bytes v2 超过 AM40")
     print(f"OOF={oof_auc:.8f} (AM40={am40_auc:.8f}, Δ={oof_auc-am40_auc:+.8f})")
     print(f"submission: {out_path}")
     print(f"sha256: {metrics['submission_sha256']}")

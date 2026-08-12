@@ -1,20 +1,22 @@
 {
-  "name": "AM40+id_bytes_TE",
-  "formula": "0.75*AM40 + 0.25*rankmean(TE(id_bytes [0, 4, 5, 7]))",
-  "w_am40": 0.75,
-  "strong_bytes": [
-    0,
-    4,
-    5,
-    7
+  "name": "AM40+id_bytes_TE_v2",
+  "formula": "0.65*AM40 + 0.35*rankmean(TE(['b0', 'b4', 'b5', 'b7', 'b2hi', 'p47']))",
+  "w_am40": 0.65,
+  "specs": [
+    "b0",
+    "b4",
+    "b5",
+    "b7",
+    "b2hi",
+    "p47"
   ],
-  "oof_auc": 0.7044127250356068,
+  "oof_auc": 0.7064823351079033,
   "am40_oof": 0.7018113510376338,
-  "delta_vs_am40": 0.002601373997973,
-  "id_pool_oof": 0.5381760173922181,
-  "spearman_id_vs_am40": -0.002039026498402465,
+  "delta_vs_am40": 0.004670984070269446,
+  "id_pool_oof": 0.5496924606254862,
+  "spearman_id_vs_am40": 0.0036769359064438337,
   "submission": "submissions/submission_am40_idbytes.csv",
-  "submission_sha256": "5aadb193f1521f7e9c8a26c8a3a572de7262053e8785797336066eb8f198099e",
+  "submission_sha256": "117048fe156fe7ce1121efe17cbc36f46a4d39d86ab3a4a0ed358efcea79590a",
   "gate_beat_am40": true,
-  "spearman_vs_w62": 0.9856576831433852
+  "spearman_vs_w62": 0.9780242271678167
 }

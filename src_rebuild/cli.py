@@ -66,6 +66,15 @@ def filter_configs(
     return tuple(by_name[name] for name in names)
 
 
+def configs_for_run(profile: str, requested: str | None) -> tuple[ModelConfig, ...]:
+    """Resolve broad smoke candidates or the locked full finalist set."""
+    if profile not in {"smoke", "full"}:
+        raise ValueError("profile must be 'smoke' or 'full'")
+    if requested is None and profile == "full":
+        requested = "cb_ratio_rmse_d5,cb_rate_rmse_d6"
+    return filter_configs(candidate_configs(profile), requested)
+
+
 def protocol_defaults(profile: str) -> dict[str, object]:
     if profile == "smoke":
         return {
@@ -193,7 +202,7 @@ def train(args: argparse.Namespace) -> int:
     y = train_frame["label"].astype(int).to_numpy()
     features = train_frame.drop(columns=["label"])
 
-    configs = filter_configs(candidate_configs(profile), args.configs)
+    configs = configs_for_run(profile, args.configs)
     evaluator = build_evaluator(profile, configs, args)
     started = time.time()
     nested = evaluator.evaluate(features, y)

@@ -112,7 +112,7 @@ class StackSpec:
     def _new_model(self) -> LogisticRegression:
         return LogisticRegression(
             C=self.regularization_c,
-            penalty="l2",
+            l1_ratio=0.0,
             solver="lbfgs",
             max_iter=1000,
             random_state=2026,

@@ -108,6 +108,7 @@ def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
     pairs = (
         ("ratio_rate", "cb_ratio_rmse_d5", "cb_rate_rmse_d6", 2),
         ("rich_ratio_rate", "cb_ratio_rich_rmse_d5", "cb_rate_rich_rmse_d6", 3),
+        ("freq_ratio_rate", "cb_ratio_freq_rmse_d5", "cb_rate_freq_rmse_d6", 4),
     )
     blends: list[BlendSpec] = []
     for prefix, ratio, rate, complexity in pairs:

@@ -8,13 +8,52 @@ import numpy as np
 import pandas as pd
 
 
-FEATURE_MODES = ("core", "all", "all_id", "ratio", "rate", "ratio_rich", "rate_rich")
+FEATURE_MODES = (
+    "core",
+    "all",
+    "all_id",
+    "ratio",
+    "rate",
+    "ratio_rich",
+    "rate_rich",
+    "ratio_freq",
+    "rate_freq",
+)
 RAW_X_COLUMNS = tuple(f"x{index}" for index in range(19))
 BIN_COLUMNS = ("t1", "t2", "r1", "r2", "c1", "c2", "w1", "w2")
 GRADE_MAP = {"s": 1.0, "ss": 2.0, "sss": 3.0}
 RATIO_QUANTILES = (5, 10, 20, 40)
 RATE_QUANTILES = (7, 13, 25)
 DAYS_FIXED_EDGES = np.array([700, 2500, 5000, 7000, 9000, 10000], dtype=float)
+RELIABILITY_COLUMNS = {
+    "ratio_freq": (
+        "binary_pattern",
+        "region|source",
+        "days_q10|region",
+        "days_q10|source",
+        "condition_q10|source",
+        "condition_ratio_q10|source",
+        "ratio_q10|region",
+        "ratio_q10|source",
+        "ratio_q20|region|source",
+        "region|source|age",
+        "x20|source",
+        "source|x20|age",
+    ),
+    "rate_freq": (
+        "binary_pattern",
+        "region|source",
+        "condition_pct_q13|source",
+        "days_q13|region",
+        "days_q13|source",
+        "rate_q13|region",
+        "rate_q13|source",
+        "rate_q7|region|source",
+        "days_q13|condition_pct_q13",
+        "region|binary",
+        "x20|source",
+    ),
+}
 CATEGORICAL_COLUMNS = (
     "month",
     "region",
@@ -66,6 +105,8 @@ class RebuildFeatureBuilder:
         self._source_condition_values: dict[str, np.ndarray] = {}
         self._global_condition_median = 1.0
         self._quantile_edges: dict[str, np.ndarray] = {}
+        self._reliability_maps: dict[str, pd.Series] = {}
+        self._rare_threshold = 0.0
 
     def fit(self, frame: pd.DataFrame) -> "RebuildFeatureBuilder":
         """Fit frequencies, group means, schema and numeric imputers."""
@@ -81,6 +122,9 @@ class RebuildFeatureBuilder:
 
         self._fit_specialized_statistics(frame)
         raw = self._build(frame)
+        if self.mode in RELIABILITY_COLUMNS:
+            self._fit_reliability(raw)
+            raw = self._apply_reliability(raw)
         cat_columns = tuple(
             column for column in raw.columns if not pd.api.types.is_numeric_dtype(raw[column])
         )
@@ -100,6 +144,8 @@ class RebuildFeatureBuilder:
             raise RuntimeError("feature builder must be fitted before transform")
         self._validate_input(frame, require_label=False)
         result = self._build(frame)
+        if self.mode in RELIABILITY_COLUMNS:
+            result = self._apply_reliability(result)
         missing = set(self._columns) - set(result.columns)
         extra = set(result.columns) - set(self._columns)
         if missing or extra:
@@ -143,10 +189,10 @@ class RebuildFeatureBuilder:
         return [column for column in frame.columns if column not in excluded]
 
     def _build(self, frame: pd.DataFrame) -> pd.DataFrame:
-        if self.mode in ("ratio", "ratio_rich"):
-            return self._build_ratio_world(frame, rich=self.mode == "ratio_rich")
-        if self.mode in ("rate", "rate_rich"):
-            return self._build_rate_world(frame, rich=self.mode == "rate_rich")
+        if self.mode in ("ratio", "ratio_rich", "ratio_freq"):
+            return self._build_ratio_world(frame, rich=self.mode != "ratio")
+        if self.mode in ("rate", "rate_rich", "rate_freq"):
+            return self._build_rate_world(frame, rich=self.mode != "rate")
         out = frame.loc[:, self._base_columns(frame)].copy()
 
         for column in CATEGORICAL_COLUMNS:
@@ -199,7 +245,7 @@ class RebuildFeatureBuilder:
         if len(finite_condition):
             self._global_condition_median = float(finite_condition.median())
 
-        if self.mode in ("ratio", "ratio_rich"):
+        if self.mode in ("ratio", "ratio_rich", "ratio_freq"):
             self._source_condition_medians = pd.DataFrame(
                 {"source": source, "condition": condition}
             ).groupby("source")["condition"].median()
@@ -217,7 +263,7 @@ class RebuildFeatureBuilder:
                 self._set_quantile_edges(f"condition_ratio_{count}", condition_ratio, count)
                 self._set_quantile_edges(f"exposure_ratio_{count}", exposure_ratio, count)
 
-        if self.mode in ("rate", "rate_rich"):
+        if self.mode in ("rate", "rate_rich", "rate_freq"):
             grouped = pd.DataFrame({"source": source, "condition": condition}).groupby("source")
             self._source_condition_values = {
                 str(name): np.sort(group["condition"].dropna().to_numpy(float))
@@ -459,6 +505,28 @@ class RebuildFeatureBuilder:
         )
         for name, columns in interactions:
             self._add_cross(out, name, columns)
+
+    def _fit_reliability(self, frame: pd.DataFrame) -> None:
+        self._rare_threshold = 5.0 / max(len(frame), 1)
+        for column in RELIABILITY_COLUMNS[self.mode]:
+            if column not in frame.columns:
+                raise ValueError(f"missing pre-registered reliability column {column!r}")
+            values = self._category_values(frame[column])
+            self._reliability_maps[column] = values.value_counts(
+                normalize=True,
+                dropna=False,
+            )
+
+    def _apply_reliability(self, frame: pd.DataFrame) -> pd.DataFrame:
+        out = frame.copy()
+        for column in RELIABILITY_COLUMNS[self.mode]:
+            mapping = self._reliability_maps.get(column)
+            if mapping is None:
+                raise RuntimeError("reliability statistics are not fitted")
+            frequency = self._category_values(out[column]).map(mapping).fillna(0.0).astype(float)
+            out[f"freq__{column}"] = frequency
+            out[f"rare__{column}"] = (frequency < self._rare_threshold).astype(float)
+        return out
 
     @staticmethod
     def _add_identifier_features(out: pd.DataFrame, identifiers: pd.Series) -> None:

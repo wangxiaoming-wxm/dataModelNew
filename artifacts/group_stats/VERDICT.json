@@ -1,0 +1,12 @@
+{
+  "verdict": "REJECT",
+  "reason": "fold-local group-stats are largely collinear with existing SUPER714 feature world; blending with fp_v4 hurts nested OOF; injecting into CatBoost smoke only +0.0005 and still loses to fp_v4 when fused",
+  "champion_unchanged": "submissions/submission_champion.csv",
+  "champion_oof": 0.7164047305145615,
+  "smoke_main_vs_main_gs": {
+    "main_oof": 0.68814,
+    "main_gs_oof": 0.68864,
+    "delta": 0.00050
+  },
+  "docs": "docs/GROUP_STATS.md"
+}

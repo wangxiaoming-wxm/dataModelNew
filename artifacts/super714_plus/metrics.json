@@ -1,0 +1,40 @@
+{
+  "mode": "full",
+  "recipe": {
+    "seeds": [
+      3100,
+      3101,
+      3102,
+      3103,
+      3104,
+      3105,
+      3106,
+      3107,
+      3108,
+      3109
+    ],
+    "bags": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "iterations": 1000,
+    "main": "Ordered d6 l2=10 +rate",
+    "alt": "Plain d6 l2=5 +ratio/cond_r bins(6,12,24)",
+    "fusion": "max2(rank)"
+  },
+  "auc": {
+    "main": 0.6977951575896102,
+    "alt": 0.6911290014401961,
+    "max2": 0.6964480588004417
+  },
+  "pearson_main_alt": 0.9513051461568904,
+  "champ_max2_auc": 0.7012752084064776,
+  "delta_vs_champ": -0.004827149606035919,
+  "test_spearman_vs_champ": 0.9833614016903688,
+  "submission": "submissions/submission_super714_plus.csv",
+  "submission_sha256": "e3a8d2573319fee94f21c90e603117e8745e1eadb810e151556ae9b1d10464c1",
+  "elapsed_minutes": 668.213644127051,
+  "different_from_champ_submission": true
+}

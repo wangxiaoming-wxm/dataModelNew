@@ -1,0 +1,69 @@
+{
+  "folds": [
+    {
+      "fold": 0,
+      "inner_auc_by_config": {
+        "blend_ratio_rate_w35": 0.669601487357238,
+        "blend_ratio_rate_w50": 0.6699638895943373,
+        "blend_ratio_rate_w65": 0.6698111396166667,
+        "cb_rate_rmse_d6": 0.6668587896029581,
+        "cb_ratio_rmse_d5": 0.6674222932101507
+      },
+      "outer_auc": 0.6969566088674195,
+      "selected": "blend_ratio_rate_w50",
+      "selected_inner_auc": 0.6699638895943373
+    },
+    {
+      "fold": 1,
+      "inner_auc_by_config": {
+        "blend_ratio_rate_w35": 0.6788530832058279,
+        "blend_ratio_rate_w50": 0.6785573779055436,
+        "blend_ratio_rate_w65": 0.677721411869987,
+        "cb_rate_rmse_d6": 0.6772953055073401,
+        "cb_ratio_rmse_d5": 0.6736360301516796
+      },
+      "outer_auc": 0.6789733300307563,
+      "selected": "blend_ratio_rate_w35",
+      "selected_inner_auc": 0.6788530832058279
+    },
+    {
+      "fold": 2,
+      "inner_auc_by_config": {
+        "blend_ratio_rate_w35": 0.6784897481444375,
+        "blend_ratio_rate_w50": 0.6790888545454079,
+        "blend_ratio_rate_w65": 0.6791700879940927,
+        "cb_rate_rmse_d6": 0.6750475487748557,
+        "cb_ratio_rmse_d5": 0.677335455819537
+      },
+      "outer_auc": 0.6895681299655345,
+      "selected": "blend_ratio_rate_w65",
+      "selected_inner_auc": 0.6791700879940927
+    },
+    {
+      "fold": 3,
+      "inner_auc_by_config": {
+        "blend_ratio_rate_w35": 0.6788931946503459,
+        "blend_ratio_rate_w50": 0.6791091823414186,
+        "blend_ratio_rate_w65": 0.6787420382475061,
+        "cb_rate_rmse_d6": 0.6764400222354218,
+        "cb_ratio_rmse_d5": 0.6757480220821276
+      },
+      "outer_auc": 0.6735508387342499,
+      "selected": "blend_ratio_rate_w50",
+      "selected_inner_auc": 0.6791091823414186
+    },
+    {
+      "fold": 4,
+      "inner_auc_by_config": {
+        "blend_ratio_rate_w35": 0.6691582893854096,
+        "blend_ratio_rate_w50": 0.67024190858251,
+        "blend_ratio_rate_w65": 0.6707923337685598,
+        "cb_rate_rmse_d6": 0.664438386608133,
+        "cb_ratio_rmse_d5": 0.6696191746959533
+      },
+      "outer_auc": 0.7045631670389675,
+      "selected": "blend_ratio_rate_w65",
+      "selected_inner_auc": 0.6707923337685598
+    }
+  ]
+}

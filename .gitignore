@@ -17,6 +17,16 @@ submissions/*_smoke.csv
 # local
 artifacts/probe/
 logs/
+.worktrees/
 *.zip
 .DS_Store
 __MACOSX/
+
+artifacts/super714_plus/*_smoke.*
+artifacts/super714_plus/train*.log
+submissions/*_plus_smoke.csv
+artifacts/super714_extend/*_smoke.*
+submissions/*_extend*_smoke.csv
+artifacts/super714_bags/*_smoke.*
+submissions/*_bags*_smoke.csv
+submissions/submission_beat_w62_smoke.csv

@@ -1,0 +1,21 @@
+{
+  "name": "fp_v5_and_heavy",
+  "formula": "0.3*v3 + 0.25*bits64 + 0.1*xs + 0.35*and_all",
+  "weights": {
+    "v3": 0.3,
+    "bits": 0.25,
+    "xs": 0.1,
+    "and_all": 0.35
+  },
+  "oof_auc": 0.7288000993568079,
+  "v3_oof": 0.707165960500892,
+  "v4_oof": 0.7164047305145615,
+  "delta_vs_v4": 0.012395368842246346,
+  "bits_oof": 0.5912706824172683,
+  "xs_oof": 0.5485205846925233,
+  "and_oof": 0.6807484093357186,
+  "spearman_and_vs_v3": 0.03493662629927023,
+  "submission": "submissions/submission_champion.csv",
+  "submission_sha256": "2e01cad679b8b13f21fbe6f6e781e2eb265526fbbd955789bf240a3fa979c889",
+  "gate_beat_v4": true
+}

@@ -1,0 +1,54 @@
+{
+  "name": "fp_v4_v3_bits_x",
+  "formula": "0.5*v3_dual + 0.35*bits64 + 0.15*x0_18_q20",
+  "weights": {
+    "v3": 0.5,
+    "bits": 0.35,
+    "xs": 0.15
+  },
+  "te_seeds": [
+    2026,
+    7,
+    42,
+    99,
+    314,
+    2718
+  ],
+  "oof_auc": 0.7164047305145615,
+  "v3_oof": 0.707165960500892,
+  "delta_vs_v3": 0.009238770013669573,
+  "bits_oof": 0.5912706824172683,
+  "xs_oof": 0.5485205846925233,
+  "spearman_bits_vs_v3": 0.025610385100616806,
+  "spearman_xs_vs_v3": 0.07552121453928216,
+  "submission": "submissions/submission_champion.csv",
+  "submission_sha256": "2e313d5d173515003fdf7c118193297b04759e16e7ae51ca91f30ade12e7a52f",
+  "gate_beat_v3": true,
+  "data": {
+    "train_rows": 14930,
+    "test_rows": 6398
+  },
+  "ignored_raw_recovered": [
+    "x0",
+    "x1",
+    "x2",
+    "x3",
+    "x4",
+    "x5",
+    "x6",
+    "x7",
+    "x8",
+    "x9",
+    "x10",
+    "x11",
+    "x12",
+    "x13",
+    "x14",
+    "x15",
+    "x16",
+    "x17",
+    "x18"
+  ],
+  "richer_id": "all 64 bit planes of 8 hex bytes",
+  "spearman_vs_w62": 0.9669116014245579
+}

@@ -1,0 +1,40 @@
+{
+  "folds": [
+    {
+      "fold": 0,
+      "inner_auc_by_config": {
+        "cb_core_logloss_d6": 0.6482961613738044,
+        "cb_rate_rmse_d6": 0.6543744677534167,
+        "cb_ratio_logloss_d5": 0.6481037574536921,
+        "cb_ratio_rmse_d5": 0.6510516363740619
+      },
+      "outer_auc": 0.6834101431984112,
+      "selected": "cb_rate_rmse_d6",
+      "selected_inner_auc": 0.6543744677534167
+    },
+    {
+      "fold": 1,
+      "inner_auc_by_config": {
+        "cb_core_logloss_d6": 0.668353654084182,
+        "cb_rate_rmse_d6": 0.6666999659093403,
+        "cb_ratio_logloss_d5": 0.6604012573674575,
+        "cb_ratio_rmse_d5": 0.6602863525816396
+      },
+      "outer_auc": 0.6601581904317791,
+      "selected": "cb_core_logloss_d6",
+      "selected_inner_auc": 0.668353654084182
+    },
+    {
+      "fold": 2,
+      "inner_auc_by_config": {
+        "cb_core_logloss_d6": 0.6608912331138381,
+        "cb_rate_rmse_d6": 0.655853466647453,
+        "cb_ratio_logloss_d5": 0.6591324677045023,
+        "cb_ratio_rmse_d5": 0.6578380074127711
+      },
+      "outer_auc": 0.677850302505242,
+      "selected": "cb_core_logloss_d6",
+      "selected_inner_auc": 0.6608912331138381
+    }
+  ]
+}

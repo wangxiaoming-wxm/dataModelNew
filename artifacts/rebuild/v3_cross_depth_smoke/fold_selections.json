@@ -1,0 +1,55 @@
+{
+  "folds": [
+    {
+      "fold": 0,
+      "inner_auc_by_config": {
+        "blend_rich_cross_depth_equal": 0.6658987682117365,
+        "blend_rich_ratio_rate_w35": 0.6648771123553778,
+        "blend_rich_ratio_rate_w50": 0.6651385599406526,
+        "blend_rich_ratio_rate_w65": 0.6649217415533784,
+        "cb_rate_rich_rmse_d5": 0.6634837518361248,
+        "cb_rate_rich_rmse_d6": 0.6623434954259833,
+        "cb_ratio_rich_rmse_d5": 0.662818009634083,
+        "cb_ratio_rich_rmse_d6": 0.6638415693709087
+      },
+      "outer_auc": 0.6884505948028259,
+      "selected": "blend_rich_cross_depth_equal",
+      "selected_inner_auc": 0.6658987682117365,
+      "stack_coefficients": {}
+    },
+    {
+      "fold": 1,
+      "inner_auc_by_config": {
+        "blend_rich_cross_depth_equal": 0.6743768599232265,
+        "blend_rich_ratio_rate_w35": 0.6730878208542554,
+        "blend_rich_ratio_rate_w50": 0.6736304267872846,
+        "blend_rich_ratio_rate_w65": 0.6736407861368833,
+        "cb_rate_rich_rmse_d5": 0.6709132533822997,
+        "cb_rate_rich_rmse_d6": 0.6698809581939207,
+        "cb_ratio_rich_rmse_d5": 0.6717514087595524,
+        "cb_ratio_rich_rmse_d6": 0.6730856929878515
+      },
+      "outer_auc": 0.6663975561663747,
+      "selected": "blend_rich_cross_depth_equal",
+      "selected_inner_auc": 0.6743768599232265,
+      "stack_coefficients": {}
+    },
+    {
+      "fold": 2,
+      "inner_auc_by_config": {
+        "blend_rich_cross_depth_equal": 0.6596769353803633,
+        "blend_rich_ratio_rate_w35": 0.6600837897322112,
+        "blend_rich_ratio_rate_w50": 0.6598920820649785,
+        "blend_rich_ratio_rate_w65": 0.659135712246288,
+        "cb_rate_rich_rmse_d5": 0.6602275005571661,
+        "cb_rate_rich_rmse_d6": 0.6590820654260732,
+        "cb_ratio_rich_rmse_d5": 0.6559106936517072,
+        "cb_ratio_rich_rmse_d6": 0.6537570451309049
+      },
+      "outer_auc": 0.6948907734555911,
+      "selected": "cb_rate_rich_rmse_d5",
+      "selected_inner_auc": 0.6602275005571661,
+      "stack_coefficients": {}
+    }
+  ]
+}

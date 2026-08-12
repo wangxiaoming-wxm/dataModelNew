@@ -1,0 +1,54 @@
+{
+  "champ_oof": 0.7012752084064776,
+  "candidates": [
+    {
+      "file": "submission_interim_rankmean.csv",
+      "oof": 0.7014634181050714,
+      "spearman_vs_champ": 0.9938518882958706,
+      "identical": false,
+      "sha16": "ffd34b118ec909b3"
+    },
+    {
+      "file": "submission_interim_w62.csv",
+      "oof": 0.7015936597140784,
+      "spearman_vs_champ": 0.9932391712316441,
+      "identical": false,
+      "sha16": "e84bd2f0a9f47f58"
+    },
+    {
+      "file": "submission_interim_w70.csv",
+      "oof": 0.7014861326397464,
+      "spearman_vs_champ": 0.9919766505128919,
+      "identical": false,
+      "sha16": "342bc0a967994796"
+    },
+    {
+      "file": "submission_interim_soft015.csv",
+      "oof": 0.7012519714126262,
+      "spearman_vs_champ": 0.9991059624182811,
+      "identical": false,
+      "sha16": "1b4c1b0ae4d65364"
+    },
+    {
+      "file": "submission_interim_soft025.csv",
+      "oof": 0.7013491488194612,
+      "spearman_vs_champ": 0.9981379807280256,
+      "identical": false,
+      "sha16": "44e73e1fbf1ac526"
+    },
+    {
+      "file": "submission_interim_pow3.csv",
+      "oof": 0.7014045294921738,
+      "spearman_vs_champ": 0.9965119188213059,
+      "identical": false,
+      "sha16": "a55ff6f34209d8c4"
+    }
+  ],
+  "recommend": {
+    "file": "submission_interim_w62.csv",
+    "oof": 0.7015936597140784,
+    "spearman_vs_champ": 0.9932391712316441,
+    "identical": false,
+    "sha16": "e84bd2f0a9f47f58"
+  }
+}

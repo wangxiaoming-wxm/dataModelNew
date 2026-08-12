@@ -26,6 +26,8 @@
 2. 至少 2/3 外折不退化；
 3. 训练代价记录在 metrics 中。
 
+4-seed 通过后允许一次预注册的 8-seed 止损验证：seeds 固定为 `2026..2033`，相对 4-seed fold-mean 必须再提高 `>= 0.0003`，且至少 2/3 外折不退化。未通过则固定 4-seed；通过才允许将完整 V2 扩到 8-seed。不得继续搜索 seed 子集。
+
 ## 能力验证 C：严格 stacking
 
 仅允许两个一级模型的 cross-fitted 预测。元模型只能在 outer-train 的 inner OOF 上拟合，outer-valid 不得参与权重、符号或正则选择。

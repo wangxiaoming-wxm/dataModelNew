@@ -1,0 +1,19 @@
+{
+  "name": "W62",
+  "formula": "0.62*main + 0.38*alt",
+  "weights": {
+    "main": 0.62,
+    "alt": 0.38
+  },
+  "source_arms": "artifacts/super714/best_v1_{oof,test}.npy",
+  "oof_auc": 0.7015936597140784,
+  "max2_oof_auc": 0.7012752084064776,
+  "delta_vs_max2": 0.00031845130760077556,
+  "submission": "submissions/submission_w62.csv",
+  "submission_sha256": "e84bd2f0a9f47f58f11d32d914ed1f4f19e12cc8c6c3373e94afc17cba227fe5",
+  "spearman_vs_submission_super714": 0.993239171953066,
+  "different_from_max2_file": true,
+  "n_test": 6398,
+  "online_auc_submitted": 0.71503,
+  "online_note": "用户提交确认；高于 best_v1 max2 锚点 0.71453"
+}

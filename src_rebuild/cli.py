@@ -110,6 +110,12 @@ def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
         ("ratio_rate", "cb_ratio_rmse_d5", "cb_rate_rmse_d6", 2),
         ("rich_ratio_rate", "cb_ratio_rich_rmse_d5", "cb_rate_rich_rmse_d6", 3),
         ("freq_ratio_rate", "cb_ratio_freq_rmse_d5", "cb_rate_freq_rmse_d6", 4),
+        (
+            "rich_logloss",
+            "cb_ratio_rich_logloss_d6",
+            "cb_rate_rich_logloss_d6",
+            4,
+        ),
     )
     blends: list[BlendSpec] = []
     for prefix, ratio, rate, complexity in pairs:
@@ -137,6 +143,21 @@ def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
                 components=cross_depth_components,
                 weights=(0.25, 0.25, 0.25, 0.25),
                 complexity=4,
+            )
+        )
+    objective_components = (
+        "cb_ratio_rich_rmse_d5",
+        "cb_rate_rich_rmse_d6",
+        "cb_ratio_rich_logloss_d6",
+        "cb_rate_rich_logloss_d6",
+    )
+    if set(objective_components).issubset(names):
+        blends.append(
+            BlendSpec(
+                name="blend_rich_objective_equal",
+                components=objective_components,
+                weights=(0.25, 0.25, 0.25, 0.25),
+                complexity=5,
             )
         )
     return tuple(blends)

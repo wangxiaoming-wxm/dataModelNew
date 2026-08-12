@@ -55,6 +55,15 @@ Phase S 只确认稳定性，不用其结果修改 V2。
 
 由于该方案每个 inner fold 还需一层 sub-inner，只有预估模型训练数可控且 A/B 无晋级方案时实现。晋级阈值仍为 smoke `+0.001`、至少 2/3 外折提升。
 
+冻结实现：
+
+- base 为 rich ratio/rate 的固定 `w50` rank blend；
+- 对每个 inner-train 再做 `StratifiedKFold(2, seed=424243+fold)`，生成严格 sub-inner base OOF；
+- residual target 固定为 `y - base_oof_rank`；
+- residual learner 固定为 Plain core-RMSE depth 5；
+- outer-valid 组合固定为 `base_rank + 0.20 * residual_raw`，不搜索 alpha、不翻转方向；
+- residual learner 的训练分区不包含对应 inner-valid/outer-valid。
+
 ## 完整确认与晋级
 
 开发仅看新 seed smoke。候选锁定后，在原 seed `2026/2718` 上运行完整 `5 outer × 3 inner × 4 model seeds × 800 trees`：

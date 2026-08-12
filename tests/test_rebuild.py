@@ -8,6 +8,7 @@ import pandas as pd
 
 from src_rebuild.cli import (
     available_blends,
+    available_residuals,
     available_stacks,
     build_evaluator,
     configs_for_run,
@@ -17,6 +18,7 @@ from src_rebuild.cli import (
 from src_rebuild.evaluation import (
     BlendSpec,
     CandidateScore,
+    ResidualSpec,
     StackSpec,
     make_stratified_splits,
     rank_average,
@@ -191,6 +193,25 @@ class EvaluationTests(unittest.TestCase):
         cross_depth = blends["blend_rich_cross_depth_equal"]
         self.assertEqual(len(cross_depth.components), 4)
         self.assertEqual(cross_depth.weights, (0.25, 0.25, 0.25, 0.25))
+
+    def test_residual_spec_uses_fixed_base_and_direction(self):
+        configs = candidate_configs("smoke")
+        residuals = available_residuals(configs)
+
+        self.assertEqual(len(residuals), 1)
+        spec = residuals[0]
+        self.assertIsInstance(spec, ResidualSpec)
+        base = spec.base_prediction(
+            {
+                spec.base_components[0]: np.array([0.2, 0.8]),
+                spec.base_components[1]: np.array([0.4, 0.6]),
+            }
+        )
+        combined = spec.combine(base, np.array([0.5, -0.5]))
+
+        np.testing.assert_allclose(base, [0.3, 0.7])
+        np.testing.assert_allclose(combined, [0.4, 0.6])
+        self.assertEqual(spec.alpha, 0.20)
 
     def test_selector_requires_margin_for_more_complex_candidate(self):
         candidates = [

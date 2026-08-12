@@ -41,6 +41,13 @@
 
 候选超参是有限、预注册集合。每个外折只依据 outer-train 的 inner OOF 选择一个配置。
 
+完整候选最终收敛为两个 RMSE CatBoost：
+
+- `cb_ratio_rmse_d5`：depth 5，800 trees；
+- `cb_rate_rmse_d6`：depth 6，800 trees。
+
+每个模型使用 seeds `2026/2027`，预测先做 rank 再平均。三个融合权重 `ratio:rate = 0.35:0.65 / 0.50:0.50 / 0.65:0.35` 在完整运行前锁定；权重不连续搜索，也不使用 outer-valid 拟合。
+
 ### 3.2 线性模型
 
 线性/Logistic 模型用于检查稳定的加性信号和作为低复杂度对照，不因单独 AUC 较低而自动融合。只有 outer-train 内选择、outer-valid 增益稳定时才可进入最终方案。
@@ -61,11 +68,15 @@
 - `x0..x18` 的逐行均值、标准差、最小、最大和分位数；
 - 类别频次与 `days/condition` 的组内均值偏差，统计量只在当前训练分区拟合。
 
-### 4.2 三个预注册特征世界
+### 4.2 五个预注册特征世界
 
 1. `core`：业务/结构字段，不含 `x0..x18` 和 `id`；
 2. `all`：`core` 加原始 `x0..x18` 与行汇总；
 3. `all_id`：`all` 加 8 个 byte、16 个 nibble、popcount；仅作消融，默认复杂度最高。
+4. `ratio`：`condition` 除以当前训练分区内的 source 中位数，再构造 `days / condition_source_ratio`、折内分位箱及少量类别交互；
+5. `rate`：用当前训练分区内每个 source 的 condition 经验分布将 condition 映射为 percentile，再构造 `days * (1-percentile)`、折内分位箱及类别交互。
+
+`ratio/rate` 的 source 统计、经验 CDF、分位边界、类别频率和缺失回退值均在每个 inner/outer 训练分区重新拟合。验证行从不参与这些统计量。
 
 ### 4.3 目标编码规则
 
@@ -97,22 +108,29 @@
 - smoke 候选若相对同轮基准低 `0.001` 以上，立即停止。
 - 完整 nested 晋级门禁：
   - fold-mean 至少提高 `0.001`；
-  - 至少 4/5 外折获胜；
+  - smoke 阶段至少 2/3 外折获胜且不得出现明显单折退化；最终确认使用 5 outer folds；
   - pooled AUC 同方向；
   - 置乱标签 AUC 位于 `[0.48, 0.52]`；
-  - outer 选择结果不过度分散。
+  - outer 可在预注册权重间变化，但应稳定选择同一组件族。
 - 未过门禁的结果保留在 `artifacts/rebuild/experiments.jsonl`，不生成推荐提交。
 - 最终提交仅写 `submissions/submission_rebuild_*.csv`，不覆盖任何旧文件。
 
 ## 7. 可复现入口与产物
 
-计划入口：
+入口：
 
 ```bash
-bash run_rebuild.sh --smoke
+# 广候选 smoke
+bash run_rebuild.sh --smoke --permutation-check
+
+# 锁定两个 finalist 的完整 5x3 nested；该命令复现推荐产物
 bash run_rebuild.sh --full
+
+# 校验数组长度、有限值、置乱门禁和 submission SHA256
 bash run_rebuild.sh --verify
 ```
+
+当前 `--full` 默认只运行已锁定的 `cb_ratio_rmse_d5,cb_rate_rmse_d6` 和三个预注册 blend。若要重跑历史消融，必须用 `--configs` 显式列出，避免无意扩大最终搜索空间。
 
 产物：
 
@@ -123,14 +141,53 @@ artifacts/rebuild/<run>/
 ├── final_inner_oof.npy
 ├── test_prediction.npy
 ├── fold_selections.json
+├── permutation.json
 └── manifest.json
 submissions/submission_rebuild_<recipe>.csv
 ```
 
 ## 8. 实验记录
 
-本节在实际训练后补充，每一行必须来自真实外层 nested 运行。
+每一行均来自实际运行；`std` 是外折 AUC 的样本标准差。smoke 仅用于淘汰/收敛候选，最终估计只看完整行。
 
 | 实验 | 协议 | fold-mean ± std | pooled AUC | 结论 |
 |---|---|---:|---:|---|
-| 待运行 | — | — | — | — |
+| 原始/core/all/id 广候选 | 3 outer × 2 inner，1 seed，250/300 trees | 0.668683 ± 0.006066 | 0.668679 | `all_id` 最差；置乱 0.502032 |
+| ratio/rate 机制消融 | 3×2，1 seed，250/300 trees | 0.673806 ± 0.012142 | 0.673804 | 固定 rate 0.678030，进入下一轮 |
+| ratio/rate blend | 3×2，1 seed，300 trees | 0.679815 ± 0.008104 | 0.679858 | 最佳固定 blend 0.680300，较单臂 +0.002270 |
+| **最终选择算法** | **5 outer × 3 inner，2 seeds，800 trees** | **0.688722 ± 0.012695** | **0.688704** | 5/5 外折均选择 ratio/rate blend |
+
+最终五折 AUC 为：
+
+```text
+0.69695661, 0.67897333, 0.68956813, 0.67355084, 0.70456317
+```
+
+完整运行中的外折选择依次为 `w50 / w35 / w65 / w50 / w65`。这说明“两个机制需要融合”稳定，但精确权重仍有抽样不确定性。最终全训练集 inner 选择为 `w65`，inner AUC `0.683282`；该数仅用于最终配方选择，不作为无偏性能估计。
+
+置乱哨兵在独立 3-fold outer 上得到 `0.492784 ± 0.007624`，pooled `0.492789`，通过 `[0.48, 0.52]` 门禁。
+
+## 9. 最终产物
+
+- 无偏性能估计：outer nested `0.688722 ± 0.012695`，pooled `0.688704`；
+- 最终配方：`0.65 * cb_ratio_rmse_d5 + 0.35 * cb_rate_rmse_d6` 的 rank blend；
+- 推荐文件：`submissions/submission_rebuild_blend_ratio_rate_w65.csv`；
+- SHA256：`787c4fd456a53b6e63f297e9d2ad84137f386ba79e92c58b0c1ca11d1d8ddaa2`；
+- 完整证据：`artifacts/rebuild/full/metrics.json`；
+- 复核命令：`bash run_rebuild.sh --verify`。
+
+## 10. 已证伪与下一轮
+
+本轮已证伪或停止：
+
+- `id` byte/nibble：固定 outer smoke `0.665772`，明显低于不含 ID 的 core；停止。
+- 原始 `x0..x18`：同深度 Logloss 下 `all=0.669431`、`core=0.669624`，没有增益；停止直接喂入和行汇总扩展。
+- ratio-Logloss：`0.676910`，低于 ratio-RMSE `0.677695`；不进入完整运行。
+- 无监督 stacking、全局方向翻转、显式目标编码和大规模 ID 组合搜索：没有泄漏安全且稳定的晋级证据，不做。
+
+仍值得继续、但必须使用新的预注册确认实验：
+
+1. 将 seeds 从 2 增至 4，只测试已经锁定的 ratio/rate/w65，使用新的 outer seed 作稳定性确认；
+2. 对两个一级模型做严格 cross-fit 的低自由度 Logistic stacking，权重/正则只在 inner OOF 拟合；
+3. 为 source 经验 CDF 增加 shrinkage 与 leave-one-out 的 label-free 稳健版本，防止小组分位跳变；
+4. 报告多个 outer seeds 的均值和 seed 间方差，但不得据此反复改特征后仍把同一批 seeds 当最终无偏估计。

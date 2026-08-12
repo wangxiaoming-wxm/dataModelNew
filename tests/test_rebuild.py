@@ -122,6 +122,19 @@ class FeatureBuilderTests(unittest.TestCase):
         self.assertNotIn("label", ratio.frame.columns)
         self.assertNotIn("label", rate.frame.columns)
 
+    def test_frequency_world_fits_reliability_only_on_training_partition(self):
+        frame = tiny_frame()
+        builder = RebuildFeatureBuilder("ratio_freq").fit(frame.iloc[:3])
+        train = builder.transform(frame.iloc[:3])
+        unseen = builder.transform(frame.iloc[3:])
+        feature = "ratio_q20|region|source"
+
+        self.assertIn(f"freq__{feature}", train.frame.columns)
+        self.assertIn(f"rare__{feature}", train.frame.columns)
+        self.assertEqual(float(unseen.frame[f"freq__{feature}"].iloc[0]), 0.0)
+        self.assertEqual(float(unseen.frame[f"rare__{feature}"].iloc[0]), 1.0)
+        self.assertNotIn("label", train.frame.columns)
+
 
 class EvaluationTests(unittest.TestCase):
     def test_evaluator_accepts_preregistered_outer_and_inner_seeds(self):
@@ -156,6 +169,17 @@ class EvaluationTests(unittest.TestCase):
         self.assertIn("blend_rich_ratio_rate_w35", blend_names)
         self.assertIn("blend_rich_ratio_rate_w50", blend_names)
         self.assertIn("blend_rich_ratio_rate_w65", blend_names)
+
+    def test_frequency_configs_and_blends_are_pre_registered(self):
+        configs = candidate_configs("smoke")
+        by_name = {config.name: config for config in configs}
+
+        self.assertEqual(by_name["cb_ratio_freq_rmse_d5"].feature_mode, "ratio_freq")
+        self.assertEqual(by_name["cb_rate_freq_rmse_d6"].feature_mode, "rate_freq")
+        blend_names = {blend.name for blend in available_blends(configs)}
+        self.assertIn("blend_freq_ratio_rate_w35", blend_names)
+        self.assertIn("blend_freq_ratio_rate_w50", blend_names)
+        self.assertIn("blend_freq_ratio_rate_w65", blend_names)
 
     def test_selector_requires_margin_for_more_complex_candidate(self):
         candidates = [

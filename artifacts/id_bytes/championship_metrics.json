@@ -1,63 +1,25 @@
 {
-  "protocol": "fp_v4 selection-free: 0.5*v3_dual + 0.35*bits64 + 0.15*x0_18",
+  "protocol": "fp_v5 and_heavy",
   "champion": {
-    "name": "fp_v4_v3_bits_x",
-    "formula": "0.5*v3_dual + 0.35*bits64 + 0.15*x0_18_q20",
+    "name": "fp_v5_and_heavy",
+    "champion_recipe": "and_heavy",
     "weights": {
-      "v3": 0.5,
-      "bits": 0.35,
-      "xs": 0.15
+      "v3": 0.3,
+      "bits": 0.25,
+      "xs": 0.1,
+      "and_all": 0.35
     },
-    "te_seeds": [
-      2026,
-      7,
-      42,
-      99,
-      314,
-      2718
-    ],
-    "oof_auc": 0.7164047305145615,
-    "v3_oof": 0.707165960500892,
-    "delta_vs_v3": 0.009238770013669573,
-    "bits_oof": 0.5912706824172683,
-    "xs_oof": 0.5485205846925233,
-    "spearman_bits_vs_v3": 0.025610385100616806,
-    "spearman_xs_vs_v3": 0.07552121453928216,
-    "submission": "submissions/submission_champion.csv",
-    "submission_sha256": "2e313d5d173515003fdf7c118193297b04759e16e7ae51ca91f30ade12e7a52f",
-    "gate_beat_v3": true,
-    "data": {
-      "train_rows": 14930,
-      "test_rows": 6398
-    },
-    "ignored_raw_recovered": [
-      "x0",
-      "x1",
-      "x2",
-      "x3",
-      "x4",
-      "x5",
-      "x6",
-      "x7",
-      "x8",
-      "x9",
-      "x10",
-      "x11",
-      "x12",
-      "x13",
-      "x14",
-      "x15",
-      "x16",
-      "x17",
-      "x18"
-    ],
-    "richer_id": "all 64 bit planes of 8 hex bytes",
-    "spearman_vs_w62": 0.9669116014245579
+    "oof_auc": 0.7288000993568079,
+    "nested_fold_mean": 0.728997978438028,
+    "delta_nest_vs_v4": 0.012396497864230471,
+    "sha256": "2e01cad679b8b13f21fbe6f6e781e2eb265526fbbd955789bf240a3fa979c889"
   },
   "files": {
     "submit_this": "submissions/submission_champion.csv",
-    "fp_v4": "submissions/submission_fp_v4.csv",
-    "v3_backup": "submissions/submission_am40_idbytes_v3.csv"
+    "fp_v5": "submissions/submission_fp_v5.csv",
+    "tempered": "submissions/submission_fp_v5_tempered.csv",
+    "aggressive": "submissions/submission_fp_v5_aggressive.csv",
+    "fp_v4_backup": "submissions/submission_fp_v4.csv"
   },
-  "advice": "Submit fp_v4 champion. Evidence in docs/FIRST_PRINCIPLES.md"
+  "advice": "Submit fp_v5 and_heavy. Tempered if risk-averse; aggressive for max local OOF."
 }

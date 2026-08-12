@@ -43,27 +43,40 @@ id = 16 位 hex（8 bytes），各 hex 位熵≈4 bit（均匀）。
 嵌套（折内选 bit）仍相对 v3 **+≈0.002**；无挑选全 64-bit 池混入后提升更大。  
 结论：bit 平面是比「整字节 TE」更细、且与现有融合近乎正交的合法信号。
 
-## 晋级配方（fp_v4）
+## 晋级配方
+
+### fp_v4（已吸收进 v5）
 
 ```text
-v3_dual = 0.55*AM40 + 0.45*(0.7*V7 + 0.3*V2)     # 既有
-bits    = mean_rank(TE_6seed(all 64 id bits))     # 新
-xs      = mean_rank(TE_6seed(qbin20(x0..x18)))    # 新（回收忽略列）
+v3_dual = 0.55*AM40 + 0.45*(0.7*V7 + 0.3*V2)
+bits    = mean_rank(TE_6seed(all 64 id bits))
+xs      = mean_rank(TE_6seed(qbin20(x0..x18)))
 score   = 0.50*v3_dual + 0.35*bits + 0.15*xs
 ```
 
-| 方案 | OOF | nested |
-|---|---:|---:|
-| AM40 | 0.70181 | — |
-| v3 dual | 0.70717 | 0.70737 |
-| **fp_v4（主交）** | **0.71640** | **≈0.71660** |
+### fp_v5（当前主交）
 
-```bash
-bash run_fp_v4.sh
-bash run_fp_v4.sh --verify
+自然扩展：选择无关的 **bit-AND 二阶池**（within-byte AND + cross-byte same-bit AND）。
+
+```text
+and_all = 0.5 * pool(within-byte ANDs) + 0.5 * pool(cross-byte same-bit ANDs)
+score   = 0.30*v3_dual + 0.25*bits + 0.10*xs + 0.35*and_all   # and_heavy
 ```
 
-主文件：`submissions/submission_champion.csv`
+| 方案 | OOF | nested fold-mean |
+|---|---:|---:|
+| AM40 | 0.70181 | — |
+| v3 dual | 0.70717 | — |
+| fp_v4 | 0.71640 | 0.71660 |
+| **fp_v5 and_heavy（主交）** | **0.72880** | **0.72900** |
+
+```bash
+bash run_fp_v5.sh
+bash run_fp_v5.sh --verify
+```
+
+主文件：`submissions/submission_champion.csv`  
+备份：`submission_fp_v5_tempered.csv`（and 权重更低）、`submission_fp_v5_aggressive.csv`（and_max）
 
 ## 未晋级 / 弱信号
 

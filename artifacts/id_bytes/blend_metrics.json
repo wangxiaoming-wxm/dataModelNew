@@ -1,0 +1,20 @@
+{
+  "name": "AM40+id_bytes_TE",
+  "formula": "0.75*AM40 + 0.25*rankmean(TE(id_bytes [0, 4, 5, 7]))",
+  "w_am40": 0.75,
+  "strong_bytes": [
+    0,
+    4,
+    5,
+    7
+  ],
+  "oof_auc": 0.7044127250356068,
+  "am40_oof": 0.7018113510376338,
+  "delta_vs_am40": 0.002601373997973,
+  "id_pool_oof": 0.5381760173922181,
+  "spearman_id_vs_am40": -0.002039026498402465,
+  "submission": "submissions/submission_am40_idbytes.csv",
+  "submission_sha256": "5aadb193f1521f7e9c8a26c8a3a572de7262053e8785797336066eb8f198099e",
+  "gate_beat_am40": true,
+  "spearman_vs_w62": 0.9856576831433852
+}

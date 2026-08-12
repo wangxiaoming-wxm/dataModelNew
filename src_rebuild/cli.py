@@ -72,7 +72,7 @@ def configs_for_run(profile: str, requested: str | None) -> tuple[ModelConfig, .
     if profile not in {"smoke", "full"}:
         raise ValueError("profile must be 'smoke' or 'full'")
     if requested is None and profile == "full":
-        requested = "cb_ratio_rmse_d5,cb_rate_rmse_d6"
+        requested = "cb_ratio_rich_rmse_d5,cb_rate_rich_rmse_d6"
     return filter_configs(candidate_configs(profile), requested)
 
 
@@ -87,9 +87,17 @@ def protocol_defaults(profile: str) -> dict[str, object]:
     return {
         "outer_splits": 5,
         "inner_splits": 3,
-        "model_seeds": (2026, 2027),
+        "model_seeds": (2026, 2027, 2028, 2029),
         "diagnose_all_outer": False,
     }
+
+
+def default_artifact_dir(profile: str) -> Path:
+    """Keep promoted V2 artifacts separate from the retained V1 evidence."""
+    if profile not in {"smoke", "full"}:
+        raise ValueError("profile must be 'smoke' or 'full'")
+    run_name = "v2_full" if profile == "full" else "smoke"
+    return ROOT / "artifacts" / "rebuild" / run_name
 
 
 def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
@@ -207,7 +215,7 @@ def train(args: argparse.Namespace) -> int:
     artifact_dir = (
         args.artifact_dir.expanduser().resolve()
         if args.artifact_dir
-        else ROOT / "artifacts" / "rebuild" / profile
+        else default_artifact_dir(profile)
     )
     artifact_dir.mkdir(parents=True, exist_ok=True)
 
@@ -297,7 +305,7 @@ def verify(args: argparse.Namespace) -> int:
     artifact_dir = (
         args.artifact_dir.expanduser().resolve()
         if args.artifact_dir
-        else ROOT / "artifacts" / "rebuild" / "full"
+        else default_artifact_dir("full")
     )
     metrics_path = artifact_dir / "metrics.json"
     metrics = json.loads(metrics_path.read_text())

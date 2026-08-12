@@ -16,7 +16,7 @@ import pandas as pd
 import scipy
 import sklearn
 
-from .evaluation import BlendSpec, HonestNestedEvaluator
+from .evaluation import BlendSpec, HonestNestedEvaluator, StackSpec
 from .io import append_experiment, save_submission, sha256_file, write_json
 from .models import ModelConfig, candidate_configs
 
@@ -114,6 +114,22 @@ def available_blends(configs: tuple[ModelConfig, ...]) -> tuple[BlendSpec, ...]:
     return tuple(blends)
 
 
+def available_stacks(configs: tuple[ModelConfig, ...]) -> tuple[StackSpec, ...]:
+    """Expose the single pre-registered strict stack when both rich arms exist."""
+    names = {config.name for config in configs}
+    components = ("cb_ratio_rich_rmse_d5", "cb_rate_rich_rmse_d6")
+    if not set(components).issubset(names):
+        return ()
+    return (
+        StackSpec(
+            name="stack_rich_ratio_rate_logit",
+            components=components,
+            regularization_c=0.1,
+            complexity=3,
+        ),
+    )
+
+
 def build_evaluator(
     profile: str,
     configs: tuple[ModelConfig, ...],
@@ -128,6 +144,7 @@ def build_evaluator(
     return HonestNestedEvaluator(
         configs,
         blends=available_blends(configs),
+        stacks=available_stacks(configs),
         outer_splits=args.outer_splits or int(defaults["outer_splits"]),
         inner_splits=args.inner_splits or int(defaults["inner_splits"]),
         outer_seed=2026,

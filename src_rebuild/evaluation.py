@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass
 import numpy as np
 import pandas as pd
 from scipy.stats import rankdata
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 
@@ -50,6 +51,74 @@ class BlendSpec:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class StackSpec:
+    """A fixed, cross-fitted logistic meta-model over OOF component ranks."""
+
+    name: str
+    components: tuple[str, ...]
+    regularization_c: float
+    complexity: int
+
+    def __post_init__(self) -> None:
+        if not self.components:
+            raise ValueError("stack must have at least one component")
+        if self.regularization_c <= 0:
+            raise ValueError("stack regularization C must be positive")
+
+    def cross_fit(
+        self,
+        predictions: dict[str, np.ndarray],
+        y: np.ndarray,
+        splits: list[tuple[np.ndarray, np.ndarray]],
+    ) -> tuple[np.ndarray, list[list[float]]]:
+        """Cross-fit the meta-model so its own inner score is label-honest."""
+        matrix = self._matrix(predictions)
+        labels = np.asarray(y, dtype=int)
+        oof = np.empty(len(labels), dtype=float)
+        coefficients: list[list[float]] = []
+        seen = np.zeros(len(labels), dtype=int)
+        for train_indices, valid_indices in splits:
+            model = self._new_model()
+            model.fit(matrix[train_indices], labels[train_indices])
+            oof[valid_indices] = model.predict_proba(matrix[valid_indices])[:, 1]
+            coefficients.append(model.coef_[0].astype(float).tolist())
+            seen[valid_indices] += 1
+        if not np.array_equal(seen, np.ones(len(labels), dtype=int)):
+            raise RuntimeError("stack cross-fit did not score every row exactly once")
+        return oof, coefficients
+
+    def fit_predict(
+        self,
+        train_predictions: dict[str, np.ndarray],
+        y: np.ndarray,
+        prediction_predictions: dict[str, np.ndarray],
+    ) -> tuple[np.ndarray, list[float]]:
+        """Fit on full cross-fitted train ranks and predict an untouched partition."""
+        model = self._new_model()
+        model.fit(self._matrix(train_predictions), np.asarray(y, dtype=int))
+        prediction = model.predict_proba(self._matrix(prediction_predictions))[:, 1]
+        return prediction, model.coef_[0].astype(float).tolist()
+
+    def to_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+    def _matrix(self, predictions: dict[str, np.ndarray]) -> np.ndarray:
+        arrays = [np.asarray(predictions[name], dtype=float) for name in self.components]
+        if any(len(array) != len(arrays[0]) for array in arrays):
+            raise ValueError("stack component lengths differ")
+        return np.column_stack(arrays)
+
+    def _new_model(self) -> LogisticRegression:
+        return LogisticRegression(
+            C=self.regularization_c,
+            penalty="l2",
+            solver="lbfgs",
+            max_iter=1000,
+            random_state=2026,
+        )
+
+
 @dataclass
 class NestedResult:
     """Complete evidence from one outer nested run."""
@@ -88,11 +157,13 @@ class FinalFitResult:
     selected_inner_oof: np.ndarray
     test_prediction: np.ndarray
     inner_auc_by_config: dict[str, float]
+    recipe_metadata: dict[str, object] | None = None
 
     def metrics(self) -> dict[str, object]:
         return {
             "selected_recipe": self.selected_recipe,
             "inner_auc_by_config": self.inner_auc_by_config,
+            "recipe_metadata": self.recipe_metadata,
         }
 
 
@@ -180,6 +251,7 @@ class HonestNestedEvaluator:
         configs: tuple[ModelConfig, ...],
         *,
         blends: tuple[BlendSpec, ...] = (),
+        stacks: tuple[StackSpec, ...] = (),
         outer_splits: int,
         inner_splits: int,
         outer_seed: int,
@@ -192,15 +264,20 @@ class HonestNestedEvaluator:
         if not configs:
             raise ValueError("at least one model config is required")
         config_names = {config.name for config in configs}
-        for blend in blends:
-            missing = set(blend.components) - config_names
+        for recipe in (*blends, *stacks):
+            missing = set(recipe.components) - config_names
             if missing:
-                raise ValueError(f"blend {blend.name!r} has unknown components {sorted(missing)}")
-        recipe_names = [config.name for config in configs] + [blend.name for blend in blends]
+                raise ValueError(f"recipe {recipe.name!r} has unknown components {sorted(missing)}")
+        recipe_names = (
+            [config.name for config in configs]
+            + [blend.name for blend in blends]
+            + [stack.name for stack in stacks]
+        )
         if len(recipe_names) != len(set(recipe_names)):
             raise ValueError("config and blend names must be unique")
         self.configs = configs
         self.blends = blends
+        self.stacks = stacks
         self.outer_splits = outer_splits
         self.inner_splits = inner_splits
         self.outer_seed = outer_seed
@@ -250,6 +327,18 @@ class HonestNestedEvaluator:
                 inner_auc = float(roc_auc_score(outer_y, prediction))
                 scores.append(CandidateScore(blend.name, inner_auc, blend.complexity))
                 print(f"  {blend.name}: inner={inner_auc:.6f}", flush=True)
+            inner_stack_coefficients: dict[str, list[list[float]]] = {}
+            for stack in self.stacks:
+                prediction, coefficients = stack.cross_fit(
+                    inner_predictions,
+                    outer_y,
+                    inner,
+                )
+                inner_predictions[stack.name] = prediction
+                inner_stack_coefficients[stack.name] = coefficients
+                inner_auc = float(roc_auc_score(outer_y, prediction))
+                scores.append(CandidateScore(stack.name, inner_auc, stack.complexity))
+                print(f"  {stack.name}: inner={inner_auc:.6f}", flush=True)
 
             selected_score = select_candidate(scores, minimum_complex_gain=self.minimum_complex_gain)
             required_names = (
@@ -275,6 +364,16 @@ class HonestNestedEvaluator:
             for blend in self.blends:
                 if all(component in outer_predictions for component in blend.components):
                     outer_predictions[blend.name] = blend.combine(outer_predictions)
+            outer_stack_coefficients: dict[str, list[float]] = {}
+            for stack in self.stacks:
+                if all(component in outer_predictions for component in stack.components):
+                    prediction, coefficients = stack.fit_predict(
+                        inner_predictions,
+                        outer_y,
+                        outer_predictions,
+                    )
+                    outer_predictions[stack.name] = prediction
+                    outer_stack_coefficients[stack.name] = coefficients
             recipes_to_score = (
                 self._recipe_names() if self.diagnose_all_outer else (selected_score.name,)
             )
@@ -294,6 +393,13 @@ class HonestNestedEvaluator:
                     "selected_inner_auc": selected_score.inner_auc,
                     "outer_auc": selected_outer_auc,
                     "inner_auc_by_config": {score.name: score.inner_auc for score in scores},
+                    "stack_coefficients": {
+                        name: {
+                            "inner_cross_fit": inner_stack_coefficients[name],
+                            "outer_fit": outer_stack_coefficients.get(name),
+                        }
+                        for name in inner_stack_coefficients
+                    },
                 }
             )
 
@@ -336,6 +442,14 @@ class HonestNestedEvaluator:
             inner_auc = float(roc_auc_score(labels, prediction))
             scores.append(CandidateScore(blend.name, inner_auc, blend.complexity))
             print(f"  {blend.name}: inner={inner_auc:.6f}", flush=True)
+        final_stack_cross_fit_coefficients: dict[str, list[list[float]]] = {}
+        for stack in self.stacks:
+            prediction, coefficients = stack.cross_fit(inner_predictions, labels, inner)
+            inner_predictions[stack.name] = prediction
+            final_stack_cross_fit_coefficients[stack.name] = coefficients
+            inner_auc = float(roc_auc_score(labels, prediction))
+            scores.append(CandidateScore(stack.name, inner_auc, stack.complexity))
+            print(f"  {stack.name}: inner={inner_auc:.6f}", flush=True)
         selected_score = select_candidate(scores, minimum_complex_gain=self.minimum_complex_gain)
         print(f"  selected={selected_score.name}", flush=True)
         component_predictions: dict[str, np.ndarray] = {}
@@ -349,15 +463,29 @@ class HonestNestedEvaluator:
                 seeds=self.model_seeds,
                 thread_count=self.thread_count,
             )
-        test_prediction = self._prediction_for_recipe(
-            selected_score.name,
-            component_predictions,
-        )
+        recipe_metadata: dict[str, object] | None = None
+        if any(stack.name == selected_score.name for stack in self.stacks):
+            stack = self._stack_by_name(selected_score.name)
+            test_prediction, coefficients = stack.fit_predict(
+                inner_predictions,
+                labels,
+                component_predictions,
+            )
+            recipe_metadata = {
+                "inner_cross_fit_coefficients": final_stack_cross_fit_coefficients[stack.name],
+                "full_fit_coefficients": coefficients,
+            }
+        else:
+            test_prediction = self._prediction_for_recipe(
+                selected_score.name,
+                component_predictions,
+            )
         return FinalFitResult(
             selected_recipe=self._recipe_descriptor(selected_score.name),
             selected_inner_oof=inner_predictions[selected_score.name],
             test_prediction=test_prediction,
             inner_auc_by_config={score.name: score.inner_auc for score in scores},
+            recipe_metadata=recipe_metadata,
         )
 
     def to_dict(self) -> dict[str, object]:
@@ -371,6 +499,7 @@ class HonestNestedEvaluator:
             "diagnose_all_outer": self.diagnose_all_outer,
             "configs": [asdict(config) for config in self.configs],
             "blends": [blend.to_dict() for blend in self.blends],
+            "stacks": [stack.to_dict() for stack in self.stacks],
         }
 
     def _config_by_name(self, name: str) -> ModelConfig:
@@ -385,15 +514,24 @@ class HonestNestedEvaluator:
                 return blend
         raise KeyError(name)
 
+    def _stack_by_name(self, name: str) -> StackSpec:
+        for stack in self.stacks:
+            if stack.name == name:
+                return stack
+        raise KeyError(name)
+
     def _recipe_names(self) -> tuple[str, ...]:
         return tuple(config.name for config in self.configs) + tuple(
             blend.name for blend in self.blends
-        )
+        ) + tuple(stack.name for stack in self.stacks)
 
     def _components_for_recipe(self, name: str) -> tuple[str, ...]:
         if any(config.name == name for config in self.configs):
             return (name,)
-        return self._blend_by_name(name).components
+        for blend in self.blends:
+            if blend.name == name:
+                return blend.components
+        return self._stack_by_name(name).components
 
     def _prediction_for_recipe(
         self,
@@ -407,4 +545,7 @@ class HonestNestedEvaluator:
     def _recipe_descriptor(self, name: str) -> dict[str, object]:
         if any(config.name == name for config in self.configs):
             return {"type": "model", **self._config_by_name(name).to_dict()}
-        return {"type": "blend", **self._blend_by_name(name).to_dict()}
+        for blend in self.blends:
+            if blend.name == name:
+                return {"type": "blend", **blend.to_dict()}
+        return {"type": "stack", **self._stack_by_name(name).to_dict()}

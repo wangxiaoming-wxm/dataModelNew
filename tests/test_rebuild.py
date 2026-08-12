@@ -5,7 +5,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src_rebuild.cli import available_blends, available_stacks, configs_for_run
+from src_rebuild.cli import (
+    available_blends,
+    available_stacks,
+    configs_for_run,
+    default_artifact_dir,
+    protocol_defaults,
+)
 from src_rebuild.evaluation import (
     BlendSpec,
     CandidateScore,
@@ -116,9 +122,11 @@ class FeatureBuilderTests(unittest.TestCase):
 
 
 class EvaluationTests(unittest.TestCase):
-    def test_full_entry_defaults_to_locked_finalists(self):
+    def test_full_entry_defaults_to_promoted_rich_finalists(self):
         names = [config.name for config in configs_for_run("full", None)]
-        self.assertEqual(names, ["cb_ratio_rmse_d5", "cb_rate_rmse_d6"])
+        self.assertEqual(names, ["cb_ratio_rich_rmse_d5", "cb_rate_rich_rmse_d6"])
+        self.assertEqual(protocol_defaults("full")["model_seeds"], (2026, 2027, 2028, 2029))
+        self.assertEqual(default_artifact_dir("full").name, "v2_full")
 
     def test_rich_configs_lock_boosting_types_and_blend_grid(self):
         configs = candidate_configs("smoke")

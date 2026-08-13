@@ -1,0 +1,30 @@
+{
+  "note": "max_ctr_complexity probe on world main, outer seed 424242 (SELECT). Run truncated once the answer was unambiguous: the CatBoost default of 4 is already optimal, and ctr=1 (no categorical combinations) costs -0.011, which independently confirms that categorical interactions carry this dataset.",
+  "baseline": "base_d5_l10_ctr4",
+  "results": {
+    "base_d5_l10_ctr4": {
+      "seed424242": 0.68993,
+      "delta_vs_base": 0.0
+    },
+    "deep_d6_l20_ctr4": {
+      "seed424242": 0.69146,
+      "delta_vs_base": 0.00153
+    },
+    "ctr6_d6_l20": {
+      "seed424242": 0.69093,
+      "delta_vs_base": 0.001
+    },
+    "ctr2_d6_l20": {
+      "seed424242": 0.69008,
+      "delta_vs_base": 0.00015
+    },
+    "ctr1_d6_l20": {
+      "seed424242": 0.68047,
+      "delta_vs_base": -0.00946
+    },
+    "ctr6_d5_l10": {
+      "seed424242": 0.68897,
+      "delta_vs_base": -0.00096
+    }
+  }
+}

@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 artifacts/vz20/cache/
 artifacts/vz20/arms/
+artifacts/vz20/ctr/

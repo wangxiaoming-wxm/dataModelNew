@@ -1,0 +1,32 @@
+{
+  "n_test": 6398,
+  "assumed_pos_rate": 0.1002,
+  "n_pos": 641,
+  "n_neg": 5757,
+  "se_single_auc": {
+    "0.700": 0.011972372436210545,
+    "0.715": 0.011849334094159072,
+    "0.720": 0.011804016512063443,
+    "0.749": 0.011496560311166049
+  },
+  "gaps_in_se_units": {
+    "W62(0.71503) -> top3(0.72)": {
+      "gap": 0.004969999999999919,
+      "in_SE": 0.419432852555807
+    },
+    "W62(0.71503) -> champion(0.749)": {
+      "gap": 0.033969999999999945,
+      "in_SE": 2.866827766865387
+    },
+    "vz19(0.71298) -> W62(0.71503)": {
+      "gap": 0.0020500000000001073,
+      "in_SE": 0.1730055025632723
+    }
+  },
+  "se_of_difference_by_correlation": {
+    "0.9": 0.005540193527844192,
+    "0.95": 0.003916089598882806,
+    "0.99": 0.0017188611518164745
+  },
+  "interpretation": "A single submission's AUC on this leaderboard carries ~0.012 of pure sampling noise, so the 0.005 gap from W62 to the top-3 line is well under half a standard error and the 0.034 gap to the champion is under three. Two highly correlated submissions can still be compared far more precisely (SE of the difference ~0.002-0.005), which is why a genuine local improvement is worth chasing and a leaderboard-rank-chasing gamble is not."
+}

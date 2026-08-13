@@ -1,0 +1,29 @@
+{
+  "univariate_auc_top": {
+    "days": 0.5932241821573325,
+    "condition": 0.46761016822986456,
+    "x1": 0.5282182191565976,
+    "x5": 0.5247231662976612,
+    "age_range": 0.522893290350368,
+    "x10": 0.5224458165051721,
+    "V": 0.5204809719372747,
+    "x19": 0.5193015327857563
+  },
+  "x_max_offdiag_corr": 0.8608174298705069,
+  "hgb_rawx_oof": 0.4992336270250518,
+  "hgb_xresidual_oof": 0.5105891528319477,
+  "knn_xspace_oof": 0.504361986785863,
+  "id_overlap_train_test": 0,
+  "spearman_idint_label": -0.0064719052650993045,
+  "id_sorted_rolling_label_range": [
+    0.079,
+    0.126
+  ],
+  "rowindex_label_auc": 0.4910918720080505,
+  "label_autocorr_lag1": 0.008981094925060577,
+  "exact_dup_feature_rows_train": 0,
+  "dup_across_train_test": 0,
+  "catkey_unique_frac_train": 0.9977846401718582,
+  "catkey_test_coverage_in_train": 0.0029696780243826195,
+  "adversarial_train_test_auc": 0.5051131810907922
+}

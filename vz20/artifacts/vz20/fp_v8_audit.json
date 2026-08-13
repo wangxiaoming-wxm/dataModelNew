@@ -1,0 +1,571 @@
+{
+  "verdict": "fp_v8 is overfit. Its reported 0.77016/0.77033 contains no transferable signal.",
+  "target": {
+    "file": "vz20/next_submit/submission_fp_v8_champion.csv",
+    "sha256": "fa2a06f4ed9af099e37225a2a9ff2e10e0a0a7979ac9c7e5dfacdcdde5866d67",
+    "source": "origin/cursor/super714-plus-edb2:src_super/fuse_fp_v8.py",
+    "claimed_oof": 0.7701614508323125,
+    "claimed_nested": 0.7703295069355633
+  },
+  "finding_1_fake_nested": {
+    "what_the_code_does": "fuse_fp_v8.py:164-165 slices an already-finished OOF vector into 5 stratified pieces and averages their AUC. Nothing is refit.",
+    "proof": "Any fixed vector's piecewise AUC equals its full AUC. Feeding y+0.01*noise (100% leakage) makes the estimator report nested=1.0 and pass the gate.",
+    "table": {
+      "v8_fuse": {
+        "full_auc": 0.7701614508323125,
+        "their_nested_seed2026": 0.7703295069355633,
+        "their_nested_all_seeds": {
+          "seed2026": 0.7703295069355633,
+          "seed7": 0.7702068361256494,
+          "seed12345": 0.7702700653359325,
+          "seed90210": 0.7701164438305301
+        },
+        "max_abs_gap_to_full": 0.00016805610325087983
+      },
+      "v7_fuse": {
+        "full_auc": 0.7583798471274498,
+        "their_nested_seed2026": 0.7585100856647914,
+        "their_nested_all_seeds": {
+          "seed2026": 0.7585100856647914,
+          "seed7": 0.7584538037895654,
+          "seed12345": 0.7584438976308909,
+          "seed90210": 0.7584978091164956
+        },
+        "max_abs_gap_to_full": 0.00013023853734162039
+      },
+      "pure_noise": {
+        "full_auc": 0.4996023836876502,
+        "their_nested_seed2026": 0.49974183772014535,
+        "their_nested_all_seeds": {
+          "seed2026": 0.49974183772014535,
+          "seed7": 0.4992089015844864,
+          "seed12345": 0.49963724049936387,
+          "seed90210": 0.49966767043997773
+        },
+        "max_abs_gap_to_full": 0.0003934821031638114
+      },
+      "label_plus_noise_LEAK": {
+        "full_auc": 1.0,
+        "their_nested_seed2026": 1.0,
+        "their_nested_all_seeds": {
+          "seed2026": 1.0,
+          "seed7": 1.0,
+          "seed12345": 1.0,
+          "seed90210": 1.0
+        },
+        "max_abs_gap_to_full": 0.0
+      },
+      "rank_of_label_LEAK": {
+        "full_auc": 1.0,
+        "their_nested_seed2026": 1.0,
+        "their_nested_all_seeds": {
+          "seed2026": 1.0,
+          "seed7": 1.0,
+          "seed12345": 1.0,
+          "seed90210": 1.0
+        },
+        "max_abs_gap_to_full": 0.0
+      }
+    },
+    "note": "random_state=2026 is also the first entry of TE_SEEDS, so the slicing shares its randomness with the splits that built the OOF.",
+    "consequence": "v4->v8 all use this same gate, so the whole promotion chain is unvalidated."
+  },
+  "finding_2_sign_flip_leak": {
+    "what_the_code_does": "fuse_fp_v8.py:79 flips a key's encoding whenever roc_auc_score(y, oof) < 0.5, using the full label vector, then reports that same vector's AUC.",
+    "scale": "~1700 keys x 6 seeds ~= 10^4 full-label one-sided selections on 14930 rows / 1496 positives",
+    "measured_inflation_by_family": {
+      "byte": {
+        "n_keys": 8,
+        "honest_crosshalf": 0.5089290462622177,
+        "fp_v8_style": 0.5306674082601492,
+        "inflation": 0.02174
+      },
+      "byte_hi": {
+        "n_keys": 8,
+        "honest_crosshalf": 0.5012280776129527,
+        "fp_v8_style": 0.52396945176219,
+        "inflation": 0.02274
+      },
+      "bit64": {
+        "n_keys": 64,
+        "honest_crosshalf": 0.5015266058106218,
+        "fp_v8_style": 0.5719108630906178,
+        "inflation": 0.07038
+      },
+      "bytepair_xor": {
+        "n_keys": 28,
+        "honest_crosshalf": 0.48615459298340313,
+        "fp_v8_style": 0.5498479295490173,
+        "inflation": 0.06369
+      },
+      "bytepair_and": {
+        "n_keys": 28,
+        "honest_crosshalf": 0.4995386337165099,
+        "fp_v8_style": 0.5462272177944222,
+        "inflation": 0.04669
+      },
+      "withinbyte_bit_and": {
+        "n_keys": 224,
+        "honest_crosshalf": 0.506503741006736,
+        "fp_v8_style": 0.5946270298285379,
+        "inflation": 0.08812
+      },
+      "withinbyte_bit_or": {
+        "n_keys": 224,
+        "honest_crosshalf": 0.49521683150502477,
+        "fp_v8_style": 0.5973297857857667,
+        "inflation": 0.10211
+      },
+      "withinbyte_bit_xor": {
+        "n_keys": 224,
+        "honest_crosshalf": 0.5033408627164373,
+        "fp_v8_style": 0.6241556562127062,
+        "inflation": 0.12081
+      },
+      "crossbyte_bit_and": {
+        "n_keys": 224,
+        "honest_crosshalf": 0.5020522893066439,
+        "fp_v8_style": 0.5959610920173015,
+        "inflation": 0.09391
+      },
+      "crossbyte_bit_or": {
+        "n_keys": 224,
+        "honest_crosshalf": 0.49376999774695707,
+        "fp_v8_style": 0.5951412988355032,
+        "inflation": 0.10137
+      },
+      "crossbyte_bit_xor": {
+        "n_keys": 224,
+        "honest_crosshalf": 0.49250163604359276,
+        "fp_v8_style": 0.624277991272842,
+        "inflation": 0.13178
+      },
+      "withinbyte_tri_and": {
+        "n_keys": 448,
+        "honest_crosshalf": 0.5097608012712577,
+        "fp_v8_style": 0.6020263554282812,
+        "inflation": 0.09227
+      },
+      "bytepair_concat": {
+        "n_keys": 28,
+        "honest_crosshalf": 0.4902953257717071,
+        "fp_v8_style": 0.5445165073215935,
+        "inflation": 0.05422
+      },
+      "CONTROL_xfeatures": {
+        "n_keys": 19,
+        "honest_crosshalf": 0.5124412059273341,
+        "fp_v8_style": 0.5408387529765245,
+        "inflation": 0.0284
+      }
+    },
+    "signature": "inflation grows with the number of keys selected over (+0.022 at 8 keys, +0.13 at 224 keys), which is selection bias, not signal."
+  },
+  "finding_3_crosshalf_transfer": {
+    "protocol": "train split in halves; TE table AND sign fitted on one half only, frozen, applied to the other; both directions; multiple seeds. Sign estimated two honest ways (in-sample on the fitting half, and inner-OOF within it).",
+    "result": "all 14 id key families land in 0.486-0.512; none is stably positive",
+    "per_family": {
+      "byte": {
+        "honest_mean": 0.5089290462622177,
+        "honest_std": 0.00959498529974461,
+        "runs_above_half": "8/10"
+      },
+      "byte_hi": {
+        "honest_mean": 0.5012280776129527,
+        "honest_std": 0.009195463705583062,
+        "runs_above_half": "6/10"
+      },
+      "bit64": {
+        "honest_mean": 0.5015266058106218,
+        "honest_std": 0.010131082706665821,
+        "runs_above_half": "5/10"
+      },
+      "bytepair_xor": {
+        "honest_mean": 0.48615459298340313,
+        "honest_std": 0.008124008745596899,
+        "runs_above_half": "0/10"
+      },
+      "bytepair_and": {
+        "honest_mean": 0.4995386337165099,
+        "honest_std": 0.0037996134420621402,
+        "runs_above_half": "4/10"
+      },
+      "withinbyte_bit_and": {
+        "honest_mean": 0.506503741006736,
+        "honest_std": 0.012077240078857817,
+        "runs_above_half": "6/10"
+      },
+      "withinbyte_bit_or": {
+        "honest_mean": 0.49521683150502477,
+        "honest_std": 0.007188655197622384,
+        "runs_above_half": "3/10"
+      },
+      "withinbyte_bit_xor": {
+        "honest_mean": 0.5033408627164373,
+        "honest_std": 0.01135358243604474,
+        "runs_above_half": "7/10"
+      },
+      "crossbyte_bit_and": {
+        "honest_mean": 0.5020522893066439,
+        "honest_std": 0.01252581987838197,
+        "runs_above_half": "5/10"
+      },
+      "crossbyte_bit_or": {
+        "honest_mean": 0.49376999774695707,
+        "honest_std": 0.013072568701576404,
+        "runs_above_half": "4/10"
+      },
+      "crossbyte_bit_xor": {
+        "honest_mean": 0.49250163604359276,
+        "honest_std": 0.00870362602707102,
+        "runs_above_half": "2/10"
+      },
+      "withinbyte_tri_and": {
+        "honest_mean": 0.5097608012712577,
+        "honest_std": 0.010331303094320883,
+        "runs_above_half": "8/10"
+      },
+      "bytepair_concat": {
+        "honest_mean": 0.4902953257717071,
+        "honest_std": 0.01012080283426383,
+        "runs_above_half": "1/10"
+      },
+      "CONTROL_xfeatures": {
+        "honest_mean": 0.5124412059273341,
+        "honest_std": 0.008232558245333404,
+        "runs_above_half": "10/10"
+      }
+    },
+    "positive_control": "CONTROL_xfeatures (real business columns) is 0.5124 with 10/10 runs above 0.5, t=4.78, so the harness can detect a real weak signal."
+  },
+  "finding_4_permutation_null": {
+    "protocol": "20 random permutations of the id column against y, same pipeline rerun",
+    "families": {
+      "byte": {
+        "honest_oof_sign_mean": 0.5116363932257976,
+        "honest_oof_sign_std": 0.010594159206893569,
+        "noflip_mean": 0.5122190264306624,
+        "eval_leak_mean": 0.5324680845445762,
+        "leak_inflation": 0.0208316913187786,
+        "null_honest_mean": 0.5024546736809548,
+        "null_honest_std": 0.0059816412521352695,
+        "z_vs_null": 1.5349833194301332,
+        "p_one_sided": 0.14285714285714285,
+        "null_leak_mean": 0.5257462831756602,
+        "leak_is_explained_by_null": true
+      },
+      "byte_hi": {
+        "honest_oof_sign_mean": 0.49130256403724076,
+        "honest_oof_sign_std": 0.009968600977664024,
+        "noflip_mean": 0.4976492322537038,
+        "eval_leak_mean": 0.5258185061077633,
+        "leak_inflation": 0.0345159420705225,
+        "null_honest_mean": 0.5006620279257913,
+        "null_honest_std": 0.007584133850495298,
+        "z_vs_null": -1.2340847449493897,
+        "p_one_sided": 0.9047619047619048,
+        "null_leak_mean": 0.5240890874499136,
+        "leak_is_explained_by_null": true
+      },
+      "bit64": {
+        "honest_oof_sign_mean": 0.4978011268930272,
+        "honest_oof_sign_std": 0.010857224244307007,
+        "noflip_mean": 0.49626003818231174,
+        "eval_leak_mean": 0.5747775086864229,
+        "leak_inflation": 0.07697638179339567,
+        "null_honest_mean": 0.4999506276078177,
+        "null_honest_std": 0.005406315246652068,
+        "z_vs_null": -0.39759070951728864,
+        "p_one_sided": 0.7142857142857143,
+        "null_leak_mean": 0.5683759391328093,
+        "leak_is_explained_by_null": true
+      },
+      "bytepair_xor": {
+        "honest_oof_sign_mean": 0.507066915509826,
+        "honest_oof_sign_std": 0.009802146498807904,
+        "noflip_mean": 0.4856090858934828,
+        "eval_leak_mean": 0.5497911888238451,
+        "leak_inflation": 0.04272427331401918,
+        "null_honest_mean": 0.5000112801424115,
+        "null_honest_std": 0.006881059029877014,
+        "z_vs_null": 1.0253705624060891,
+        "p_one_sided": 0.19047619047619047,
+        "null_leak_mean": 0.5451923741958109,
+        "leak_is_explained_by_null": true
+      },
+      "bytepair_and": {
+        "honest_oof_sign_mean": 0.49184784555748484,
+        "honest_oof_sign_std": 0.012831482859761243,
+        "noflip_mean": 0.5000724974304959,
+        "eval_leak_mean": 0.5467895198736173,
+        "leak_inflation": 0.054941674316132505,
+        "null_honest_mean": 0.5026929225291563,
+        "null_honest_std": 0.008011121114218565,
+        "z_vs_null": -1.3537527166357595,
+        "p_one_sided": 0.9523809523809523,
+        "null_leak_mean": 0.546798519440258,
+        "leak_is_explained_by_null": true
+      },
+      "withinbyte_bit_and": {
+        "honest_oof_sign_mean": 0.5038941784977962,
+        "honest_oof_sign_std": 0.007484098361611985,
+        "noflip_mean": 0.49830122813400535,
+        "eval_leak_mean": 0.5963985445979114,
+        "leak_inflation": 0.09250436610011525,
+        "null_honest_mean": 0.49806792979382675,
+        "null_honest_std": 0.005873800723532229,
+        "z_vs_null": 0.9919043866482727,
+        "p_one_sided": 0.19047619047619047,
+        "null_leak_mean": 0.594505412527795,
+        "leak_is_explained_by_null": true
+      },
+      "crossbyte_bit_xor": {
+        "honest_oof_sign_mean": 0.5033804435602113,
+        "honest_oof_sign_std": 0.013352037477281893,
+        "noflip_mean": 0.4903466793622588,
+        "eval_leak_mean": 0.6249178992722592,
+        "leak_inflation": 0.12153745571204788,
+        "null_honest_mean": 0.5005348563864215,
+        "null_honest_std": 0.004616854068259383,
+        "z_vs_null": 0.6163476539908536,
+        "p_one_sided": 0.2857142857142857,
+        "null_leak_mean": 0.6278105119184382,
+        "leak_is_explained_by_null": true
+      },
+      "withinbyte_tri_and": {
+        "honest_oof_sign_mean": 0.5032793850280649,
+        "honest_oof_sign_std": 0.01344102482109239,
+        "noflip_mean": 0.5026717235407433,
+        "eval_leak_mean": 0.6011500703113949,
+        "leak_inflation": 0.09787068528332998,
+        "null_honest_mean": 0.5026934325488284,
+        "null_honest_std": 0.006038302672676072,
+        "z_vs_null": 0.09703926931123114,
+        "p_one_sided": 0.42857142857142855,
+        "null_leak_mean": 0.6050245595619386,
+        "leak_is_explained_by_null": true
+      },
+      "bytepair_concat": {
+        "honest_oof_sign_mean": 0.4983153428247746,
+        "honest_oof_sign_std": 0.008598662029268239,
+        "noflip_mean": 0.4877286447216564,
+        "eval_leak_mean": 0.5443467329682288,
+        "leak_inflation": 0.0460313901434542,
+        "null_honest_mean": 0.49849634134278176,
+        "null_honest_std": 0.006401500580803997,
+        "z_vs_null": -0.028274389062766896,
+        "p_one_sided": 0.47619047619047616,
+        "null_leak_mean": 0.5436273116579451,
+        "leak_is_explained_by_null": true
+      },
+      "CONTROL_xfeatures": {
+        "honest_oof_sign_mean": 0.5087795698625114,
+        "honest_oof_sign_std": 0.017397637310130297,
+        "noflip_mean": 0.5121840299588376,
+        "eval_leak_mean": 0.5449057477011132,
+        "leak_inflation": 0.036126177838601836,
+        "null_honest_mean": 0.508865236581457,
+        "null_honest_std": 1.1390647892519134e-16,
+        "z_vs_null": -752079422996.4,
+        "p_one_sided": 1.0,
+        "null_leak_mean": 0.5456831089047741,
+        "leak_is_explained_by_null": false
+      }
+    },
+    "headline": "honest transfer z in [-1.35,+1.53], min p=0.14 -> nothing significant; and the fp_v8-style score on real ids matches the score on permuted ids to within 0.0067, i.e. the reported 'signal' survives destroying the ids.",
+    "caveat": "CONTROL_xfeatures has a degenerate z because permuting the id column cannot change x-features; its null std is 0 by construction. Its evidence is the 10/10 cross-half record in finding_3, not this z."
+  },
+  "finding_5_cardinality": {
+    "n_train": 14930,
+    "n_positives": 1496,
+    "key_spaces": {
+      "byte": {
+        "levels_in_train": 256,
+        "levels_in_test": 256,
+        "rows_per_level_train": 58.32,
+        "test_rows_with_unseen_key": 0.0,
+        "positives_per_level": 5.84
+      },
+      "byte_hi": {
+        "levels_in_train": 16,
+        "levels_in_test": 16,
+        "rows_per_level_train": 933.12,
+        "test_rows_with_unseen_key": 0.0
+      },
+      "bit": {
+        "levels_in_train": 2,
+        "levels_in_test": 2,
+        "rows_per_level_train": 7465.0,
+        "test_rows_with_unseen_key": 0.0
+      },
+      "bytepair_xor": {
+        "levels_in_train": 256,
+        "levels_in_test": 256,
+        "rows_per_level_train": 58.32,
+        "test_rows_with_unseen_key": 0.0
+      },
+      "bytepair_and": {
+        "levels_in_train": 249,
+        "levels_in_test": 238,
+        "rows_per_level_train": 59.96,
+        "test_rows_with_unseen_key": 0.0005
+      },
+      "bytepair_concat": {
+        "levels_in_train": 13371,
+        "levels_in_test": 6078,
+        "rows_per_level_train": 1.12,
+        "test_rows_with_unseen_key": 0.8026,
+        "positives_per_level": 0.0228
+      }
+    },
+    "id_is_random_hash": {
+      "train_test_id_overlap": 0,
+      "byte_means": [
+        127.72886805090423,
+        127.8748158070998,
+        127.0655056932351,
+        126.14608171466845,
+        126.92150033489618,
+        127.2034829202947,
+        126.52217012726055,
+        127.24454119223041
+      ],
+      "bit_mean_range": [
+        0.49202947086403215,
+        0.5068318821165438
+      ],
+      "note": "uniform 64-bit hash with zero train/test id overlap: there is no carrier for any memorised id effect to travel on."
+    }
+  },
+  "finding_6_dataset_diagnostics": {
+    "adversarial_train_vs_test_auc": 0.4964762828805971,
+    "verdict": "same distribution (iid split)",
+    "duplicates": {
+      "train_exact_dup_rows": 0,
+      "test_exact_dup_rows": 0,
+      "train_test_exact_matches": 0,
+      "entity_block_train_groups": 8985,
+      "entity_block_shared_with_test": 1595
+    },
+    "days_is_time_index": false,
+    "implication": "iid split, so local repeated CV is a trustworthy proxy for the leaderboard."
+  },
+  "finding_7_composition": {
+    "nominal_label_informative_weight": 0.106,
+    "expansion": "fp_v8 = 0.80*v7 + 0.20*bytepair_mean; v7 = 0.15*v3 + 0.10*bits + 0.05*xs + 0.22*and_all + 0.06*tri + 0.06*or + 0.06*xor + 0.30*cmean; v3 = 0.55*am40 + 0.45*id_pool. Real content = 0.80*(0.15*0.55 + 0.05) = 0.106.",
+    "spearman_bytepair_mean_vs_W62": -0.03,
+    "reading": "the component that makes fp_v8 look different from W62 is orthogonal to the signal because it is noise."
+  },
+  "spearman_matrix": {
+    "vz19_SUBMITTED_0.71298": {
+      "vz19_SUBMITTED_0.71298": 1.0,
+      "W62_SUBMITTED_0.71503": 0.9948532140033945,
+      "fp_v8_champion": 0.9169966174172578,
+      "fp_v8_tempered": 0.9594640200944405,
+      "fp_v8_aggressive": 0.8480817715357339,
+      "am40": 0.9955849010850807,
+      "vz20": 0.9918558517592998
+    },
+    "W62_SUBMITTED_0.71503": {
+      "vz19_SUBMITTED_0.71298": 0.9948532140033945,
+      "W62_SUBMITTED_0.71503": 1.0,
+      "fp_v8_champion": 0.9077251714838706,
+      "fp_v8_tempered": 0.9505540220236298,
+      "fp_v8_aggressive": 0.8390098435440614,
+      "am40": 0.998932108802142,
+      "vz20": 0.9841437895538947
+    },
+    "fp_v8_champion": {
+      "vz19_SUBMITTED_0.71298": 0.9169966174172578,
+      "W62_SUBMITTED_0.71503": 0.9077251714838706,
+      "fp_v8_champion": 1.0,
+      "fp_v8_tempered": 0.9567438518906172,
+      "fp_v8_aggressive": 0.9818939367540547,
+      "am40": 0.908805023153894,
+      "vz20": 0.9115608728259911
+    },
+    "fp_v8_tempered": {
+      "vz19_SUBMITTED_0.71298": 0.9594640200944405,
+      "W62_SUBMITTED_0.71503": 0.9505540220236298,
+      "fp_v8_champion": 0.9567438518906172,
+      "fp_v8_tempered": 1.0,
+      "fp_v8_aggressive": 0.8855584919394476,
+      "am40": 0.9515999336779135,
+      "vz20": 0.9538894998359517
+    },
+    "fp_v8_aggressive": {
+      "vz19_SUBMITTED_0.71298": 0.8480817715357339,
+      "W62_SUBMITTED_0.71503": 0.8390098435440614,
+      "fp_v8_champion": 0.9818939367540547,
+      "fp_v8_tempered": 0.8855584919394476,
+      "fp_v8_aggressive": 1.0,
+      "am40": 0.8400564774558031,
+      "vz20": 0.8430233299209607
+    },
+    "am40": {
+      "vz19_SUBMITTED_0.71298": 0.9955849010850806,
+      "W62_SUBMITTED_0.71503": 0.998932108802142,
+      "fp_v8_champion": 0.9088050231538941,
+      "fp_v8_tempered": 0.9515999336779135,
+      "fp_v8_aggressive": 0.8400564774558031,
+      "am40": 1.0,
+      "vz20": 0.9843729948485294
+    },
+    "vz20": {
+      "vz19_SUBMITTED_0.71298": 0.9918558517592998,
+      "W62_SUBMITTED_0.71503": 0.9841437895538947,
+      "fp_v8_champion": 0.9115608728259911,
+      "fp_v8_tempered": 0.9538894998359518,
+      "fp_v8_aggressive": 0.8430233299209607,
+      "am40": 0.9843729948485295,
+      "vz20": 0.9999999999999999
+    }
+  },
+  "leaderboard_noise": {
+    "n_test": 6398,
+    "assumed_pos_rate": 0.1002,
+    "n_pos": 641,
+    "n_neg": 5757,
+    "se_single_auc": {
+      "0.700": 0.011972372436210545,
+      "0.715": 0.011849334094159072,
+      "0.720": 0.011804016512063443,
+      "0.749": 0.011496560311166049
+    },
+    "gaps_in_se_units": {
+      "W62(0.71503) -> top3(0.72)": {
+        "gap": 0.004969999999999919,
+        "in_SE": 0.419432852555807
+      },
+      "W62(0.71503) -> champion(0.749)": {
+        "gap": 0.033969999999999945,
+        "in_SE": 2.866827766865387
+      },
+      "vz19(0.71298) -> W62(0.71503)": {
+        "gap": 0.0020500000000001073,
+        "in_SE": 0.1730055025632723
+      }
+    },
+    "se_of_difference_by_correlation": {
+      "0.9": 0.005540193527844192,
+      "0.95": 0.003916089598882806,
+      "0.99": 0.0017188611518164745
+    },
+    "interpretation": "A single submission's AUC on this leaderboard carries ~0.012 of pure sampling noise, so the 0.005 gap from W62 to the top-3 line is well under half a standard error and the 0.034 gap to the champion is under three. Two highly correlated submissions can still be compared far more precisely (SE of the difference ~0.002-0.005), which is why a genuine local improvement is worth chasing and a leaderboard-rank-chasing gamble is not."
+  },
+  "expected_online_for_fp_v8": {
+    "range": [
+      0.685,
+      0.705
+    ],
+    "basis": "rho(W62)=0.9077. Calibrating on the measured noise frontier (vz21_frontier.json), reaching rho~0.90 by injecting label-independent variation costs about -0.031 fold-mean AUC; the honest-but-weak route costs about -0.020. Anchoring the family at W62's 0.71503 puts fp_v8 near 0.685-0.705.",
+    "conclusion": "very unlikely to beat W62's 0.71503, effectively no chance of the 0.72 top-3 line."
+  },
+  "collateral_finding_vz19": {
+    "issue": "src/build_vz19.py mixes in byte07 (id byte0/byte7 TE) at w_te~0.11, and w_te was scanned on the full OOF (build_vz19.py:120-125).",
+    "byte_family_honest_crosshalf": 0.5116,
+    "byte_family_z_vs_null": 1.53,
+    "byte_family_p": 0.143,
+    "online_evidence": "vz19 (with the noise) scored 0.71298; W62 (without) scored 0.71503, and the two correlate 0.9949. The 0.002 gap runs the same direction as the injected noise."
+  }
+}

@@ -41,6 +41,8 @@ vz19 的 OOF→线上 +0.013 外推已失效。本地抬升若来自 max2/byteTE
 python3 vz20/src/probe_new_axes.py
 python3 vz20/src/probe_round3.py
 python3 vz20/src/probe_ordered.py
+python3 vz20/src/probe_w1.py
+python3 vz20/src/probe_joint.py
 ```
 
 依赖：`artifacts/super714/best_v1_{oof,test}.npy` 与 `data/{train,test,submit_sample}.csv`。

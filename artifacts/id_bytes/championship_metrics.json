@@ -1,0 +1,24 @@
+{
+  "protocol": "fp_v8 byte20",
+  "champion": {
+    "name": "fp_v8_byte20",
+    "champion_recipe": "byte20",
+    "weights": {
+      "v7": 0.8,
+      "bytepair_mean": 0.2
+    },
+    "oof_auc": 0.7701614508323125,
+    "nested_fold_mean": 0.7703295069355633,
+    "delta_nest_vs_v7": 0.011819421270771957,
+    "sha256": "fa2a06f4ed9af099e37225a2a9ff2e10e0a0a7979ac9c7e5dfacdcdde5866d67"
+  },
+  "files": {
+    "submit_this": "submissions/submission_champion.csv",
+    "fp_v8": "submissions/submission_fp_v8.csv",
+    "tempered": "submissions/submission_fp_v8_tempered.csv",
+    "aggressive": "submissions/submission_fp_v8_aggressive.csv",
+    "fp_v7_backup": "submissions/submission_fp_v7.csv",
+    "fp_v6_backup": "submissions/submission_fp_v6.csv"
+  },
+  "advice": "Submit fp_v8 byte20. Tempered (=v7) if risk-averse. Local nested ≠ LB rank; id-TE-heavy."
+}

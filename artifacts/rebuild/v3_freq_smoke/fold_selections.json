@@ -1,0 +1,61 @@
+{
+  "folds": [
+    {
+      "fold": 0,
+      "inner_auc_by_config": {
+        "blend_freq_ratio_rate_w35": 0.6646453989032752,
+        "blend_freq_ratio_rate_w50": 0.6653347716216984,
+        "blend_freq_ratio_rate_w65": 0.665464795458282,
+        "blend_rich_ratio_rate_w35": 0.6648771123553778,
+        "blend_rich_ratio_rate_w50": 0.6651385599406526,
+        "blend_rich_ratio_rate_w65": 0.6649217415533784,
+        "cb_rate_freq_rmse_d6": 0.6611172284159311,
+        "cb_rate_rich_rmse_d6": 0.6623434954259833,
+        "cb_ratio_freq_rmse_d5": 0.6639900160508323,
+        "cb_ratio_rich_rmse_d5": 0.662818009634083
+      },
+      "outer_auc": 0.6881811859538639,
+      "selected": "blend_rich_ratio_rate_w50",
+      "selected_inner_auc": 0.6651385599406526,
+      "stack_coefficients": {}
+    },
+    {
+      "fold": 1,
+      "inner_auc_by_config": {
+        "blend_freq_ratio_rate_w35": 0.6725415751497457,
+        "blend_freq_ratio_rate_w50": 0.6730074099027766,
+        "blend_freq_ratio_rate_w65": 0.6730159773648772,
+        "blend_rich_ratio_rate_w35": 0.6730878208542554,
+        "blend_rich_ratio_rate_w50": 0.6736304267872846,
+        "blend_rich_ratio_rate_w65": 0.6736407861368833,
+        "cb_rate_freq_rmse_d6": 0.669298650753511,
+        "cb_rate_rich_rmse_d6": 0.6698809581939207,
+        "cb_ratio_freq_rmse_d5": 0.6712150184362824,
+        "cb_ratio_rich_rmse_d5": 0.6717514087595524
+      },
+      "outer_auc": 0.6658381524102247,
+      "selected": "blend_rich_ratio_rate_w65",
+      "selected_inner_auc": 0.6736407861368833,
+      "stack_coefficients": {}
+    },
+    {
+      "fold": 2,
+      "inner_auc_by_config": {
+        "blend_freq_ratio_rate_w35": 0.6590516338617386,
+        "blend_freq_ratio_rate_w50": 0.6585859302347438,
+        "blend_freq_ratio_rate_w65": 0.6577712146042868,
+        "blend_rich_ratio_rate_w35": 0.6600837897322112,
+        "blend_rich_ratio_rate_w50": 0.6598920820649785,
+        "blend_rich_ratio_rate_w65": 0.659135712246288,
+        "cb_rate_freq_rmse_d6": 0.6583001867961022,
+        "cb_rate_rich_rmse_d6": 0.6590820654260732,
+        "cb_ratio_freq_rmse_d5": 0.6541495228062199,
+        "cb_ratio_rich_rmse_d5": 0.6559106936517072
+      },
+      "outer_auc": 0.6991707338509913,
+      "selected": "blend_rich_ratio_rate_w35",
+      "selected_inner_auc": 0.6600837897322112,
+      "stack_coefficients": {}
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "name": "fp_v6_heavy_xor",
+  "formula": "0.2*v3 + 0.15*bits + 0.05*xs + 0.3*and_all + 0.1*tri + 0.1*or + 0.1*xor",
+  "weights": {
+    "v3": 0.2,
+    "bits": 0.15,
+    "xs": 0.05,
+    "and_all": 0.3,
+    "tri": 0.1,
+    "or": 0.1,
+    "xor": 0.1
+  },
+  "oof_auc": 0.7434166163115536,
+  "nested_fold_mean": 0.743499816019302,
+  "delta_nest_vs_v5": 0.01450183758127399,
+  "delta_full_vs_v5": 0.01461651695474575,
+  "arm_aucs": {
+    "v3": 0.707165960500892,
+    "bits": 0.5912706824172683,
+    "xs": 0.5485205846925233,
+    "and_all": 0.6807484093357186,
+    "or": 0.6502153477209635,
+    "tri": 0.6404031912005536,
+    "xor": 0.651296713821344
+  },
+  "spearman_xor_vs_and": 0.07318969561668316,
+  "spearman_or_vs_and": 0.2376756729093449,
+  "tempered": {
+    "name": "and_tri_or",
+    "weights": {
+      "v3": 0.22,
+      "bits": 0.18,
+      "xs": 0.1,
+      "and_all": 0.3,
+      "tri": 0.1,
+      "or": 0.1,
+      "xor": 0.0
+    },
+    "oof": 0.737460034360896,
+    "sha256": "1f180b9f65ecb27c03a591908e5df34fdfa997a4a66cea20cd8f91754cb6952e"
+  },
+  "aggressive": {
+    "name": "max_id_signal",
+    "weights": {
+      "v3": 0.15,
+      "bits": 0.15,
+      "xs": 0.05,
+      "and_all": 0.35,
+      "tri": 0.1,
+      "or": 0.1,
+      "xor": 0.1
+    },
+    "oof": 0.7539260070425506,
+    "sha256": "70f4c542237829ec00ee4893eb530b2d3b464f88791f7ffc210af4819154a1f7"
+  },
+  "fp_v5_oof": 0.7288000993568079,
+  "submission": "submissions/submission_fp_v6.csv",
+  "submission_sha256": "879376c94da76e51f14c6c6566ce77485ca609934bf957efe4d29646193483c7",
+  "EXPECTED_OOF": 0.7434166163115536,
+  "gate_beat_v5": true,
+  "note": "global champion is fp_v7; v6 retained as tempered backup"
+}

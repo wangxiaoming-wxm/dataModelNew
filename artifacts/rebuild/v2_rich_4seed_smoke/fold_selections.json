@@ -1,0 +1,43 @@
+{
+  "folds": [
+    {
+      "fold": 0,
+      "inner_auc_by_config": {
+        "blend_rich_ratio_rate_w35": 0.6565284845156282,
+        "blend_rich_ratio_rate_w50": 0.6566019519030517,
+        "blend_rich_ratio_rate_w65": 0.6561581797648416,
+        "cb_rate_rich_rmse_d6": 0.6545224664614656,
+        "cb_ratio_rich_rmse_d5": 0.6534352387219721
+      },
+      "outer_auc": 0.6969463715282285,
+      "selected": "blend_rich_ratio_rate_w50",
+      "selected_inner_auc": 0.6566019519030517
+    },
+    {
+      "fold": 1,
+      "inner_auc_by_config": {
+        "blend_rich_ratio_rate_w35": 0.6688399835504728,
+        "blend_rich_ratio_rate_w50": 0.6687381819419849,
+        "blend_rich_ratio_rate_w65": 0.6682843864330821,
+        "cb_rate_rich_rmse_d6": 0.6673526609305361,
+        "cb_ratio_rich_rmse_d5": 0.6657123559154462
+      },
+      "outer_auc": 0.681482437854718,
+      "selected": "blend_rich_ratio_rate_w35",
+      "selected_inner_auc": 0.6688399835504728
+    },
+    {
+      "fold": 2,
+      "inner_auc_by_config": {
+        "blend_rich_ratio_rate_w35": 0.6644506073334701,
+        "blend_rich_ratio_rate_w50": 0.6642974985254116,
+        "blend_rich_ratio_rate_w65": 0.6637111315082153,
+        "cb_rate_rich_rmse_d6": 0.6632668530450808,
+        "cb_ratio_rich_rmse_d5": 0.6611768646717284
+      },
+      "outer_auc": 0.6884175827920884,
+      "selected": "blend_rich_ratio_rate_w35",
+      "selected_inner_auc": 0.6644506073334701
+    }
+  ]
+}

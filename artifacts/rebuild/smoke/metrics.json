@@ -1,0 +1,253 @@
+{
+  "data": {
+    "positive_rate": 0.10020093770931011,
+    "test_rows": 6398,
+    "train_rows": 14930
+  },
+  "elapsed_seconds": 209.1159200668335,
+  "final": {
+    "inner_auc_by_config": {
+      "cb_all_id_logloss_d5": 0.6647152567633087,
+      "cb_all_logloss_d5": 0.6685782701565745,
+      "cb_core_logloss_d5": 0.6707474211415047,
+      "cb_core_logloss_d6": 0.6720096825120077,
+      "cb_core_rmse_d5": 0.6695670614666752
+    },
+    "selected_config": {
+      "complexity": 1,
+      "depth": 6,
+      "feature_mode": "core",
+      "iterations": 250,
+      "l2_leaf_reg": 12.0,
+      "learning_rate": 0.03,
+      "name": "cb_core_logloss_d6",
+      "objective": "logloss",
+      "random_strength": 0.7
+    },
+    "submission": "submissions/submission_rebuild_smoke_cb_core_logloss_d6.csv",
+    "submission_sha256": "d1fb7a0c1934da1516e76efe8b5ecc5701b3f0227541a2f4d0787216ce342653"
+  },
+  "name": "first_principles_rebuild_smoke",
+  "nested": {
+    "candidate_outer_auc": {
+      "cb_all_id_logloss_d5": {
+        "folds": [
+          0.6708535427263638,
+          0.6589024408799735,
+          0.6675585773195507
+        ],
+        "mean": 0.6657715203086293,
+        "std": 0.006172713212673222
+      },
+      "cb_all_logloss_d5": {
+        "folds": [
+          0.6701008090320882,
+          0.6608200769560559,
+          0.6773731818744383
+        ],
+        "mean": 0.6694313559541941,
+        "std": 0.00829683350305223
+      },
+      "cb_core_logloss_d5": {
+        "folds": [
+          0.6729237841471241,
+          0.6620333118223941,
+          0.673913608879466
+        ],
+        "mean": 0.6696235682829949,
+        "std": 0.006591959731631875
+      },
+      "cb_core_logloss_d6": {
+        "folds": [
+          0.6760439145374267,
+          0.6601581904317791,
+          0.677850302505242
+        ],
+        "mean": 0.6713508024914826,
+        "std": 0.009735074879621214
+      },
+      "cb_core_rmse_d5": {
+        "folds": [
+          0.6727523828362397,
+          0.6605287394798529,
+          0.675637341684738
+        ],
+        "mean": 0.6696394880002768,
+        "std": 0.008020913342081918
+      }
+    },
+    "fold_auc": [
+      0.6701008090320882,
+      0.6620333118223941,
+      0.673913608879466
+    ],
+    "fold_mean": 0.6686825765779828,
+    "fold_selections": [
+      {
+        "fold": 0,
+        "inner_auc_by_config": {
+          "cb_all_id_logloss_d5": 0.6469405984814649,
+          "cb_all_logloss_d5": 0.6516711814765422,
+          "cb_core_logloss_d5": 0.6509329238273105,
+          "cb_core_logloss_d6": 0.6482961613738044,
+          "cb_core_rmse_d5": 0.651425244917423
+        },
+        "outer_auc": 0.6701008090320882,
+        "selected": "cb_all_logloss_d5",
+        "selected_inner_auc": 0.6516711814765422
+      },
+      {
+        "fold": 1,
+        "inner_auc_by_config": {
+          "cb_all_id_logloss_d5": 0.6527088523274155,
+          "cb_all_logloss_d5": 0.6612972011165251,
+          "cb_core_logloss_d5": 0.6689548323398063,
+          "cb_core_logloss_d6": 0.668353654084182,
+          "cb_core_rmse_d5": 0.6664473097721032
+        },
+        "outer_auc": 0.6620333118223941,
+        "selected": "cb_core_logloss_d5",
+        "selected_inner_auc": 0.6689548323398063
+      },
+      {
+        "fold": 2,
+        "inner_auc_by_config": {
+          "cb_all_id_logloss_d5": 0.6503739949752118,
+          "cb_all_logloss_d5": 0.6541855484081159,
+          "cb_core_logloss_d5": 0.6606075035287189,
+          "cb_core_logloss_d6": 0.6608912331138381,
+          "cb_core_rmse_d5": 0.6578257005301359
+        },
+        "outer_auc": 0.673913608879466,
+        "selected": "cb_core_logloss_d5",
+        "selected_inner_auc": 0.6606075035287189
+      }
+    ],
+    "fold_std": 0.006065797722598118,
+    "pooled_auc": 0.668679079898637
+  },
+  "permutation": {
+    "candidate_outer_auc": {
+      "cb_core_logloss_d5": {
+        "folds": [
+          0.492598417021627,
+          0.5195768938502283,
+          0.49391985090877133
+        ],
+        "mean": 0.5020317205935423,
+        "std": 0.015208924200444729
+      }
+    },
+    "fold_auc": [
+      0.492598417021627,
+      0.5195768938502283,
+      0.49391985090877133
+    ],
+    "fold_mean": 0.5020317205935423,
+    "fold_selections": [
+      {
+        "fold": 0,
+        "inner_auc_by_config": {
+          "cb_core_logloss_d5": 0.488390136913644
+        },
+        "outer_auc": 0.492598417021627,
+        "selected": "cb_core_logloss_d5",
+        "selected_inner_auc": 0.488390136913644
+      },
+      {
+        "fold": 1,
+        "inner_auc_by_config": {
+          "cb_core_logloss_d5": 0.4752172999570395
+        },
+        "outer_auc": 0.5195768938502283,
+        "selected": "cb_core_logloss_d5",
+        "selected_inner_auc": 0.4752172999570395
+      },
+      {
+        "fold": 2,
+        "inner_auc_by_config": {
+          "cb_core_logloss_d5": 0.4980359334121571
+        },
+        "outer_auc": 0.49391985090877133,
+        "selected": "cb_core_logloss_d5",
+        "selected_inner_auc": 0.4980359334121571
+      }
+    ],
+    "fold_std": 0.015208924200444729,
+    "gate_pass": true,
+    "gate_range": [
+      0.48,
+      0.52
+    ],
+    "pooled_auc": 0.5020370932083094
+  },
+  "profile": "smoke",
+  "protocol": {
+    "configs": [
+      {
+        "complexity": 0,
+        "depth": 5,
+        "feature_mode": "core",
+        "iterations": 250,
+        "l2_leaf_reg": 10.0,
+        "learning_rate": 0.03,
+        "name": "cb_core_logloss_d5",
+        "objective": "logloss",
+        "random_strength": 0.7
+      },
+      {
+        "complexity": 1,
+        "depth": 5,
+        "feature_mode": "all",
+        "iterations": 250,
+        "l2_leaf_reg": 10.0,
+        "learning_rate": 0.03,
+        "name": "cb_all_logloss_d5",
+        "objective": "logloss",
+        "random_strength": 0.7
+      },
+      {
+        "complexity": 1,
+        "depth": 5,
+        "feature_mode": "core",
+        "iterations": 300,
+        "l2_leaf_reg": 10.0,
+        "learning_rate": 0.03,
+        "name": "cb_core_rmse_d5",
+        "objective": "rmse",
+        "random_strength": 0.7
+      },
+      {
+        "complexity": 1,
+        "depth": 6,
+        "feature_mode": "core",
+        "iterations": 250,
+        "l2_leaf_reg": 12.0,
+        "learning_rate": 0.03,
+        "name": "cb_core_logloss_d6",
+        "objective": "logloss",
+        "random_strength": 0.7
+      },
+      {
+        "complexity": 2,
+        "depth": 5,
+        "feature_mode": "all_id",
+        "iterations": 250,
+        "l2_leaf_reg": 12.0,
+        "learning_rate": 0.03,
+        "name": "cb_all_id_logloss_d5",
+        "objective": "logloss",
+        "random_strength": 0.7
+      }
+    ],
+    "diagnose_all_outer": true,
+    "inner_seed": 2718,
+    "inner_splits": 2,
+    "minimum_complex_gain": 0.0005,
+    "model_seeds": [
+      2026
+    ],
+    "outer_seed": 2026,
+    "outer_splits": 3
+  }
+}

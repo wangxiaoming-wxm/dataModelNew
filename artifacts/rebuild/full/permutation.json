@@ -1,0 +1,55 @@
+{
+  "candidate_outer_auc": {
+    "cb_rate_rmse_d6": {
+      "folds": [
+        0.4918206220390759,
+        0.5008440283872793,
+        0.4856877263408256
+      ],
+      "mean": 0.4927841255890602,
+      "std": 0.007623950894972919
+    }
+  },
+  "fold_auc": [
+    0.4918206220390759,
+    0.5008440283872793,
+    0.4856877263408256
+  ],
+  "fold_mean": 0.4927841255890602,
+  "fold_selections": [
+    {
+      "fold": 0,
+      "inner_auc_by_config": {
+        "cb_rate_rmse_d6": 0.4798204349538119
+      },
+      "outer_auc": 0.4918206220390759,
+      "selected": "cb_rate_rmse_d6",
+      "selected_inner_auc": 0.4798204349538119
+    },
+    {
+      "fold": 1,
+      "inner_auc_by_config": {
+        "cb_rate_rmse_d6": 0.4842200227300929
+      },
+      "outer_auc": 0.5008440283872793,
+      "selected": "cb_rate_rmse_d6",
+      "selected_inner_auc": 0.4842200227300929
+    },
+    {
+      "fold": 2,
+      "inner_auc_by_config": {
+        "cb_rate_rmse_d6": 0.4996686092148568
+      },
+      "outer_auc": 0.4856877263408256,
+      "selected": "cb_rate_rmse_d6",
+      "selected_inner_auc": 0.4996686092148568
+    }
+  ],
+  "fold_std": 0.007623950894972919,
+  "gate_pass": true,
+  "gate_range": [
+    0.48,
+    0.52
+  ],
+  "pooled_auc": 0.49278886917144543
+}

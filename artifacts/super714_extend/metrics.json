@@ -1,0 +1,52 @@
+{
+  "mode": "full",
+  "recipe": {
+    "frozen_seeds": 8,
+    "new_seeds": [
+      2034,
+      2035,
+      2036,
+      2037
+    ],
+    "bags": [
+      0,
+      1,
+      2
+    ],
+    "iterations": 800,
+    "main": "Ordered d5 l2=10 (best_v1 identical)",
+    "alt": "Plain d6 l2=6 (best_v1 identical)",
+    "merge": "(8*frozen + 4*new_pool)/12"
+  },
+  "auc": {
+    "new_main": 0.6976296873046999,
+    "new_alt": 0.6940376311919871,
+    "merged_main": 0.6999210688579302,
+    "merged_alt": 0.697130490001027,
+    "merged_max2": 0.700692069328442,
+    "merged_w62": 0.7012520211706429,
+    "merged_wbest": 0.701272844900679,
+    "wbest_w_main": 0.65,
+    "frozen_max2": 0.7012752084064776,
+    "frozen_w62": 0.7015936597140784,
+    "delta_w62_vs_frozen_w62": -0.00034163854343549627
+  },
+  "pearson_merged_main_alt": 0.949918930300014,
+  "elapsed_minutes": 57.9280118783315,
+  "submissions": {
+    "max2": {
+      "path": "submissions/submission_super714_extend.csv",
+      "sha256": "42ccb6980ebabe2e29b647e8ebdf4cf34a399b63b1e8bbb2980f512ca8cd74a9"
+    },
+    "w62": {
+      "path": "submissions/submission_super714_extend_w62.csv",
+      "sha256": "c2d9f52c44022228d960a024ae974e5da8de09959fc16d0356677df93748fcf7"
+    },
+    "wbest": {
+      "path": "submissions/submission_super714_extend_wbest.csv",
+      "sha256": "7eedab739cde17dcfdb824f98b55b2233ffb471d608ec89a908753ad8e900c7e"
+    }
+  },
+  "spearman_extend_w62_vs_submission_w62": 0.9999191980124477,
+  "different_from_submission_w62": true
+}

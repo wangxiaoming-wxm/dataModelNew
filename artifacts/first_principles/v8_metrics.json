@@ -1,0 +1,33 @@
+{
+  "name": "fp_v8_byte20",
+  "formula": "0.8*v7_cross30 + 0.2*bytepair_mean",
+  "weights": {
+    "v7": 0.8,
+    "bytepair_mean": 0.2
+  },
+  "oof_auc": 0.7701614508323125,
+  "nested_fold_mean": 0.7703295069355633,
+  "delta_nest_vs_v7": 0.011819421270771957,
+  "delta_full_vs_v7": 0.011781603704862698,
+  "arm_aucs": {
+    "byte_mean": 0.6002324246723335,
+    "byte_xor": 0.5683348987205423,
+    "byte_and": 0.5725723163113148
+  },
+  "spearman_bm_vs_v7": 0.030957151704633205,
+  "tempered": {
+    "name": "fp_v7_cross30",
+    "oof": 0.7583798471274498,
+    "sha256": "02e83afbc86b07c2beaa80922370387fa3d0ed652116ed12d77ead1fe7a3f1d7"
+  },
+  "aggressive": {
+    "name": "byte30",
+    "oof": 0.7681591882357718,
+    "sha256": "8eeb0db054977d0512ec1a52be70a855728b17cb12938d38fc4c667b2763f2ac"
+  },
+  "fp_v7_oof": 0.7583798471274498,
+  "submission": "submissions/submission_champion.csv",
+  "submission_sha256": "fa2a06f4ed9af099e37225a2a9ff2e10e0a0a7979ac9c7e5dfacdcdde5866d67",
+  "EXPECTED_OOF": 0.7701614508323125,
+  "gate_beat_v7": true
+}

@@ -28,7 +28,9 @@ vz19 的 OOF→线上 +0.013 外推已失效。本地抬升若来自 max2/byteTE
 | `src/probe_new_axes.py` | 分类/排序/切片专家探针 |
 | `src/probe_round2.py` | KNN / YetiRank / 第三世界 |
 | `src/probe_round3.py` | Langevin / 分裂准则 / Quantile |
-| `src/probe_ordered.py` | Ordered `fold_len_multiplier` 确认（进行中） |
+| `src/probe_ordered.py` | Ordered `fold_len_multiplier` / permutation（已证伪） |
+| `src/probe_w1.py` | w1=0 弱切片交叉与上采样（已证伪） |
+| `src/probe_joint.py` | 双世界拼单模型（弱于 rank 融合） |
 | `docs/EVIDENCE.md` | 换轴证据 |
 | `docs/INDEPENDENT_AUDIT.md` | 对 rebuild V2 的独立审核 |
 | `submission_vz20.csv` | 历史 AM40 克隆，**不要交** |
@@ -46,4 +48,4 @@ python3 vz20/src/probe_ordered.py
 ## 提交建议
 
 - **不要交 W62、AM40、rebuild V2、fp_v6–v8。**
-- 等 Ordered 内部超参确认：只有诚实 OOF 相对同预算默认 Ordered **+0.001** 且与 W62 排名明显不同，才生成新的 `submission_vz20.csv`。
+- 只有诚实 OOF 相对冻结 W62 **+0.001** 且 test Spearman < 0.995，才生成新的 `submission_vz20.csv`。本轮未达到。
